@@ -15,8 +15,8 @@ The plan is split into phases. Each phase ends with a working, testable state. R
 
 Resolve the open issues that block the MVP. Each decision is recorded in the spec.
 
-- [ ] OI-002 — choose the OSM extract for the import (Geoapify localities or Overture Divisions). Recommendation: Geoapify, because it already links settlements with their boundaries.
-- [ ] OI-003 — settlements without a boundary: import as point only (recommended) or skip.
+- [x] OI-002 — choose the OSM extract for the import (Geoapify localities or Overture Divisions). Recommendation: Geoapify, because it already links settlements with their boundaries.
+- [x] OI-003 — settlements without a boundary: import as point only (recommended) or skip.
 - [ ] OI-005 — what happens to a rating when all visits to the city are deleted (recommended: the rating is deleted too, since BR-005 requires a visit).
 - [ ] OI-007 — confirm rounding of the suggested rating to 0.5.
 - [ ] OI-008 — approximate dates in the calendar (recommended for MVP: not shown, only counted in the coverage note).
