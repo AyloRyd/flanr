@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.3 |
+| Version | 0.4 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-10 |
@@ -17,6 +17,7 @@
 | 0.1 | 2026-11-09 | A. Malyshkin | Initial template |
 | 0.2 | 2026-11-09 | A. Malyshkin | First full draft based on the concept document |
 | 0.3 | 2026-11-10 | A. Malyshkin | Lived-in cities, rating colour scale, monthly city data import, staged rollout, product renamed to Flanr |
+| 0.4 | 2026-11-10 | A. Malyshkin | Resolved OI-002 (Geoapify localities extract) and OI-003 (settlements without a boundary are imported as points) |
 
 ---
 
@@ -1046,7 +1047,7 @@ The two default lists are not stored as list entries. Visited is derived from vi
 | country_code | yes | ISO 3166-1 alpha-2 |
 | region_1_id | yes | First-level region |
 | centre | yes | Point |
-| boundary | yes* | Polygon or multipolygon. *Required where OSM has one, see OI-003 |
+| boundary | yes* | Polygon or multipolygon. *Required where OSM has one. Settlements without a mapped boundary are stored as points only (OI-003) |
 | population | yes | |
 | population_year | yes | Year the population refers to |
 | settlement_type | yes | city, town, village, hamlet |
@@ -1112,7 +1113,9 @@ List: id, user_id, title, description, visibility, created_at. ListEntry: list_i
 | Wikidata | All other city fields | CC0 |
 | Wikimedia Commons | Main images, coats of arms, flags | Per file, free licences only |
 
-The initial import SHOULD use a ready-made OSM extract (Geoapify localities dataset or Overture Maps Divisions) instead of processing the full OSM planet file. See OI-002.
+The import MUST use the Geoapify localities dataset, a ready-made OSM extract that links settlements with their boundaries, instead of processing the full OSM planet file. See OI-002.
+
+Settlements that have no mapped boundary in OSM MUST be imported with their centre point only and MUST NOT be skipped. See OI-003 and FR-CITY-001.
 
 ### 5.4 Data retention and deletion
 
@@ -1266,8 +1269,8 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | ID | Issue | Area | Status |
 |---|---|---|---|
 | OI-001 | Friendship model: mutual friendship with requests, one-way following, or both. | Social | Open, before R2 |
-| OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Open |
-| OI-003 | How to treat settlements without a mapped boundary: import them as points only, or skip them. | Data | Open |
+| OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Resolved 2026-11-10: Geoapify localities, see §5.3 |
+| OI-003 | How to treat settlements without a mapped boundary: import them as points only, or skip them. | Data | Resolved 2026-11-10: import as points only, see §5.3 |
 | OI-004 | How the community rating should take into account that cities change over time. | Ratings | Open |
 | OI-005 | What happens to a rating when the user deletes all their visits to the city. | Ratings | Open |
 | OI-006 | How text reviews relate to visit posts in the social part. | Ratings, Social | Open, before R2 |
