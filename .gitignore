@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Test output
+playwright-report/
+test-results/
+
+# Local data (personal travel data, imported datasets)
+test-data/
+data/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
