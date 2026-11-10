@@ -7,7 +7,7 @@ Flanr is a web app for tracking and rating visited cities, similar to Letterboxd
 - `docs/CONCEPT.md` — product concept, the source of intent.
 - `docs/SRS.md` — requirements (SRS). The source of truth for behaviour.
 - `docs/MVP.md` — implementation plan by phases.
-- `test-data/travels.csv` — real travel data of the owner, used for seeding and tests.
+- `test-data/travels.csv` — real travel data of the owner, used for seeding and tests. It is personal data and stays local: the folder is gitignored and the repository is public. Never commit it or copy its rows into fixtures.
 
 Before working on a feature, read the relevant requirements in the spec. Reference requirement IDs (for example `FR-VIS-004`, `BR-002`) in commit messages, PR descriptions and test names.
 
