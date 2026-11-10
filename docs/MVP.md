@@ -31,13 +31,13 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 ## Phase 1 — Repository and tooling
 
-- [ ] Monorepo with pnpm workspaces: `apps/web`, `apps/api`, `packages/shared`, `packages/data-import` (CON-008).
-- [ ] TypeScript strict mode, shared tsconfig, ESLint, Prettier (NFR-MAINT-001).
-- [ ] Docker Compose for local PostgreSQL with PostGIS.
-- [ ] Vitest for unit tests, Playwright for end-to-end tests.
-- [ ] GitHub Actions: typecheck, lint, tests on every push.
-- [ ] Environment variable handling, no secrets in the repository (NFR-SEC-006).
-- [ ] Concept, spec and this plan committed to `docs/`. Test data committed to `test-data/travels.csv`.
+- [x] Monorepo with pnpm workspaces: `apps/web`, `apps/api`, `packages/shared`, `packages/data-import` (CON-008).
+- [x] TypeScript strict mode, shared tsconfig, ESLint, Prettier (NFR-MAINT-001).
+- [x] Docker Compose for local PostgreSQL with PostGIS.
+- [x] Vitest for unit tests, Playwright for end-to-end tests.
+- [x] GitHub Actions: typecheck, lint, tests on every push.
+- [x] Environment variable handling, no secrets in the repository (NFR-SEC-006).
+- [x] Concept, spec and this plan committed to `docs/`. The owner's test data stays local in `test-data/travels.csv`, which is gitignored because the repository is public.
 
 **Done when:** a fresh clone runs `pnpm install && pnpm dev` with an empty web page, an API health endpoint and a running database.
 
@@ -160,6 +160,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [ ] Creates undated visits before registration with the given count, and ratings from the `Rating` column.
 - [ ] Rows with `Lived` become lived-in cities (FR-VIS-010) without visits.
 - [ ] Creates a test user and a second user with a private profile for privacy tests.
+- [ ] Automated tests and CI use a small made-up fixture in the same CSV format, committed to the repository. The real `test-data/travels.csv` is only read when it exists locally.
 
 **Done when:** the seed runs on an empty database and all 161 rows are either imported or listed in the report with a reason.
 

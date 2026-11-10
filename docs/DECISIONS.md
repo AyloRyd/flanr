@@ -4,6 +4,7 @@ Decisions made while preparing the project, with the reasons behind them. The co
 
 ## 2026-11-10
 
+- **The owner's travel data is not committed.** The repository is public, and `test-data/travels.csv` shows the owner's travel history and where they have lived. It stays local and gitignored. Automated tests use a made-up fixture in the same format.
 - **City data extract: Geoapify localities (OI-002).** It already links OSM settlements with their boundaries, so no own processing of the OSM planet file is needed. Overture Divisions would need extra matching to OSM IDs. Licence and download terms are checked at the start of the import work.
 - **Settlements without a boundary are imported as points (OI-003).** Skipping them would lose villages and hamlets that users have visited; FR-CITY-001 already requires a point fallback on the city page.
 - **Name: Flanr** (from flâneur, a person who explores a city on foot). Formerly CityHub. Domain not bought yet; candidates are `flanr.app` (about $14/year at Cloudflare Registrar) or a `.com` variant (about $10.50/year). Check availability and EU trademarks before buying.
