@@ -1,7 +1,9 @@
 name: CI
 
+# Branch pushes are covered by their pull request, so push runs only on main.
 on:
   push:
+    branches: [main]
   pull_request:
 
 concurrency:
