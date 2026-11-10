@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: flanr
+      POSTGRES_PASSWORD: flanr
+      POSTGRES_DB: flanr
+    ports:
+      # 5433 on the host, so a locally installed PostgreSQL on 5432 does not clash.
+      - '5433:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      # Check over TCP: on first start the init server only listens on the Unix socket.
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U flanr -d flanr']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  db-data:

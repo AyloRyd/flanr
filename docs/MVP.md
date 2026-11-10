@@ -31,12 +31,12 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 ## Phase 1 — Repository and tooling
 
-- [ ] Monorepo with pnpm workspaces: `apps/web`, `apps/api`, `packages/shared`, `packages/data-import` (CON-008).
-- [ ] TypeScript strict mode, shared tsconfig, ESLint, Prettier (NFR-MAINT-001).
-- [ ] Docker Compose for local PostgreSQL with PostGIS.
-- [ ] Vitest for unit tests, Playwright for end-to-end tests.
-- [ ] GitHub Actions: typecheck, lint, tests on every push.
-- [ ] Environment variable handling, no secrets in the repository (NFR-SEC-006).
+- [x] Monorepo with pnpm workspaces: `apps/web`, `apps/api`, `packages/shared`, `packages/data-import` (CON-008).
+- [x] TypeScript strict mode, shared tsconfig, ESLint, Prettier (NFR-MAINT-001).
+- [x] Docker Compose for local PostgreSQL with PostGIS.
+- [x] Vitest for unit tests, Playwright for end-to-end tests.
+- [x] GitHub Actions: typecheck, lint, tests on every push.
+- [x] Environment variable handling, no secrets in the repository (NFR-SEC-006).
 - [ ] Concept, spec and this plan committed to `docs/`. Test data committed to `test-data/travels.csv`.
 
 **Done when:** a fresh clone runs `pnpm install && pnpm dev` with an empty web page, an API health endpoint and a running database.
