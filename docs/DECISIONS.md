@@ -4,6 +4,8 @@ Decisions made while preparing the project, with the reasons behind them. The co
 
 ## 2026-11-10
 
+- **City data extract: Geoapify localities (OI-002).** It already links OSM settlements with their boundaries, so no own processing of the OSM planet file is needed. Overture Divisions would need extra matching to OSM IDs. Licence and download terms are checked at the start of the import work.
+- **Settlements without a boundary are imported as points (OI-003).** Skipping them would lose villages and hamlets that users have visited; FR-CITY-001 already requires a point fallback on the city page.
 - **Name: Flanr** (from flâneur, a person who explores a city on foot). Formerly CityHub. Domain not bought yet; candidates are `flanr.app` (about $14/year at Cloudflare Registrar) or a `.com` variant (about $10.50/year). Check availability and EU trademarks before buying.
 - **Hosting (proposal, decide in phase 11):** one VPS in Germany with about 8 GB RAM running PostgreSQL + PostGIS, the Hono API and Next.js (standalone) in Docker Compose behind Caddy, optionally managed with Coolify or Dokploy. Not Vercel, because the Hobby plan is non-commercial only and affiliate links later count as commercial use. Hetzner's cheap plans were unavailable to order in autumn 2026; netcup (VPS 1000, about 14 €/month) was the best value at that time. Nightly `pg_dump` to separate storage. Nothing needs to be bought before phase 11.
 - **City data:** Flanr keeps its own copy and imports monthly (FR-CITY-006). Rollout: Germany, then continental Europe for the MVP, then the world after the MVP (CON-012).
