@@ -26,6 +26,36 @@ export interface CountryConfig {
 }
 
 const countries: Record<string, CountryConfig> = {
+  // Bundesländer, Bezirke, Gemeinden. Vienna is a state and a municipality at once.
+  AT: {
+    code: 'AT',
+    name: 'Österreich',
+    nameEn: 'Austria',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 6, 4],
+    languages: ['de'],
+  },
+  // Gewesten, provincies, gemeenten. Brussels has no province.
+  BE: {
+    code: 'BE',
+    name: 'België / Belgique / Belgien',
+    nameEn: 'Belgium',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['nl', 'fr', 'de'],
+  },
+  // Kantone, Bezirke, Gemeinden.
+  CH: {
+    code: 'CH',
+    name: 'Schweiz / Suisse / Svizzera / Svizra',
+    nameEn: 'Switzerland',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['de', 'fr', 'it', 'rm'],
+  },
   // Länder, Kreise, Gemeinden. District-free cities and city-states have no Gemeinde level.
   DE: {
     code: 'DE',
