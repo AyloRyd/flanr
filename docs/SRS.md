@@ -280,7 +280,7 @@ A city MAY belong to one municipality. The municipality is reference data, like 
 
 When a city and its municipality are the same thing (for example Cologne), the city represents the municipality. Its boundary, population and area are those of the whole municipality and include the other cities inside it. Because of this, populations MUST NOT be added up across cities without excluding the cities that are part of another city's municipality.
 
-Whether a city and its municipality are the same thing is taken from the source data, not assumed. In Germany the town of Herbstein is the municipality of Herbstein, so the city represents it. In Ukraine the city of Kharkiv and the Kharkiv hromada are two different units with different boundaries: the city keeps its own boundary and population and is part of the hromada, like every other settlement in it.
+Whether a city and its municipality are the same thing is taken from the source data, not assumed. In Germany the town of Herbstein is the municipality of Herbstein, so the city represents it. In the Netherlands Winschoten is the seat of the municipality of Oldambt but is not that municipality: it keeps its own boundary and population and is part of Oldambt, like every other settlement in it.
 
 ---
 
