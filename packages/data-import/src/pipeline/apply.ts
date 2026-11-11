@@ -1,4 +1,6 @@
 import type { Sql, TransactionSql } from 'postgres';
+import type { CountryConfig } from '../countries.ts';
+import { enrichCitiesFromWikidata } from '../wikidata/enrich.ts';
 import { rebuildTileShapes } from './tile-shapes.ts';
 
 /**
@@ -10,12 +12,15 @@ import { rebuildTileShapes } from './tile-shapes.ts';
  * Cities without a first-level region are skipped; validation has already limited how many
  * there may be.
  */
-export async function applyCities(sql: Sql, countryCode: string): Promise<void> {
+export async function applyCities(sql: Sql, country: CountryConfig): Promise<void> {
+  const countryCode = country.code;
   await sql.begin(async (tx) => {
     await upsertCountry(tx, countryCode);
     await upsertRegions(tx, countryCode);
     await upsertCities(tx, countryCode);
     await replaceCityNames(tx, countryCode);
+    // The upsert above reset the fields that come from OSM, so the Wikidata data is applied again.
+    await enrichCitiesFromWikidata(tx, country);
     await rebuildTileShapes(tx, countryCode);
   });
 }
@@ -52,11 +57,12 @@ async function upsertCities(tx: TransactionSql, countryCode: string): Promise<vo
   await tx`
     INSERT INTO cities (osm_type, osm_id, wikidata_id, name_local, name_en, country_code,
       region_1_id, region_2_id, settlement_type, capital_status, centre, boundary,
-      boundary_osm_type, boundary_osm_id, boundary_match, population, population_year, wikipedia_url)
+      boundary_osm_type, boundary_osm_id, boundary_match, population, population_year,
+      population_source, wikipedia_url)
     SELECT c.osm_type, c.osm_id, c.wikidata_id, c.name_local, c.name_en, ${countryCode},
            r1.id, r2.id, c.settlement_type, c.capital_status, c.centre, c.boundary,
            c.boundary_osm_type, c.boundary_osm_id, c.boundary_match, c.population, c.population_year,
-           c.wikipedia_url
+           CASE WHEN c.population IS NOT NULL THEN 'openstreetmap' END, c.wikipedia_url
     FROM staging.city c
     JOIN regions r1 ON r1.osm_type = c.region_1_osm_type AND r1.osm_id = c.region_1_osm_id
     LEFT JOIN regions r2 ON r2.osm_type = c.region_2_osm_type AND r2.osm_id = c.region_2_osm_id
@@ -67,7 +73,8 @@ async function upsertCities(tx: TransactionSql, countryCode: string): Promise<vo
       capital_status = excluded.capital_status, centre = excluded.centre, boundary = excluded.boundary,
       boundary_osm_type = excluded.boundary_osm_type, boundary_osm_id = excluded.boundary_osm_id,
       boundary_match = excluded.boundary_match, population = excluded.population,
-      population_year = excluded.population_year, wikipedia_url = excluded.wikipedia_url,
+      population_year = excluded.population_year, population_source = excluded.population_source,
+      wikipedia_url = excluded.wikipedia_url,
       in_source = true, updated_at = now()
   `;
   await tx`

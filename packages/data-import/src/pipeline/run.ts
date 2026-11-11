@@ -53,7 +53,7 @@ export async function importCities(sql: Sql, input: ImportInput): Promise<Import
     }
 
     log('Applying');
-    await applyCities(sql, input.country.code);
+    await applyCities(sql, input.country);
     await finishRun(sql, runId, 'succeeded', stats, null);
     return { runId, ok: true, errors: [], stats };
   } catch (error) {
