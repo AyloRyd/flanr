@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - tools/tile-bench
 
 # Dependencies allowed to run install scripts.
 onlyBuiltDependencies:

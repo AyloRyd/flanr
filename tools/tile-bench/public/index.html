@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flanr tile stand</title>
+    <link rel="stylesheet" href="/vendor/maplibre-gl/maplibre-gl.css" />
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+      }
+      #panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1;
+        padding: 10px 12px;
+        max-width: 280px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+      }
+      #panel a {
+        margin-right: 8px;
+      }
+      #panel a.active {
+        font-weight: 600;
+        text-decoration: none;
+        color: inherit;
+      }
+      #info {
+        margin-top: 6px;
+        color: #444;
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+      <div id="sources"></div>
+      <div id="info">Hover or click a city.</div>
+    </div>
+    <div id="map"></div>
+    <script src="/vendor/pmtiles.js"></script>
+    <script type="module" src="/stand.js"></script>
+  </body>
+</html>

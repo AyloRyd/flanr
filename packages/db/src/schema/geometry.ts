@@ -10,3 +10,8 @@ export const point = customType<{ data: string; driverData: string }>({
 export const multiPolygon = customType<{ data: string; driverData: string }>({
   dataType: () => 'geometry(MultiPolygon, 4326)',
 });
+
+/** Web Mercator (EPSG:3857), the projection of map tiles. */
+export const multiPolygonMercator = customType<{ data: string; driverData: string }>({
+  dataType: () => 'geometry(MultiPolygon, 3857)',
+});

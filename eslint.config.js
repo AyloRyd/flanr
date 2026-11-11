@@ -24,6 +24,13 @@ export default tseslint.config(
     },
   },
   {
+    // The map stand page runs in the browser and gets the pmtiles library from a script tag.
+    files: ['tools/tile-bench/public/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.browser, pmtiles: 'readonly' },
+    },
+  },
+  {
     files: ['apps/web/**/*.{ts,tsx}'],
     plugins: {
       '@next/next': nextPlugin,
