@@ -53,6 +53,7 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`. Both exist. The MVP map uses the API tiles; revisit after the Europe import (see DECISIONS.md and `docs/notes/tile-delivery.md`).
 - [x] Re-runnable import that updates by source IDs and runs in a transaction (FR-CITY-006, NFR-REL-002).
 - [x] Attribution data stored for OSM, Wikidata and Commons (NFR-LIC).
+- [ ] Municipalities: import them as reference data, link each city to its municipality, give a city that represents its municipality the municipality's boundary, and take the Wikidata ID from the linked boundary when the settlement has none (BR-001, BR-017).
 
 **Done when:** all cities from the test data exist in the database with boundaries where OSM has them, and Ostia, Lyngby, Körbecke and Hoogezand are checked by hand against BR-001.
 
@@ -117,6 +118,7 @@ Each business rule gets unit tests before or together with its implementation (N
 ## Phase 7 — Web pages
 
 - [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004).
+- [ ] Links to external maps on the city page (FR-CITY-009).
 - [ ] Visit form with date precision and the "before registration" option, help hint with the recommended visit model (FR-VIS-002, FR-VIS-003, FR-VIS-008).
 - [ ] Rating form with criteria and the suggested subjective rating (FR-RATE-001…003).
 - [ ] Search page for cities and lists (Phase 5).

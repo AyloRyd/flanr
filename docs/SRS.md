@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.5 |
+| Version | 0.6 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-10 |
+| Date | 2026-11-11 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -19,6 +19,7 @@
 | 0.3 | 2026-11-10 | A. Malyshkin | Lived-in cities, rating colour scale, monthly city data import, staged rollout, product renamed to Flanr |
 | 0.4 | 2026-11-10 | A. Malyshkin | Resolved OI-002 (Geoapify localities extract) and OI-003 (settlements without a boundary are imported as points) |
 | 0.5 | 2026-11-10 | A. Malyshkin | OI-002 revised: Geofabrik OSM extracts instead of Geoapify localities |
+| 0.6 | 2026-11-11 | A. Malyshkin | Cities that are part of a municipality (BR-001, BR-017, Municipality entity), population made optional, external map links (FR-CITY-009), city districts for later (FR-CITY-010), OI-020 and OI-021 |
 
 ---
 
@@ -221,7 +222,13 @@ The expected number of users at launch is one to five.
 ## 3. Business rules
 
 #### BR-001 — Definition of a city
-A city is any settlement of type city, town, village or hamlet. There is no minimum population. A part of another settlement, such as a district, suburb or borough (for example Wuppertal-Barmen), is not a city.
+A city is any settlement of type city, town, village or hamlet. There is no minimum population.
+
+A settlement is a city even when it is administratively part of a municipality, for example Worringen in the municipality of Cologne, Körbecke in Möhnesee or Ostia in Rome. Such a city can be visited and rated on its own, and a visit to it is not a visit to the main city of its municipality.
+
+A part of the continuous built-up area of another settlement, such as a district, suburb or borough (for example Wuppertal-Elberfeld), is not a city. A municipality that is not itself a settlement (for example Oldambt, which consists of Winschoten, Bad Nieuweschans and other settlements) is not a city either.
+
+The line between a separate settlement and a district follows the OpenStreetMap place classification: city, town, village and hamlet are settlements; suburb, quarter, neighbourhood and borough are districts.
 
 #### BR-002 — Dates of visits
 A visit that took place after the user's registration date MUST have a date. A visit that took place before the registration date MAY have no date. A visit MAY be added at any time, including long after registration.
@@ -267,6 +274,13 @@ Core functionality, including logging visits, rating cities, lists, the map and 
 
 #### BR-016 — Lived-in cities
 A user can mark any number of cities as lived-in cities: at most one as the current city and any number as past cities. The user decides what counts as having lived somewhere. A lived-in city counts as a visited city but does not require visits. The user can still log visits to it. The current lived-in city is the user's home location (FR-PROF-003).
+
+#### BR-017 — Cities and municipalities
+A city MAY belong to one municipality. The municipality is reference data, like a region: it cannot be visited or rated.
+
+When a city and its municipality are the same thing (for example Cologne), the city represents the municipality. Its boundary, population and area are those of the whole municipality and include the other cities inside it. Because of this, populations MUST NOT be added up across cities without excluding the cities that are part of another city's municipality.
+
+Whether a city and its municipality are the same thing is taken from the source data, not assumed. In Germany the town of Herbstein is the municipality of Herbstein, so the city represents it. In the Netherlands Winschoten is the seat of the municipality of Oldambt but is not that municipality: it keeps its own boundary and population and is part of Oldambt, like every other settlement in it.
 
 ---
 
@@ -399,13 +413,15 @@ A user can mark any number of cities as lived-in cities: at most one as the curr
 #### FR-CITY-001 — City page with required data
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Cities
 
-**Description.** Every city MUST have a city page that shows its name, English name, country, first-level region, settlement type, capital status, population with its reference year, a map with its boundary, and a link to Wikipedia where one exists.
+**Description.** Every city MUST have a city page that shows its name, English name, country, first-level region, settlement type, capital status, a map with its boundary, and, where they are known, its population with the reference year, its municipality (when the city is part of one, see BR-017) and a link to Wikipedia.
 
 **Acceptance criteria.**
 1. Given a city with all required fields, when its page is opened, then all of them are shown.
 2. Given a city without a mapped boundary, when its page is opened, then the map shows the city as a point and no error is shown.
+3. Given a city without a known population, when its page is opened, then no population field is shown.
+4. Given Worringen, when its page is opened, then it is shown as part of Cologne.
 
-**Related.** OI-003.
+**Related.** BR-017, OI-003.
 
 #### FR-CITY-002 — City page with optional data
 **Priority:** Should · **Release:** MVP · **Status:** Draft · **Source:** Concept §Cities
@@ -463,6 +479,20 @@ A user can mark any number of cities as lived-in cities: at most one as the curr
 **Priority:** Could · **Release:** R2 · **Status:** Draft · **Source:** Concept §Cities
 
 **Description.** Registered users MAY suggest corrections to a city's data. A correction MUST go through moderation before it is applied.
+
+#### FR-CITY-009 — Links to external maps
+**Priority:** Should · **Release:** MVP · **Status:** Draft · **Source:** Owner, 2026-11-11
+
+**Description.** The city page SHOULD offer links that open the city in external map services: at least OpenStreetMap, Google Maps and Apple Maps. The links MUST be built from the city's name, coordinates and OpenStreetMap ID through a list of link templates, and MUST NOT be stored per city, so that a service can be added or changed in one place.
+
+**Acceptance criteria.**
+1. Given the page of Cologne, when the user follows the OpenStreetMap link, then OpenStreetMap opens the object that Flanr imported the city from.
+2. Given a new map service added to the list of templates, then its link appears on every city page without changes to city data.
+
+#### FR-CITY-010 — City districts
+**Priority:** Could · **Release:** Later · **Status:** Draft · **Source:** Owner, 2026-11-11
+
+**Description.** The system MAY import the districts of cities (suburbs, quarters, neighbourhoods and boroughs) and show them on the city page and on the map as additional information. Districts are not cities (BR-001): they cannot be visited, rated or added to lists.
 
 ### 4.4 Visits and dates (`FR-VIS`)
 
@@ -828,10 +858,11 @@ Each mode MUST have a legend.
 #### FR-SRCH-002 — Disambiguation
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Cities
 
-**Description.** Search results MUST show the country, region and settlement type of each city, so that cities with the same name can be told apart.
+**Description.** Search results MUST show the country, region and settlement type of each city, and its municipality when the city is part of one (BR-017), so that cities with the same name can be told apart.
 
 **Acceptance criteria.**
 1. Given the query "Frankfurt", then Frankfurt am Main and Frankfurt (Oder) are shown with their regions.
+2. Given the query "Stockhausen", then the Stockhausen that is part of Herbstein is shown with that municipality.
 
 #### FR-SRCH-003 — Filtering and sorting
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Rating cities
@@ -1009,6 +1040,7 @@ User 1───* List 1───* ListEntry *───1 City
 City *───1 Country
 City *───1 Region (first level)
 City *───0..1 Region (second level)
+City *───0..1 Municipality
 City 1───* CityName
 User 1───* LivedCity *───1 City
 User *───* User                      (Friendship, R2)
@@ -1049,12 +1081,14 @@ The two default lists are not stored as list entries. Visited is derived from vi
 | region_1_id | yes | First-level region |
 | centre | yes | Point |
 | boundary | yes* | Polygon or multipolygon. *Required where OSM has one. Settlements without a mapped boundary are stored as points only (OI-003) |
-| population | yes | |
-| population_year | yes | Year the population refers to |
+| population | no | Required where it is known. For a city that represents its municipality it is the population of the whole municipality, see BR-017 |
+| population_year | no | Year the population refers to, where known |
 | settlement_type | yes | city, town, village, hamlet |
 | capital_status | yes | national, regional, none |
 | wikipedia_url | no | Required where it exists |
 | region_2_id | no | Second-level region |
+| municipality_id | no | The municipality the city belongs to, see BR-017 |
+| represents_municipality | yes | True when the city and its municipality are the same thing. Default false |
 | area_km2 | no | Population density is derived from it |
 | time_zone | no | |
 | elevation_m | no | |
@@ -1068,6 +1102,19 @@ The two default lists are not stored as list entries. Visited is derived from vi
 | transport_modes | no | For example metro, tram, S-Bahn |
 | unesco_sites | no | |
 | twin_cities | no | References to other cities |
+
+#### Municipality
+The lowest administrative unit with its own local government (Gemeinde, gemeente, commune, kommune, hromada). Its administrative level in OpenStreetMap differs by country. Not every country has municipalities everywhere; a city without one simply has no municipality.
+
+| Attribute | Required | Notes |
+|---|---|---|
+| id | yes | Internal ID, stable across imports |
+| osm_id, osm_type | yes | Source object |
+| wikidata_id | no | |
+| name_local | yes | |
+| name_en | yes | Falls back to the local name |
+| country_code | yes | |
+| boundary | yes | |
 
 #### CityName
 Alternative names, transliterations and names in other languages, each with a language code where known. Used by search.
@@ -1288,6 +1335,8 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-017 | Hosting provider for the web client, API and database. | Operations | Open |
 | OI-019 | Whether a lived-in city can have a period (from, to), and how lived-in periods appear in time-based statistics. | Visits | Open |
 | OI-018 | Whether planned trips can have dates, or the Planned list stays a simple set of cities. | Lists | Open |
+| OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
+| OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. | Data | Open |
 
 ---
 
@@ -1297,7 +1346,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 |---|---|
 | Idea | §1.2, §2.2 |
 | Accounts and guests | FR-AUTH-001…010, FR-PROF-001…003, FR-STAT-005 |
-| Cities | BR-001, FR-CITY-001…008, FR-SRCH-001…002, §5.2 City |
+| Cities | BR-001, BR-017, FR-CITY-001…010, FR-SRCH-001…002, §5.2 City, §5.2 Municipality |
 | Visits and dates | BR-002, BR-003, BR-011, BR-012, FR-VIS-001…009, FR-STAT-004 |
 | Cities the user has lived in | BR-016, FR-VIS-010, FR-MAP-005, FR-STAT-001 |
 | Rating cities | BR-005…BR-009, FR-RATE-001…008, FR-CITY-003, FR-SRCH-003 |
