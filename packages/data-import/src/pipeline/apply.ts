@@ -1,4 +1,5 @@
 import type { Sql, TransactionSql } from 'postgres';
+import { rebuildTileShapes } from './tile-shapes.ts';
 
 /**
  * Replaces the live city data of one country with staging.city in a single transaction
@@ -15,6 +16,7 @@ export async function applyCities(sql: Sql, countryCode: string): Promise<void> 
     await upsertRegions(tx, countryCode);
     await upsertCities(tx, countryCode);
     await replaceCityNames(tx, countryCode);
+    await rebuildTileShapes(tx, countryCode);
   });
 }
 

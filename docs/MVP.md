@@ -49,7 +49,7 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] Import from the chosen OSM extract: city, town, village, hamlet; exclude suburbs and boroughs (BR-001, FR-CITY-005).
 - [ ] Roll out in stages (CON-012): Germany first (done), then continental Europe (covers all countries in the test data). The whole world comes after the MVP.
 - [ ] Enrichment from Wikidata through SPARQL or a Wikidata dump: population with year, capital status, Wikipedia link, English and alternative names, area, and the desirable fields where cheap (FR-CITY-002).
-- [ ] Boundary simplification for different zoom levels.
+- [x] Boundary simplification for different zoom levels.
 - [ ] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`.
 - [x] Re-runnable import that updates by source IDs and runs in a transaction (FR-CITY-006, NFR-REL-002).
 - [x] Attribution data stored for OSM, Wikidata and Commons (NFR-LIC).
