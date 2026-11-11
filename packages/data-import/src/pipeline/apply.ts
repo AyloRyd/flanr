@@ -9,8 +9,8 @@ import { rebuildTileShapes } from './tile-shapes.ts';
  * everything linked to them survive. Cities that are no longer in the source are kept and
  * marked with in_source = false.
  *
- * Cities without a first-level region are skipped; validation has already limited how many
- * there may be.
+ * In a country with regions, cities without a first-level region are skipped; validation has
+ * already limited how many there may be.
  */
 export async function applyCities(sql: Sql, country: CountryConfig): Promise<void> {
   const countryCode = country.code;
@@ -18,7 +18,7 @@ export async function applyCities(sql: Sql, country: CountryConfig): Promise<voi
     await upsertCountry(tx, countryCode);
     await upsertRegions(tx, countryCode);
     await upsertMunicipalities(tx, countryCode);
-    await upsertCities(tx, countryCode);
+    await upsertCities(tx, country);
     await replaceCityNames(tx, countryCode);
     // The upsert above reset the fields that come from OSM, so the Wikidata data is applied again.
     await enrichCitiesFromWikidata(tx, country);
@@ -73,7 +73,10 @@ async function upsertMunicipalities(tx: TransactionSql, countryCode: string): Pr
   `;
 }
 
-async function upsertCities(tx: TransactionSql, countryCode: string): Promise<void> {
+async function upsertCities(tx: TransactionSql, country: CountryConfig): Promise<void> {
+  const countryCode = country.code;
+  // In a country with regions a city without one is a data problem and is left out.
+  const regionRequired = country.region1Level !== null;
   await tx`
     INSERT INTO cities (osm_type, osm_id, wikidata_id, name_local, name_en, country_code,
       region_1_id, region_2_id, municipality_id, represents_municipality, settlement_type, capital_status, centre, boundary,
@@ -84,10 +87,11 @@ async function upsertCities(tx: TransactionSql, countryCode: string): Promise<vo
            c.boundary_osm_type, c.boundary_osm_id, c.boundary_match, c.population, c.population_year,
            CASE WHEN c.population IS NOT NULL THEN 'openstreetmap' END, c.wikipedia_url
     FROM staging.city c
-    JOIN regions r1 ON r1.osm_type = c.region_1_osm_type AND r1.osm_id = c.region_1_osm_id
+    LEFT JOIN regions r1 ON r1.osm_type = c.region_1_osm_type AND r1.osm_id = c.region_1_osm_id
     LEFT JOIN regions r2 ON r2.osm_type = c.region_2_osm_type AND r2.osm_id = c.region_2_osm_id
     LEFT JOIN municipalities m
       ON m.osm_type = c.municipality_osm_type AND m.osm_id = c.municipality_osm_id
+    WHERE r1.id IS NOT NULL OR NOT ${regionRequired}
     ON CONFLICT (osm_type, osm_id) DO UPDATE SET
       wikidata_id = excluded.wikidata_id, name_local = excluded.name_local, name_en = excluded.name_en,
       country_code = excluded.country_code, region_1_id = excluded.region_1_id,
@@ -106,7 +110,8 @@ async function upsertCities(tx: TransactionSql, countryCode: string): Promise<vo
     WHERE c.country_code = ${countryCode} AND c.in_source
       AND NOT EXISTS (
         SELECT 1 FROM staging.city s
-        WHERE s.osm_type = c.osm_type AND s.osm_id = c.osm_id AND s.region_1_osm_id IS NOT NULL
+        WHERE s.osm_type = c.osm_type AND s.osm_id = c.osm_id
+          AND (s.region_1_osm_id IS NOT NULL OR NOT ${regionRequired})
       )
   `;
 }

@@ -22,6 +22,22 @@ describe('settlementType (BR-001)', () => {
   );
 });
 
+describe('settlementType for capitals', () => {
+  it('treats the capital of a country as a city even when it is tagged as a suburb', () => {
+    // Vatican City in OSM.
+    expect(settlementType({ place: 'suburb', capital: 'yes' })).toBe('city');
+  });
+
+  it('keeps the place type of a capital that has one', () => {
+    expect(settlementType({ place: 'town', capital: 'yes' })).toBe('town');
+  });
+
+  it('does not treat a regional capital or an untyped object as a city', () => {
+    expect(settlementType({ place: 'suburb', capital: '4' })).toBeNull();
+    expect(settlementType({ capital: 'yes' })).toBeNull();
+  });
+});
+
 describe('parsePopulation', () => {
   it.each([
     ['4662', 4662],

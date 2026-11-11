@@ -81,6 +81,39 @@ describe('First-level regions', () => {
   });
 });
 
+describe('Country without regions', () => {
+  // Like Monaco or Vatican City: no first-level regions and no municipalities.
+  const microstate: CountryConfig = {
+    ...germany,
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [],
+  };
+
+  it('imports its cities without a region or a municipality', async () => {
+    const result = await runImport(baseFeatures(), baseRelations(), microstate);
+
+    expect(result.ok).toBe(true);
+    const cities = await sql`
+      SELECT name_local, region_1_id, region_2_id, municipality_id FROM cities ORDER BY name_local
+    `;
+    expect(cities.map((c) => c.name_local)).toEqual(['Dorf', 'Großstadt', 'Kleinstadt', 'Weiler']);
+    for (const row of cities) {
+      expect(row).toMatchObject({ region_1_id: null, region_2_id: null, municipality_id: null });
+    }
+  });
+
+  it('still rejects cities without a region in a country that has regions', async () => {
+    // Without the states, no city of the base fixture has a region.
+    const withoutStates = baseFeatures().filter((f) => f.tags.admin_level !== '4');
+
+    const result = await runImport(withoutStates);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors[0]).toMatch(/have no first-level region/);
+  });
+});
+
 describe('Municipality names with an ending (Denmark)', () => {
   const danishStyle: CountryConfig = {
     ...germany,

@@ -102,9 +102,8 @@ export const cities = pgTable(
     countryCode: char('country_code', { length: 2 })
       .notNull()
       .references(() => countries.code),
-    region1Id: integer('region_1_id')
-      .notNull()
-      .references(() => regions.id),
+    /** Null in countries without first-level regions, such as Monaco or Vatican City. */
+    region1Id: integer('region_1_id').references(() => regions.id),
     region2Id: integer('region_2_id').references(() => regions.id),
     municipalityId: integer('municipality_id').references(() => municipalities.id),
     /** True when the city and its municipality are the same thing, for example Cologne (BR-017). */

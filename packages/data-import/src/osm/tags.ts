@@ -13,11 +13,15 @@ export interface CityName {
 
 /**
  * Settlement type from the OSM place tag. Anything else, such as suburb, borough or
- * neighbourhood, is not a city (BR-001).
+ * neighbourhood, is not a city (BR-001), unless it is the capital of a country.
  */
 export function settlementType(tags: Tags): SettlementType | null {
   const place = tags.place;
-  return settlementTypes.find((type) => type === place) ?? null;
+  const type = settlementTypes.find((candidate) => candidate === place);
+  if (type) return type;
+  // The capital of a country is a city even when OSM maps it as part of another place:
+  // Vatican City is tagged as a suburb of Rome.
+  return place !== undefined && capitalStatus(tags) === 'national' ? 'city' : null;
 }
 
 /** Accepts plain integers and integers with thousands separators ("1.069.200", "1,069,200"). */

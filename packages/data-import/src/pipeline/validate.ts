@@ -31,10 +31,10 @@ export interface CityStats {
 /** Checks staging.city before it replaces the live data (FR-CITY-006). */
 export async function validateCities(
   sql: Sql,
-  countryCode: string,
+  country: { code: string; region1Level: number | null },
   options: ValidationOptions = defaultValidationOptions,
 ): Promise<ValidationResult> {
-  const stats = await cityStats(sql, countryCode);
+  const stats = await cityStats(sql, country.code);
   const errors: string[] = [];
 
   if (stats.cities === 0) {
@@ -49,7 +49,12 @@ export async function validateCities(
         `below ${options.minShareOfExisting * 100}% of the current data`,
     );
   }
-  if (stats.cities > 0 && stats.withoutRegion / stats.cities > options.maxShareWithoutRegion) {
+  const regionRequired = country.region1Level !== null;
+  if (
+    regionRequired &&
+    stats.cities > 0 &&
+    stats.withoutRegion / stats.cities > options.maxShareWithoutRegion
+  ) {
     errors.push(`${stats.withoutRegion} of ${stats.cities} cities have no first-level region`);
   }
 
