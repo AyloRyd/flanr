@@ -8,6 +8,7 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
+  real,
   smallint,
   text,
   timestamp,
@@ -90,7 +91,14 @@ export const cities = pgTable(
     boundaryMatch: text('boundary_match'),
     population: integer('population'),
     populationYear: smallint('population_year'),
+    /** Where the population comes from: openstreetmap or wikidata. */
+    populationSource: text('population_source'),
     wikipediaUrl: text('wikipedia_url'),
+    areaKm2: real('area_km2'),
+    elevationM: integer('elevation_m'),
+    website: text('website'),
+    /** Year of founding or first mention. Negative for years BCE. */
+    founded: smallint('founded'),
     /** False when the city is missing from the latest import but kept because data may be linked to it (FR-CITY-006). */
     inSource: boolean('in_source').notNull().default(true),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

@@ -5,10 +5,12 @@ export interface CountryConfig {
   region1Level: number;
   /** OSM admin_level of second-level regions (districts), if any. */
   region2Level: number | null;
+  /** Local languages, used for alternative names and as a fallback for Wikipedia links. */
+  languages: string[];
 }
 
 const countries: Record<string, CountryConfig> = {
-  DE: { code: 'DE', region1Level: 4, region2Level: 6 },
+  DE: { code: 'DE', region1Level: 4, region2Level: 6, languages: ['de'] },
 };
 
 export function countryConfig(code: string): CountryConfig {

@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await sql`TRUNCATE city_tile_shapes, city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
 });
 
 async function runImport(features: FixtureFeature[] = baseFeatures()) {
@@ -181,7 +181,7 @@ describe('Re-running the import (FR-CITY-006)', () => {
     // Cities are written before names, so this makes the transaction fail after the cities were updated.
     await sql`DROP TABLE staging.place_name`;
 
-    await expect(applyCities(sql, 'DE')).rejects.toThrow();
+    await expect(applyCities(sql, country)).rejects.toThrow();
     await dropStaging(sql);
 
     expect(await sql`SELECT id, population FROM cities ORDER BY id`).toEqual(before);
