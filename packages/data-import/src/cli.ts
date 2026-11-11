@@ -10,7 +10,8 @@ const usage = `Usage: pnpm import:osm --country DE --pbf data/raw/geofabrik/germ
   --country       ISO 3166-1 alpha-2 code of the country to import
   --pbf           OSM extract inside the data directory
   --skip-extract  reuse the files in data/work/<country> from an earlier run
-  --keep-staging  keep the staging tables after the run, for looking into the matching`;
+  --keep-staging  keep the staging tables after the run, for looking into the matching
+  --extract-only  stop after writing the files to data/work/<country>, without touching the database`;
 
 const { values } = parseArgs({
   options: {
@@ -18,6 +19,7 @@ const { values } = parseArgs({
     pbf: { type: 'string' },
     'skip-extract': { type: 'boolean', default: false },
     'keep-staging': { type: 'boolean', default: false },
+    'extract-only': { type: 'boolean', default: false },
     help: { type: 'boolean', default: false },
   },
 });
@@ -44,6 +46,11 @@ const files = values['skip-extract']
     }
   : (log('Extracting with osmium'),
     await extractOsm({ repoRoot, pbf: resolve(repoRoot, values.pbf ?? ''), workDir }));
+
+if (values['extract-only']) {
+  console.log(JSON.stringify(files, null, 2));
+  process.exit(0);
+}
 
 const sql = postgres(databaseUrl, { max: 1, onnotice: () => {} });
 try {
