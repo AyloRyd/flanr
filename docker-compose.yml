@@ -24,5 +24,12 @@ services:
     volumes:
       - ./data:/data
 
+  # Builds the PMTiles archive of the city layer. Not started by `docker compose up`.
+  tippecanoe:
+    build: tools/tippecanoe
+    profiles: [tools]
+    volumes:
+      - ./data:/data
+
 volumes:
   db-data:

@@ -49,9 +49,16 @@ Cities come from OpenStreetMap. Download a country extract from [Geofabrik](http
 ```bash
 pnpm db:migrate
 pnpm import:osm --country DE --pbf data/raw/geofabrik/germany-latest.osm.pbf
+pnpm import:wikidata --country DE
 ```
 
 The import filters the extract with osmium (it runs in Docker, nothing to install), loads it into staging tables, links settlements with their boundaries and regions, validates the result and applies it in one transaction. It can be re-run at any time; cities keep their IDs. Germany takes about five minutes.
+
+`import:wikidata` fetches the Wikidata items that the cities link to into our own copy and fills population, English names, Wikipedia links, area, elevation, website and founding year from it. It asks Wikidata only for items that are new or older than 30 days, and it continues where it stopped if interrupted. The first run for Germany makes about 850 requests. Later OSM imports reuse the stored copy without calling Wikidata.
+
+### Map tiles
+
+The API serves the city layer as vector tiles at `/tiles/cities/{z}/{x}/{y}.mvt`, built by PostGIS from boundaries that the import simplifies per zoom range. `pnpm tiles:build` builds the same layer as a PMTiles archive in `data/tiles/`. `tools/tile-bench` has a map page to look at both.
 
 Unit and integration tests need the database to be running (`pnpm db:up`). They use a separate `flanr_test` database.
 
@@ -64,5 +71,7 @@ packages/shared        Types and zod schemas shared by web and API
 packages/db            Drizzle schema, migrations and database client
 packages/data-import   City data import from OpenStreetMap and Wikidata
 tools/osmium           Docker image with osmium for processing OSM extracts
+tools/tippecanoe       Docker image with tippecanoe for building PMTiles
+tools/tile-bench       Map stand and measurements for the city tiles
 docs/                  Concept, requirements, plan and decisions
 ```

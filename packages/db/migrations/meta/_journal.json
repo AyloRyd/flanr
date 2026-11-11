@@ -22,6 +22,27 @@
       "when": 1794385499817,
       "tag": "0002_seed_data_sources",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794390770084,
+      "tag": "0003_city_tile_shapes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794391334422,
+      "tag": "0004_cities_settlement_type_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794392875857,
+      "tag": "0005_wikidata",
+      "breakpoints": true
     }
   ]
 }

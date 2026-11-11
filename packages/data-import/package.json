@@ -6,9 +6,12 @@
   "description": "City data import from OpenStreetMap extracts (FR-CITY-005, FR-CITY-006).",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "import:osm": "tsx --env-file-if-exists=../../.env src/cli.ts"
+    "import:osm": "tsx --env-file-if-exists=../../.env src/cli.ts",
+    "tiles:build": "tsx --env-file-if-exists=../../.env src/tiles/cli.ts",
+    "import:wikidata": "tsx --env-file-if-exists=../../.env src/wikidata/cli.ts"
   },
   "dependencies": {
+    "@flanr/shared": "workspace:*",
     "postgres": "^4.1.0"
   },
   "devDependencies": {

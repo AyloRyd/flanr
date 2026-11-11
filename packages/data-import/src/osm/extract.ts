@@ -1,9 +1,6 @@
-import { execFile } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
-import { relative, resolve } from 'node:path';
-import { promisify } from 'node:util';
-
-const run = promisify(execFile);
+import { resolve } from 'node:path';
+import { pathInDataDir, runTool } from '../docker.ts';
 
 export interface ExtractedFiles {
   features: string;
@@ -24,14 +21,7 @@ export async function extractOsm(options: {
   pbf: string;
   workDir: string;
 }): Promise<ExtractedFiles> {
-  const dataDir = resolve(options.repoRoot, 'data');
-  const inContainer = (path: string) => {
-    const inside = relative(dataDir, resolve(path));
-    if (inside.startsWith('..')) {
-      throw new Error(`${path} must be inside ${dataDir}`);
-    }
-    return inside;
-  };
+  const inContainer = (path: string) => pathInDataDir(options.repoRoot, path);
   await mkdir(options.workDir, { recursive: true });
 
   const pbf = inContainer(options.pbf);
@@ -39,7 +29,7 @@ export async function extractOsm(options: {
   const features = resolve(options.workDir, 'features.geojsonseq');
   const relations = resolve(options.workDir, 'relations.opl');
 
-  const osmium = (args: string[]) => runOsmium(options.repoRoot, args);
+  const osmium = (args: string[]) => runTool(options.repoRoot, 'osmium', args);
   const timestamp = await osmium([
     'fileinfo',
     '-g',
@@ -80,15 +70,4 @@ export async function extractOsm(options: {
 
   const parsed = new Date(timestamp.trim());
   return { features, relations, sourceTimestamp: Number.isNaN(parsed.getTime()) ? null : parsed };
-}
-
-async function runOsmium(repoRoot: string, args: string[]): Promise<string> {
-  // Run as the current user so the output files are not owned by root.
-  const user = `${process.getuid?.() ?? 1000}:${process.getgid?.() ?? 1000}`;
-  const { stdout } = await run(
-    'docker',
-    ['compose', 'run', '--rm', '-T', '--user', user, 'osmium', ...args],
-    { cwd: repoRoot, maxBuffer: 64 * 1024 * 1024 },
-  );
-  return stdout;
 }

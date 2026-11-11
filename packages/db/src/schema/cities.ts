@@ -7,6 +7,8 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
+  real,
   smallint,
   text,
   timestamp,
@@ -14,7 +16,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { multiPolygon, point } from './geometry.ts';
+import { multiPolygon, multiPolygonMercator, point } from './geometry.ts';
 
 /** OSM element type: node, way or relation. */
 export const osmTypeEnum = pgEnum('osm_type', ['node', 'way', 'relation']);
@@ -89,7 +91,14 @@ export const cities = pgTable(
     boundaryMatch: text('boundary_match'),
     population: integer('population'),
     populationYear: smallint('population_year'),
+    /** Where the population comes from: openstreetmap or wikidata. */
+    populationSource: text('population_source'),
     wikipediaUrl: text('wikipedia_url'),
+    areaKm2: real('area_km2'),
+    elevationM: integer('elevation_m'),
+    website: text('website'),
+    /** Year of founding or first mention. Negative for years BCE. */
+    founded: smallint('founded'),
     /** False when the city is missing from the latest import but kept because data may be linked to it (FR-CITY-006). */
     inSource: boolean('in_source').notNull().default(true),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -98,6 +107,8 @@ export const cities = pgTable(
     uniqueIndex('cities_osm_uq').on(t.osmType, t.osmId),
     index('cities_country_idx').on(t.countryCode),
     index('cities_region_1_idx').on(t.region1Id),
+    // Low-zoom map tiles select the few cities and towns of a large area by type.
+    index('cities_settlement_type_idx').on(t.settlementType),
     index('cities_centre_gix').using('gist', t.centre),
     index('cities_boundary_gix').using('gist', t.boundary),
   ],
@@ -120,5 +131,25 @@ export const cityNames = pgTable(
   (t) => [
     index('city_names_city_idx').on(t.cityId),
     unique('city_names_uq').on(t.cityId, t.name, t.kind, t.lang).nullsNotDistinct(),
+  ],
+);
+
+/**
+ * City boundaries simplified for a range of map zooms, in Web Mercator, ready for vector tiles.
+ * Rebuilt by the import together with the cities.
+ */
+export const cityTileShapes = pgTable(
+  'city_tile_shapes',
+  {
+    cityId: integer('city_id')
+      .notNull()
+      .references(() => cities.id, { onDelete: 'cascade' }),
+    minZoom: smallint('min_zoom').notNull(),
+    maxZoom: smallint('max_zoom').notNull(),
+    geom: multiPolygonMercator('geom').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.cityId, t.minZoom] }),
+    index('city_tile_shapes_geom_gix').using('gist', t.geom),
   ],
 );

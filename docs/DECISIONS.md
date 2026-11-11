@@ -2,6 +2,12 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-11
+
+- **City layer delivery for the MVP: tiles built by the API.** The map takes the city layer from `GET /tiles/cities/{z}/{x}/{y}.mvt`, built by PostGIS on request. For Germany this is fast enough (7–40 ms median per tile, see `docs/notes/tile-delivery.md`), the data is always current and there is no separate file to build and publish. The PMTiles build is kept working as the alternative; both produce the same layers, so switching only changes the map source.
+- **Revisit after the Europe import.** The measurements are repeated on Europe-sized data. If the API tiles get noticeably slower, the static geometry moves to PMTiles, with user data still coming from the API and applied through feature-state. This hybrid is the expected setup for world-wide data: the geometry changes only with the monthly import, and low-zoom tiles with thousands of cities are expensive to build per request.
+- **Open for world-wide data:** the zoom from which a city is shown depends only on its settlement type. That works for Germany but will need thinning by population at low zooms.
+
 ## 2026-11-10
 
 - **City data extract revised: Geofabrik instead of Geoapify (OI-002).** The Geoapify archive for Germany (snapshot of September 2025) turned out to have no boundary geometry: its `border` field only gives the boundary relation's ID, name, population and bbox. It also has no Wikidata IDs and contains mis-tagged objects such as restaurants and mills. Geofabrik extracts are updated daily, carry full geometry and the `wikidata` and `population` tags, and keep OpenStreetMap as the only source. The cost is that the import links settlements to boundaries itself, through the boundary relation's `label` or `admin_centre` member, the shared Wikidata ID, or spatial containment.

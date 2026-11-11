@@ -1,0 +1,1 @@
+CREATE INDEX "cities_settlement_type_idx" ON "cities" USING btree ("settlement_type");

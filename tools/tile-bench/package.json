@@ -1,0 +1,23 @@
+{
+  "name": "@flanr/tile-bench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Map stand and measurements for comparing ways to deliver the city layer. Not part of the product.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "serve": "tsx src/server.ts",
+    "measure": "tsx src/measure.ts"
+  },
+  "dependencies": {
+    "@flanr/shared": "workspace:*",
+    "@hono/node-server": "^2.1.6",
+    "hono": "^4.13.17",
+    "maplibre-gl": "^6.17.0",
+    "pmtiles": "^4.5.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "tsx": "^4.23.15"
+  }
+}

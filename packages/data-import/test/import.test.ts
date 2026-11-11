@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await sql`TRUNCATE city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
 });
 
 async function runImport(features: FixtureFeature[] = baseFeatures()) {
@@ -123,6 +123,26 @@ describe('OSM city import', () => {
     ]);
   });
 
+  it('builds simplified boundaries for the zoom ranges where the settlement type is shown', async () => {
+    await runImport();
+
+    const shapes = await sql`
+      SELECT c.name_local AS name, s.min_zoom, ST_SRID(s.geom) AS srid
+      FROM city_tile_shapes s JOIN cities c ON c.id = s.city_id
+      ORDER BY c.name_local, s.min_zoom
+    `;
+    expect(shapes.map((s) => `${s.name} z${s.min_zoom}+`)).toEqual([
+      'Dorf z8+',
+      'Dorf z11+',
+      'Großstadt z0+',
+      'Großstadt z8+',
+      'Großstadt z11+',
+      'Kleinstadt z8+',
+      'Kleinstadt z11+',
+    ]);
+    expect(new Set(shapes.map((s) => s.srid))).toEqual(new Set([3857]));
+  });
+
   it('records the run with its source timestamp and statistics', async () => {
     await runImport();
 
@@ -161,7 +181,7 @@ describe('Re-running the import (FR-CITY-006)', () => {
     // Cities are written before names, so this makes the transaction fail after the cities were updated.
     await sql`DROP TABLE staging.place_name`;
 
-    await expect(applyCities(sql, 'DE')).rejects.toThrow();
+    await expect(applyCities(sql, country)).rejects.toThrow();
     await dropStaging(sql);
 
     expect(await sql`SELECT id, population FROM cities ORDER BY id`).toEqual(before);

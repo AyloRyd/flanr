@@ -48,9 +48,9 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] Drizzle schema for countries, regions, cities, city names (section 5.2), with PostGIS geometry columns and spatial indexes.
 - [x] Import from the chosen OSM extract: city, town, village, hamlet; exclude suburbs and boroughs (BR-001, FR-CITY-005).
 - [ ] Roll out in stages (CON-012): Germany first (done), then continental Europe (covers all countries in the test data). The whole world comes after the MVP.
-- [ ] Enrichment from Wikidata through SPARQL or a Wikidata dump: population with year, capital status, Wikipedia link, English and alternative names, area, and the desirable fields where cheap (FR-CITY-002).
-- [ ] Boundary simplification for different zoom levels.
-- [ ] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`.
+- [x] Enrichment from Wikidata: population with year, Wikipedia link, English and alternative names, area, elevation, website and founding year (FR-CITY-002). Done through the Wikidata API instead of SPARQL or a dump. Capital status comes from OSM. Images, coats of arms and flags are left for later because they need author and licence data from Commons (NFR-LIC-003).
+- [x] Boundary simplification for different zoom levels.
+- [x] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`. Both exist. The MVP map uses the API tiles; revisit after the Europe import (see DECISIONS.md and `docs/notes/tile-delivery.md`).
 - [x] Re-runnable import that updates by source IDs and runs in a transaction (FR-CITY-006, NFR-REL-002).
 - [x] Attribution data stored for OSM, Wikidata and Commons (NFR-LIC).
 - [ ] Municipalities: import them as reference data, link each city to its municipality, give a city that represents its municipality the municipality's boundary, and take the Wikidata ID from the linked boundary when the settlement has none (BR-001, BR-017).
@@ -134,7 +134,7 @@ Each business rule gets unit tests before or together with its implementation (N
 ## Phase 8 — Map
 
 - [ ] Mapbox GL JS with standard and satellite styles, globe at low zoom (FR-MAP-001…002).
-- [ ] City layer from Flanr's own vector tiles (FR-MAP-003).
+- [ ] City layer from Flanr's own vector tiles, served by the API (FR-MAP-003).
 - [ ] Click on a city: boundary highlight and preview (FR-MAP-004).
 - [ ] Three map modes with legends (FR-MAP-005).
 - [ ] Planned cities as a separate layer (FR-MAP-006).
