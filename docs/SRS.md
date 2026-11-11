@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.4 |
+| Version | 0.5 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-10 |
@@ -18,6 +18,7 @@
 | 0.2 | 2026-11-09 | A. Malyshkin | First full draft based on the concept document |
 | 0.3 | 2026-11-10 | A. Malyshkin | Lived-in cities, rating colour scale, monthly city data import, staged rollout, product renamed to Flanr |
 | 0.4 | 2026-11-10 | A. Malyshkin | Resolved OI-002 (Geoapify localities extract) and OI-003 (settlements without a boundary are imported as points) |
+| 0.5 | 2026-11-10 | A. Malyshkin | OI-002 revised: Geofabrik OSM extracts instead of Geoapify localities |
 
 ---
 
@@ -1113,7 +1114,7 @@ List: id, user_id, title, description, visibility, created_at. ListEntry: list_i
 | Wikidata | All other city fields | CC0 |
 | Wikimedia Commons | Main images, coats of arms, flags | Per file, free licences only |
 
-The import MUST use the Geoapify localities dataset, a ready-made OSM extract that links settlements with their boundaries, instead of processing the full OSM planet file. See OI-002.
+The import MUST use regional OpenStreetMap extracts from Geofabrik (PBF format) instead of the full OSM planet file, starting with Germany. The import filters them to settlements and administrative boundaries and links each settlement to its boundary itself. See OI-002.
 
 Settlements that have no mapped boundary in OSM MUST be imported with their centre point only and MUST NOT be skipped. See OI-003 and FR-CITY-001.
 
@@ -1269,7 +1270,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | ID | Issue | Area | Status |
 |---|---|---|---|
 | OI-001 | Friendship model: mutual friendship with requests, one-way following, or both. | Social | Open, before R2 |
-| OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Resolved 2026-11-10: Geoapify localities, see §5.3 |
+| OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Resolved 2026-11-10: Geofabrik regional extracts, see §5.3 |
 | OI-003 | How to treat settlements without a mapped boundary: import them as points only, or skip them. | Data | Resolved 2026-11-10: import as points only, see §5.3 |
 | OI-004 | How the community rating should take into account that cities change over time. | Ratings | Open |
 | OI-005 | What happens to a rating when the user deletes all their visits to the city. | Ratings | Open |
