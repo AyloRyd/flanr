@@ -1,0 +1,734 @@
+{
+  "id": "b2948c56-2933-4649-aa82-23fc2cbef383",
+  "prevId": "11b491f9-2029-43b6-92fc-62dfdede327f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.cities": {
+      "name": "cities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "cities_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
+        "osm_type": {
+          "name": "osm_type",
+          "type": "osm_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "osm_id": {
+          "name": "osm_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wikidata_id": {
+          "name": "wikidata_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_local": {
+          "name": "name_local",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_en": {
+          "name": "name_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country_code": {
+          "name": "country_code",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "region_1_id": {
+          "name": "region_1_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "region_2_id": {
+          "name": "region_2_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "settlement_type": {
+          "name": "settlement_type",
+          "type": "settlement_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capital_status": {
+          "name": "capital_status",
+          "type": "capital_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'none'"
+        },
+        "centre": {
+          "name": "centre",
+          "type": "geometry(Point, 4326)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "boundary": {
+          "name": "boundary",
+          "type": "geometry(MultiPolygon, 4326)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boundary_osm_type": {
+          "name": "boundary_osm_type",
+          "type": "osm_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boundary_osm_id": {
+          "name": "boundary_osm_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boundary_match": {
+          "name": "boundary_match",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "population": {
+          "name": "population",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "population_year": {
+          "name": "population_year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wikipedia_url": {
+          "name": "wikipedia_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "in_source": {
+          "name": "in_source",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "cities_osm_uq": {
+          "name": "cities_osm_uq",
+          "columns": [
+            {
+              "expression": "osm_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "osm_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "cities_country_idx": {
+          "name": "cities_country_idx",
+          "columns": [
+            {
+              "expression": "country_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "cities_region_1_idx": {
+          "name": "cities_region_1_idx",
+          "columns": [
+            {
+              "expression": "region_1_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "cities_centre_gix": {
+          "name": "cities_centre_gix",
+          "columns": [
+            {
+              "expression": "centre",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "gist",
+          "concurrently": false
+        },
+        "cities_boundary_gix": {
+          "name": "cities_boundary_gix",
+          "columns": [
+            {
+              "expression": "boundary",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "gist",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "cities_country_code_countries_code_fk": {
+          "name": "cities_country_code_countries_code_fk",
+          "tableFrom": "cities",
+          "columnsFrom": ["country_code"],
+          "tableTo": "countries",
+          "columnsTo": ["code"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "cities_region_1_id_regions_id_fk": {
+          "name": "cities_region_1_id_regions_id_fk",
+          "tableFrom": "cities",
+          "columnsFrom": ["region_1_id"],
+          "tableTo": "regions",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "cities_region_2_id_regions_id_fk": {
+          "name": "cities_region_2_id_regions_id_fk",
+          "tableFrom": "cities",
+          "columnsFrom": ["region_2_id"],
+          "tableTo": "regions",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.city_names": {
+      "name": "city_names",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "city_names_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
+        "city_id": {
+          "name": "city_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lang": {
+          "name": "lang",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "city_names_city_idx": {
+          "name": "city_names_city_idx",
+          "columns": [
+            {
+              "expression": "city_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "city_names_city_id_cities_id_fk": {
+          "name": "city_names_city_id_cities_id_fk",
+          "tableFrom": "city_names",
+          "columnsFrom": ["city_id"],
+          "tableTo": "cities",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "city_names_uq": {
+          "name": "city_names_uq",
+          "columns": ["city_id", "name", "kind", "lang"],
+          "nullsNotDistinct": true
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.countries": {
+      "name": "countries",
+      "schema": "",
+      "columns": {
+        "code": {
+          "name": "code",
+          "type": "char(2)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "osm_id": {
+          "name": "osm_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_local": {
+          "name": "name_local",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_en": {
+          "name": "name_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "boundary": {
+          "name": "boundary",
+          "type": "geometry(MultiPolygon, 4326)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.regions": {
+      "name": "regions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "regions_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
+        "osm_type": {
+          "name": "osm_type",
+          "type": "osm_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "osm_id": {
+          "name": "osm_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wikidata_id": {
+          "name": "wikidata_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "country_code": {
+          "name": "country_code",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iso_code": {
+          "name": "iso_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_local": {
+          "name": "name_local",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name_en": {
+          "name": "name_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "boundary": {
+          "name": "boundary",
+          "type": "geometry(MultiPolygon, 4326)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "in_source": {
+          "name": "in_source",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "regions_osm_uq": {
+          "name": "regions_osm_uq",
+          "columns": [
+            {
+              "expression": "osm_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "osm_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "regions_boundary_gix": {
+          "name": "regions_boundary_gix",
+          "columns": [
+            {
+              "expression": "boundary",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "gist",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "regions_country_code_countries_code_fk": {
+          "name": "regions_country_code_countries_code_fk",
+          "tableFrom": "regions",
+          "columnsFrom": ["country_code"],
+          "tableTo": "countries",
+          "columnsTo": ["code"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "regions_level_ck": {
+          "name": "regions_level_ck",
+          "value": "\"regions\".\"level\" in (1, 2)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.data_sources": {
+      "name": "data_sources",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "licence": {
+          "name": "licence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "licence_url": {
+          "name": "licence_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attribution": {
+          "name": "attribution",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.import_runs": {
+      "name": "import_runs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "import_runs_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country_code": {
+          "name": "country_code",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_timestamp": {
+          "name": "source_timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "import_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'running'"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stats": {
+          "name": "stats",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "import_runs_source_id_data_sources_id_fk": {
+          "name": "import_runs_source_id_data_sources_id_fk",
+          "tableFrom": "import_runs",
+          "columnsFrom": ["source_id"],
+          "tableTo": "data_sources",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.capital_status": {
+      "name": "capital_status",
+      "schema": "public",
+      "values": ["national", "regional", "none"]
+    },
+    "public.osm_type": {
+      "name": "osm_type",
+      "schema": "public",
+      "values": ["node", "way", "relation"]
+    },
+    "public.settlement_type": {
+      "name": "settlement_type",
+      "schema": "public",
+      "values": ["city", "town", "village", "hamlet"]
+    },
+    "public.import_status": {
+      "name": "import_status",
+      "schema": "public",
+      "values": ["running", "succeeded", "failed"]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
