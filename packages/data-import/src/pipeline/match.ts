@@ -10,9 +10,9 @@ export async function matchCities(sql: Sql, country: CountryConfig): Promise<voi
   await indexStaging(sql);
   await selectCountry(sql, country);
   await selectSettlements(sql);
+  await selectMunicipalities(sql, country);
   await linkBoundaries(sql);
   await selectRegions(sql, country);
-  await selectMunicipalities(sql, country);
   await buildCities(sql);
 }
 
@@ -136,8 +136,10 @@ async function selectSettlements(sql: Sql): Promise<void> {
  * The Wikidata ID comes before the label, because it says what the settlement is: a town whose
  * item is the municipality gets the municipality's boundary, not that of its core district, so
  * that boundary, population and area describe the same thing (BR-017).
- * Within a method the most specific boundary (highest admin_level) wins. The candidate must
- * always contain the settlement's centre. A boundary is given to one settlement only.
+ * Within a method a municipality's boundary wins, then the most specific one (highest
+ * admin_level). Warsaw has the same Wikidata ID on its powiat, its gmina and its settlement
+ * boundary; it gets the gmina's. The candidate must always contain the settlement's centre.
+ * A boundary is given to one settlement only.
  */
 async function linkBoundaries(sql: Sql): Promise<void> {
   await sql.unsafe(`
@@ -178,7 +180,9 @@ async function linkBoundaries(sql: Sql): Promise<void> {
              array_position(ARRAY['city', 'town', 'village', 'hamlet'], s.settlement_type::text) AS rank
       FROM staging.boundary_candidate c
       JOIN staging.settlement s USING (osm_type, osm_id)
-      ORDER BY c.osm_type, c.osm_id, c.priority, c.admin_level DESC NULLS LAST
+      LEFT JOIN staging.municipality m ON m.osm_type = c.b_type AND m.osm_id = c.b_id
+      ORDER BY c.osm_type, c.osm_id, c.priority, (m.osm_id IS NOT NULL) DESC,
+               c.admin_level DESC NULLS LAST
     ) best
     ORDER BY b_type, b_id, priority, rank;
   `);

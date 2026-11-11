@@ -56,6 +56,16 @@ const countries: Record<string, CountryConfig> = {
     municipalityLevels: [8],
     languages: ['de', 'fr', 'it', 'rm'],
   },
+  // Kraje, okresy, obce. Prague is a region and a municipality at once.
+  CZ: {
+    code: 'CZ',
+    name: 'Česko',
+    nameEn: 'Czechia',
+    region1Level: 4,
+    region2Level: 5,
+    municipalityLevels: [8, 4],
+    languages: ['cs'],
+  },
   // Länder, Kreise, Gemeinden. District-free cities and city-states have no Gemeinde level.
   DE: {
     code: 'DE',
@@ -76,6 +86,27 @@ const countries: Record<string, CountryConfig> = {
     municipalityLevels: [7],
     municipalityNameEndings: ['s Kommune', ' Kommune'],
     languages: ['da'],
+  },
+  // Régions, départements, communes. Metropolitan France only: the extract has no country
+  // boundary, because the relation of France also covers the overseas territories.
+  FR: {
+    code: 'FR',
+    name: 'France',
+    nameEn: 'France',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['fr'],
+  },
+  // Megyék (and Budapest), járások, települések.
+  HU: {
+    code: 'HU',
+    name: 'Magyarország',
+    nameEn: 'Hungary',
+    region1Level: 6,
+    region2Level: 7,
+    municipalityLevels: [8],
+    languages: ['hu'],
   },
   // Regioni, province and metropolitan cities, comuni.
   IT: {
@@ -147,6 +178,28 @@ const countries: Record<string, CountryConfig> = {
     municipalityLevels: [8, 5],
     languages: ['sk'],
   },
+  // Län, kommuner. Most towns have no boundary of their own in OSM.
+  SE: {
+    code: 'SE',
+    name: 'Sverige',
+    nameEn: 'Sweden',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [7],
+    // Most are "Malmö kommun" or "Stockholms kommun"; a few call themselves "Göteborgs Stad".
+    municipalityNameEndings: ['s kommun', ' kommun', 's Stad', ' Stad', 's stad', ' stad'],
+    languages: ['sv'],
+  },
+  // Województwa, powiaty, gminy. Settlements have their own boundaries at level 8.
+  PL: {
+    code: 'PL',
+    name: 'Polska',
+    nameEn: 'Poland',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [7],
+    languages: ['pl'],
+  },
   // Castelli. Imported from the Italy extract.
   SM: {
     code: 'SM',
@@ -156,6 +209,16 @@ const countries: Record<string, CountryConfig> = {
     region2Level: null,
     municipalityLevels: [8],
     languages: ['it'],
+  },
+  // Oblasts, raions, hromadas. Kyiv and Sevastopol are regions without hromadas.
+  UA: {
+    code: 'UA',
+    name: 'Україна',
+    nameEn: 'Ukraine',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [7, 4],
+    languages: ['uk'],
   },
   // No subdivisions. Imported from the Italy extract.
   VA: {

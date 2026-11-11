@@ -233,6 +233,19 @@ export function municipalityFeatures(): FixtureFeature[] {
   ];
 }
 
+/**
+ * Like Warsaw: the municipality and the settlement's own, smaller boundary carry the same
+ * Wikidata ID as the settlement.
+ */
+export function sharedWikidataFeatures(): FixtureFeature[] {
+  const boundary = { boundary: 'administrative', name: 'Neustadt', wikidata: 'Q20' };
+  return [
+    relationArea(110, [0.5, 4.5, 3, 6.5], { ...boundary, admin_level: '8' }),
+    relationArea(111, [1, 5, 2, 6], { ...boundary, admin_level: '9' }),
+    node(20, 1.5, 5.5, { place: 'town', name: 'Neustadt', wikidata: 'Q20' }),
+  ];
+}
+
 export function municipalityRelations(): FixtureRelation[] {
   return [
     {
