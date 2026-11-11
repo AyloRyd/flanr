@@ -17,5 +17,12 @@ services:
       timeout: 5s
       retries: 30
 
+  # Command-line tool for OSM extracts, used by the city import. Not started by `docker compose up`.
+  osmium:
+    build: tools/osmium
+    profiles: [tools]
+    volumes:
+      - ./data:/data
+
 volumes:
   db-data:

@@ -45,14 +45,14 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 ## Phase 2 — City data pipeline
 
-- [ ] Drizzle schema for countries, regions, cities, city names (section 5.2), with PostGIS geometry columns and spatial indexes.
-- [ ] Import from the chosen OSM extract: city, town, village, hamlet; exclude suburbs and boroughs (BR-001, FR-CITY-005).
-- [ ] Roll out in stages (CON-012): Germany first, then continental Europe (covers all countries in the test data). The whole world comes after the MVP.
+- [x] Drizzle schema for countries, regions, cities, city names (section 5.2), with PostGIS geometry columns and spatial indexes.
+- [x] Import from the chosen OSM extract: city, town, village, hamlet; exclude suburbs and boroughs (BR-001, FR-CITY-005).
+- [ ] Roll out in stages (CON-012): Germany first (done), then continental Europe (covers all countries in the test data). The whole world comes after the MVP.
 - [ ] Enrichment from Wikidata through SPARQL or a Wikidata dump: population with year, capital status, Wikipedia link, English and alternative names, area, and the desirable fields where cheap (FR-CITY-002).
 - [ ] Boundary simplification for different zoom levels.
 - [ ] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`.
-- [ ] Re-runnable import that updates by source IDs and runs in a transaction (FR-CITY-006, NFR-REL-002).
-- [ ] Attribution data stored for OSM, Wikidata and Commons (NFR-LIC).
+- [x] Re-runnable import that updates by source IDs and runs in a transaction (FR-CITY-006, NFR-REL-002).
+- [x] Attribution data stored for OSM, Wikidata and Commons (NFR-LIC).
 
 **Done when:** all cities from the test data exist in the database with boundaries where OSM has them, and Ostia, Lyngby, Körbecke and Hoogezand are checked by hand against BR-001.
 
