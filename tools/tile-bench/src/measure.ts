@@ -132,17 +132,17 @@ async function measureBrowser() {
       for (let run = 0; run < browserRuns && finished; run++) {
         const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
         const page = await context.newPage();
-        const session = await context.newCDPSession(page);
-        await session.send('Network.enable');
-        const dataRequests = new Set<string>();
+        // Counted on the context, because MapLibre loads tiles and GeoJSON from a web worker.
         let bytes = 0;
-        session.on('Network.requestWillBeSent', ({ requestId, request }) => {
-          if (request.url.includes('/tiles/cities/') || request.url.includes('/data/')) {
-            dataRequests.add(requestId);
-          }
-        });
-        session.on('Network.loadingFinished', ({ requestId, encodedDataLength }) => {
-          if (dataRequests.has(requestId)) bytes += encodedDataLength;
+        const counted: Promise<void>[] = [];
+        context.on('requestfinished', (request) => {
+          const url = request.url();
+          if (!url.includes('/tiles/cities/') && !url.includes('/data/')) return;
+          counted.push(
+            request.sizes().then((sizes) => {
+              bytes += sizes.responseBodySize;
+            }),
+          );
         });
 
         await page.goto(`${standUrl}/?source=${source}&${view.query}`);
@@ -151,6 +151,7 @@ async function measureBrowser() {
             timeout: firstRenderTimeoutMs,
           });
           renderTimes.push(await page.evaluate(() => window.__bench.firstIdleMs as number));
+          await Promise.all(counted);
           transferred.push(bytes);
         } catch {
           finished = false;
@@ -186,11 +187,12 @@ declare global {
   }
 }
 
-const sample = await sampleTiles();
+// BENCH_ONLY=browser skips the per-tile timings.
+const tiles = process.env.BENCH_ONLY === 'browser' ? [] : await measureTiles(await sampleTiles());
 console.log(
   JSON.stringify(
     {
-      tiles: await measureTiles(sample),
+      tiles,
       browser: await measureBrowser(),
       files: await fileSizes(),
     },
