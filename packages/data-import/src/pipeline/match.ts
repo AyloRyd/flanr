@@ -11,6 +11,7 @@ export async function matchCities(sql: Sql, country: CountryConfig): Promise<voi
   await selectSettlements(sql);
   await linkBoundaries(sql);
   await selectRegions(sql, country);
+  await selectMunicipalities(sql, country);
   await buildCities(sql);
 }
 
@@ -87,10 +88,13 @@ async function selectSettlements(sql: Sql): Promise<void> {
 /**
  * Finds a boundary for each settlement. Candidates in order of trust:
  *   1. the settlement is itself mapped as an area;
- *   2. the settlement node is the label member of a boundary relation;
- *   3. the boundary has the same Wikidata ID;
+ *   2. the boundary has the same Wikidata ID;
+ *   3. the settlement node is the label member of a boundary relation;
  *   4. the settlement node is the admin_centre of a boundary with the same name;
  *   5. a boundary with the same name contains the settlement.
+ * The Wikidata ID comes before the label, because it says what the settlement is: a town whose
+ * item is the municipality gets the municipality's boundary, not that of its core district, so
+ * that boundary, population and area describe the same thing (BR-017).
  * Within a method the most specific boundary (highest admin_level) wins. The candidate must
  * always contain the settlement's centre. A boundary is given to one settlement only.
  */
@@ -102,14 +106,14 @@ async function linkBoundaries(sql: Sql): Promise<void> {
     FROM staging.settlement s
     JOIN staging.boundary b ON b.osm_type = s.osm_type AND b.osm_id = s.osm_id
     UNION ALL
-    SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'label', 2
+    SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'label', 3
     FROM staging.settlement s
     JOIN staging.boundary_member m
       ON m.member_type = s.osm_type AND m.member_id = s.osm_id AND m.role = 'label'
     JOIN staging.boundary b ON b.osm_type = 'relation' AND b.osm_id = m.boundary_osm_id
     WHERE ST_Covers(b.geom, s.centre)
     UNION ALL
-    SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'wikidata', 3
+    SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'wikidata', 2
     FROM staging.settlement s
     JOIN staging.boundary b ON b.tags->>'wikidata' = s.wikidata_id
     WHERE coalesce(b.admin_level, 99) > 2 AND ST_Covers(b.geom, s.centre)
@@ -162,15 +166,55 @@ async function selectRegions(sql: Sql, country: CountryConfig): Promise<void> {
   `);
 }
 
+/**
+ * Municipalities of the country (BR-017). A boundary of a less specific level is a municipality
+ * only if no boundary of a more specific level lies inside it.
+ */
+async function selectMunicipalities(sql: Sql, country: CountryConfig): Promise<void> {
+  const levels = country.municipalityLevels;
+  await sql`
+    CREATE TABLE staging.municipality_candidate AS
+    SELECT b.osm_type, b.osm_id, b.admin_level, b.name, b.tags, b.geom,
+           ST_PointOnSurface(b.geom) AS inner_point
+    FROM staging.boundary b
+    WHERE b.admin_level IN ${sql(levels)} AND b.name IS NOT NULL
+  `;
+  await sql.unsafe(`
+    CREATE INDEX ON staging.municipality_candidate USING gist (inner_point);
+
+    CREATE TABLE staging.municipality AS
+    SELECT m.osm_type, m.osm_id, m.name AS name_local,
+           coalesce(m.tags->>'name:en', m.name) AS name_en,
+           CASE WHEN m.tags->>'wikidata' ~ '^Q[0-9]+$' THEN m.tags->>'wikidata' END AS wikidata_id,
+           m.geom
+    FROM staging.municipality_candidate m
+    WHERE EXISTS (SELECT 1 FROM staging.country_part c WHERE ST_Intersects(c.geom, m.inner_point))
+      AND NOT EXISTS (
+        SELECT 1 FROM staging.municipality_candidate finer
+        WHERE finer.admin_level > m.admin_level AND ST_Covers(m.geom, finer.inner_point)
+      );
+
+    CREATE TABLE staging.municipality_part AS
+    SELECT osm_type, osm_id, ST_Subdivide(geom, 256) AS geom FROM staging.municipality;
+    CREATE INDEX ON staging.municipality_part USING gist (geom);
+  `);
+}
+
 async function buildCities(sql: Sql): Promise<void> {
   await sql.unsafe(`
     CREATE TABLE staging.city AS
-    SELECT s.osm_type, s.osm_id, s.wikidata_id, s.name AS name_local, s.name_en, s.settlement_type,
+    SELECT s.osm_type, s.osm_id,
+           -- A settlement without a Wikidata ID takes the one of its boundary.
+           coalesce(s.wikidata_id, CASE WHEN b.tags->>'wikidata' ~ '^Q[0-9]+$' THEN b.tags->>'wikidata' END) AS wikidata_id,
+           s.name AS name_local, s.name_en, s.settlement_type,
            s.capital_status, s.population, s.population_year, s.wikipedia_url, s.centre,
            b.geom AS boundary, bc.b_type AS boundary_osm_type, bc.b_id AS boundary_osm_id,
            bc.method AS boundary_match,
            r1.osm_type AS region_1_osm_type, r1.osm_id AS region_1_osm_id,
-           r2.osm_type AS region_2_osm_type, r2.osm_id AS region_2_osm_id
+           r2.osm_type AS region_2_osm_type, r2.osm_id AS region_2_osm_id,
+           m.osm_type AS municipality_osm_type, m.osm_id AS municipality_osm_id,
+           -- The city is its municipality when its boundary is the municipality's boundary.
+           coalesce(m.osm_type = bc.b_type AND m.osm_id = bc.b_id, false) AS represents_municipality
     FROM staging.settlement s
     LEFT JOIN staging.boundary_choice bc ON bc.osm_type = s.osm_type AND bc.osm_id = s.osm_id
     LEFT JOIN staging.boundary b ON b.osm_type = bc.b_type AND b.osm_id = bc.b_id
@@ -181,7 +225,11 @@ async function buildCities(sql: Sql): Promise<void> {
     LEFT JOIN LATERAL (
       SELECT osm_type, osm_id FROM staging.region_part r
       WHERE r.level = 2 AND ST_Intersects(r.geom, s.centre) LIMIT 1
-    ) r2 ON true;
+    ) r2 ON true
+    LEFT JOIN LATERAL (
+      SELECT osm_type, osm_id FROM staging.municipality_part mp
+      WHERE ST_Intersects(mp.geom, s.centre) LIMIT 1
+    ) m ON true;
     ALTER TABLE staging.city ADD PRIMARY KEY (osm_type, osm_id);
   `);
 }

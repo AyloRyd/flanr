@@ -7,7 +7,8 @@ import type { Tags } from '../src/osm/tags.ts';
  * A tiny synthetic OSM extract, written in the formats that osmium produces.
  * Coordinates are plain degrees on a 10 × 10 country so the geometry is easy to follow:
  *
- *   country DE: 0..10 × 0..10, state West: x 0..5, state East: x 5..10, district: x 0..5, y 0..5
+ *   country DE: 0..10 × 0..10, state West: x 0..5, state East: x 5..10,
+ *   district Landkreis Nord: x 0..5, y 4..10 (the city in the south-west is district-free)
  */
 export interface FixtureFeature {
   id: string;
@@ -76,10 +77,10 @@ export function baseFeatures(): FixtureFeature[] {
       'name:en': 'East',
       'ISO3166-2': 'DE-OO',
     }),
-    relationArea(4, [0, 0, 5, 5], {
+    relationArea(4, [0, 4, 5, 10], {
       boundary: 'administrative',
       admin_level: '6',
-      name: 'Landkreis Süd',
+      name: 'Landkreis Nord',
     }),
     // A neighbouring state outside the country, as a strip of it is included in real extracts.
     relationArea(5, [10, 0, 15, 10], {
@@ -88,7 +89,7 @@ export function baseFeatures(): FixtureFeature[] {
       name: 'Nachbarland',
     }),
 
-    // City linked to its boundary through the label role.
+    // District-free city: its boundary is a district-level one and has the same Wikidata ID.
     node(10, 2, 2, {
       place: 'city',
       name: 'Großstadt',
@@ -201,4 +202,46 @@ function escape(value: string): string {
   return [...value]
     .map((char) => (/[A-Za-z0-9_:.-]/.test(char) ? char : `%${char.codePointAt(0)?.toString(16)}%`))
     .join('');
+}
+
+/**
+ * Extra features for the municipality rules (BR-017), all inside Landkreis Nord:
+ * a municipality "Altstadt" whose main settlement has the same name, with a core district of
+ * its own, and a second village inside the same municipality.
+ */
+export function municipalityFeatures(): FixtureFeature[] {
+  const boundary = { boundary: 'administrative' };
+  return [
+    // The municipality, and the smaller core district that carries the label of the village node.
+    relationArea(104, [0.5, 7.5, 3, 9.5], {
+      ...boundary,
+      admin_level: '8',
+      name: 'Altstadt',
+      wikidata: 'Q17',
+    }),
+    relationArea(105, [0.8, 7.8, 1.5, 8.5], { ...boundary, admin_level: '9', name: 'Altstadt' }),
+    node(17, 1, 8, { place: 'village', name: 'Altstadt', wikidata: 'Q17' }),
+
+    // Another village in the same municipality. Only its boundary has a Wikidata ID.
+    relationArea(106, [2.2, 8.8, 2.8, 9.3], {
+      ...boundary,
+      admin_level: '9',
+      name: 'Nebendorf',
+      wikidata: 'Q18',
+    }),
+    node(18, 2.5, 9, { place: 'village', name: 'Nebendorf' }),
+  ];
+}
+
+export function municipalityRelations(): FixtureRelation[] {
+  return [
+    {
+      id: 105,
+      tags: { boundary: 'administrative', admin_level: '9', name: 'Altstadt' },
+      members: [
+        { ref: 'w5', role: 'outer' },
+        { ref: 'n17', role: 'label' },
+      ],
+    },
+  ];
 }

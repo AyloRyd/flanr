@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, municipalities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
 });
 
 async function runImport(features: FixtureFeature[] = baseFeatures()) {
@@ -79,13 +79,13 @@ describe('OSM city import', () => {
     });
   });
 
-  it('links boundaries by label, by name and location, and merges a settlement mapped twice', async () => {
+  it('links boundaries by Wikidata ID, by name and location, and merges a settlement mapped twice', async () => {
     await runImport();
 
     expect(await city('Großstadt')).toMatchObject({
       has_boundary: true,
       boundary_osm_id: '100',
-      boundary_match: 'label',
+      boundary_match: 'wikidata',
     });
     expect(await city('Dorf')).toMatchObject({
       has_boundary: true,

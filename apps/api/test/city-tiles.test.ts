@@ -50,7 +50,7 @@ async function layerFeatures(coordinates: { z: number; x: number; y: number }, l
 }
 
 beforeAll(async () => {
-  await sql`TRUNCATE city_tile_shapes, city_names, cities, regions, countries RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE city_tile_shapes, city_names, cities, municipalities, regions, countries RESTART IDENTITY CASCADE`;
   await sql`INSERT INTO countries (code, name_local, name_en) VALUES ('DE', 'Deutschland', 'Germany')`;
   await sql`
     INSERT INTO regions (osm_type, osm_id, country_code, level, name_local, name_en, boundary)

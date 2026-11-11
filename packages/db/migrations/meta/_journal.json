@@ -43,6 +43,13 @@
       "when": 1794392875857,
       "tag": "0005_wikidata",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794398801825,
+      "tag": "0006_municipalities",
+      "breakpoints": true
     }
   ]
 }

@@ -52,6 +52,8 @@ pnpm import:osm --country DE --pbf data/raw/geofabrik/germany-latest.osm.pbf
 pnpm import:wikidata --country DE
 ```
 
+Every city is also linked to its municipality. A city that is its municipality (Cologne) gets the municipality's boundary; a village inside it (Worringen) stays a city of its own and is marked as part of it.
+
 The import filters the extract with osmium (it runs in Docker, nothing to install), loads it into staging tables, links settlements with their boundaries and regions, validates the result and applies it in one transaction. It can be re-run at any time; cities keep their IDs. Germany takes about five minutes.
 
 `import:wikidata` fetches the Wikidata items that the cities link to into our own copy and fills population, English names, Wikipedia links, area, elevation, website and founding year from it. It asks Wikidata only for items that are new or older than 30 days, and it continues where it stopped if interrupted. The first run for Germany makes about 850 requests. Later OSM imports reuse the stored copy without calling Wikidata.
