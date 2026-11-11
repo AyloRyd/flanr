@@ -52,6 +52,8 @@ pnpm import:osm --country DE --pbf data/raw/geofabrik/germany-latest.osm.pbf
 pnpm import:wikidata --country DE
 ```
 
+Countries set up so far: Germany (`DE`), Denmark (`DK`), Italy (`IT`) and the Netherlands (`NL`). A new country needs an entry in `packages/data-import/src/countries.ts` that says at which OpenStreetMap admin levels its regions and municipalities are. `--extract-only` writes the filtered files without touching the database, which helps to look at the levels first.
+
 Every city is also linked to its municipality. A city that is its municipality (Cologne) gets the municipality's boundary; a village inside it (Worringen) stays a city of its own and is marked as part of it.
 
 The import filters the extract with osmium (it runs in Docker, nothing to install), loads it into staging tables, links settlements with their boundaries and regions, validates the result and applies it in one transaction. It can be re-run at any time; cities keep their IDs. Germany takes about five minutes.

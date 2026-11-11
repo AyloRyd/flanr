@@ -6,8 +6,9 @@ import type { CountryConfig } from '../countries.ts';
  * with its regions and, where one can be found, its boundary.
  */
 export async function matchCities(sql: Sql, country: CountryConfig): Promise<void> {
+  await addMatchNames(sql, country);
   await indexStaging(sql);
-  await selectCountry(sql, country.code);
+  await selectCountry(sql, country);
   await selectSettlements(sql);
   await linkBoundaries(sql);
   await selectRegions(sql, country);
@@ -15,10 +16,33 @@ export async function matchCities(sql: Sql, country: CountryConfig): Promise<voi
   await buildCities(sql);
 }
 
+/**
+ * Names under which a boundary can be matched to a settlement: its own name, and the name
+ * without a municipality ending such as " Kommune" where the country has those.
+ */
+async function addMatchNames(sql: Sql, country: CountryConfig): Promise<void> {
+  const endings = country.municipalityNameEndings ?? [];
+  await sql`
+    ALTER TABLE staging.boundary ADD COLUMN match_names text[];
+  `;
+  await sql`
+    UPDATE staging.boundary b SET match_names = ARRAY(
+      SELECT DISTINCT variant FROM (
+        SELECT b.name AS variant
+        UNION ALL
+        SELECT left(b.name, length(b.name) - length(ending))
+        FROM unnest(${endings}::text[]) AS ending
+        WHERE b.name LIKE '%' || ending AND length(b.name) > length(ending)
+      ) variants
+    )
+    WHERE b.name IS NOT NULL
+  `;
+}
+
 async function indexStaging(sql: Sql): Promise<void> {
   await sql.unsafe(`
     CREATE INDEX ON staging.boundary USING gist (geom);
-    CREATE INDEX ON staging.boundary (name);
+    CREATE INDEX ON staging.boundary USING gin (match_names);
     CREATE INDEX ON staging.boundary ((tags->>'wikidata'));
     CREATE INDEX ON staging.boundary_member (member_type, member_id);
     CREATE INDEX ON staging.place_name (osm_type, osm_id);
@@ -28,20 +52,37 @@ async function indexStaging(sql: Sql): Promise<void> {
   `);
 }
 
-/** The country boundary, split into small parts so that point-in-polygon tests stay fast. */
-async function selectCountry(sql: Sql, code: string): Promise<void> {
+/**
+ * The country boundary, split into small parts so that point-in-polygon tests stay fast.
+ *
+ * Some extracts have no usable country boundary: the relation of the Netherlands also covers
+ * the Caribbean and is cut off by the extract. The boundary is then built from the first-level
+ * regions, which are recognised by their ISO 3166-2 code.
+ */
+async function selectCountry(sql: Sql, country: CountryConfig): Promise<void> {
   await sql`
     CREATE TABLE staging.country AS
     SELECT osm_type, osm_id, name, tags, geom
     FROM staging.boundary
     WHERE admin_level = 2
-      AND upper(coalesce(tags->>'ISO3166-1:alpha2', tags->>'ISO3166-1')) = ${code}
+      AND upper(coalesce(tags->>'ISO3166-1:alpha2', tags->>'ISO3166-1')) = ${country.code}
     ORDER BY ST_Area(geom) DESC
     LIMIT 1
   `;
   const [found] = await sql`SELECT count(*)::int AS count FROM staging.country`;
   if (found?.count !== 1) {
-    throw new Error(`Country boundary for ${code} not found in the extract`);
+    await sql`
+      INSERT INTO staging.country (osm_type, osm_id, name, tags, geom)
+      SELECT 'relation', NULL, ${country.name}, ${sql.json({ 'name:en': country.nameEn })},
+             ST_Multi(ST_Union(geom))
+      FROM staging.boundary
+      WHERE admin_level = ${country.region1Level} AND tags->>'ISO3166-2' LIKE ${country.code + '-%'}
+      HAVING count(*) > 0
+    `;
+    const [built] = await sql`SELECT count(*)::int AS count FROM staging.country`;
+    if (built?.count !== 1) {
+      throw new Error(`Country boundary for ${country.code} not found in the extract`);
+    }
   }
   await sql.unsafe(`
     CREATE TABLE staging.country_part AS
@@ -123,11 +164,11 @@ async function linkBoundaries(sql: Sql): Promise<void> {
     JOIN staging.boundary_member m
       ON m.member_type = s.osm_type AND m.member_id = s.osm_id AND m.role = 'admin_centre'
     JOIN staging.boundary b ON b.osm_type = 'relation' AND b.osm_id = m.boundary_osm_id
-    WHERE b.name = s.name AND ST_Covers(b.geom, s.centre)
+    WHERE s.name = ANY(b.match_names) AND ST_Covers(b.geom, s.centre)
     UNION ALL
     SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'name_and_location', 5
     FROM staging.settlement s
-    JOIN staging.boundary b ON b.name = s.name AND ST_Covers(b.geom, s.centre)
+    JOIN staging.boundary b ON b.match_names @> ARRAY[s.name] AND ST_Covers(b.geom, s.centre)
     WHERE coalesce(b.admin_level, 99) > 2;
 
     CREATE TABLE staging.boundary_choice AS
@@ -157,6 +198,9 @@ async function selectRegions(sql: Sql, country: CountryConfig): Promise<void> {
     FROM staging.boundary b
     WHERE b.admin_level IN ${sql(levels)}
       AND b.name IS NOT NULL
+      -- First-level regions have an ISO 3166-2 code. This keeps out other things mapped at the
+      -- same level, such as small islands in Italy.
+      AND (b.admin_level <> ${country.region1Level} OR b.tags->>'ISO3166-2' LIKE ${country.code + '-%'})
       AND EXISTS (SELECT 1 FROM staging.country_part c WHERE ST_Intersects(c.geom, ST_PointOnSurface(b.geom)))
   `;
   await sql.unsafe(`
