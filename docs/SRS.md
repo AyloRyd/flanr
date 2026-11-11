@@ -1336,7 +1336,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-019 | Whether a lived-in city can have a period (from, to), and how lived-in periods appear in time-based statistics. | Visits | Open |
 | OI-018 | Whether planned trips can have dates, or the Planned list stays a simple set of cities. | Lists | Open |
 | OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
-| OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. | Data | Open |
+| OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Open |
 
 ---
 

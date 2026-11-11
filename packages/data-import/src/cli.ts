@@ -9,13 +9,15 @@ const usage = `Usage: pnpm import:osm --country DE --pbf data/raw/geofabrik/germ
 
   --country       ISO 3166-1 alpha-2 code of the country to import
   --pbf           OSM extract inside the data directory
-  --skip-extract  reuse the files in data/work/<country> from an earlier run`;
+  --skip-extract  reuse the files in data/work/<country> from an earlier run
+  --keep-staging  keep the staging tables after the run, for looking into the matching`;
 
 const { values } = parseArgs({
   options: {
     country: { type: 'string' },
     pbf: { type: 'string' },
     'skip-extract': { type: 'boolean', default: false },
+    'keep-staging': { type: 'boolean', default: false },
     help: { type: 'boolean', default: false },
   },
 });
@@ -45,7 +47,12 @@ const files = values['skip-extract']
 
 const sql = postgres(databaseUrl, { max: 1, onnotice: () => {} });
 try {
-  const result = await importCities(sql, { country, ...files, log });
+  const result = await importCities(sql, {
+    country,
+    ...files,
+    log,
+    keepStaging: values['keep-staging'],
+  });
   console.log(JSON.stringify(result, null, 2));
   process.exitCode = result.ok ? 0 : 1;
 } finally {

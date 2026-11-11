@@ -12,6 +12,8 @@ export interface ImportInput {
   relations: string;
   sourceTimestamp: Date | null;
   validation?: ValidationOptions;
+  /** Keep the staging tables after the run, to look into how cities were matched. */
+  keepStaging?: boolean;
   log?: (message: string) => void;
 }
 
@@ -61,7 +63,7 @@ export async function importCities(sql: Sql, input: ImportInput): Promise<Import
     await finishRun(sql, runId, 'failed', stats, message);
     throw error;
   } finally {
-    await dropStaging(sql);
+    if (!input.keepStaging) await dropStaging(sql);
   }
 }
 

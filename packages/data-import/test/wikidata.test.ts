@@ -15,7 +15,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, municipalities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
 });
 
 /** The base fixture, with Wikidata IDs added to the village, the town and the hamlet. */

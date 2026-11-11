@@ -63,6 +63,32 @@ export const regions = pgTable(
   ],
 );
 
+/**
+ * The lowest administrative unit with its own local government (Gemeinde, gemeente, commune).
+ * Reference data: a city links to its municipality, which cannot be visited itself (BR-017).
+ */
+export const municipalities = pgTable(
+  'municipalities',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    osmType: osmTypeEnum('osm_type').notNull(),
+    osmId: bigint('osm_id', { mode: 'number' }).notNull(),
+    wikidataId: text('wikidata_id'),
+    countryCode: char('country_code', { length: 2 })
+      .notNull()
+      .references(() => countries.code),
+    nameLocal: text('name_local').notNull(),
+    nameEn: text('name_en').notNull(),
+    boundary: multiPolygon('boundary').notNull(),
+    inSource: boolean('in_source').notNull().default(true),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('municipalities_osm_uq').on(t.osmType, t.osmId),
+    index('municipalities_boundary_gix').using('gist', t.boundary),
+  ],
+);
+
 export const cities = pgTable(
   'cities',
   {
@@ -80,6 +106,9 @@ export const cities = pgTable(
       .notNull()
       .references(() => regions.id),
     region2Id: integer('region_2_id').references(() => regions.id),
+    municipalityId: integer('municipality_id').references(() => municipalities.id),
+    /** True when the city and its municipality are the same thing, for example Cologne (BR-017). */
+    representsMunicipality: boolean('represents_municipality').notNull().default(false),
     settlementType: settlementTypeEnum('settlement_type').notNull(),
     capitalStatus: capitalStatusEnum('capital_status').notNull().default('none'),
     centre: point('centre').notNull(),
@@ -107,6 +136,7 @@ export const cities = pgTable(
     uniqueIndex('cities_osm_uq').on(t.osmType, t.osmId),
     index('cities_country_idx').on(t.countryCode),
     index('cities_region_1_idx').on(t.region1Id),
+    index('cities_municipality_idx').on(t.municipalityId),
     // Low-zoom map tiles select the few cities and towns of a large area by type.
     index('cities_settlement_type_idx').on(t.settlementType),
     index('cities_centre_gix').using('gist', t.centre),

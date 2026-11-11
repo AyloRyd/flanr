@@ -17,6 +17,7 @@ export async function applyCities(sql: Sql, country: CountryConfig): Promise<voi
   await sql.begin(async (tx) => {
     await upsertCountry(tx, countryCode);
     await upsertRegions(tx, countryCode);
+    await upsertMunicipalities(tx, countryCode);
     await upsertCities(tx, countryCode);
     await replaceCityNames(tx, countryCode);
     // The upsert above reset the fields that come from OSM, so the Wikidata data is applied again.
@@ -53,23 +54,46 @@ async function upsertRegions(tx: TransactionSql, countryCode: string): Promise<v
   `;
 }
 
+async function upsertMunicipalities(tx: TransactionSql, countryCode: string): Promise<void> {
+  await tx`
+    INSERT INTO municipalities (osm_type, osm_id, wikidata_id, country_code, name_local, name_en, boundary)
+    SELECT osm_type, osm_id, wikidata_id, ${countryCode}, name_local, name_en, geom
+    FROM staging.municipality
+    ON CONFLICT (osm_type, osm_id) DO UPDATE SET
+      wikidata_id = excluded.wikidata_id, country_code = excluded.country_code,
+      name_local = excluded.name_local, name_en = excluded.name_en, boundary = excluded.boundary,
+      in_source = true, updated_at = now()
+  `;
+  await tx`
+    UPDATE municipalities m SET in_source = false, updated_at = now()
+    WHERE m.country_code = ${countryCode} AND m.in_source
+      AND NOT EXISTS (
+        SELECT 1 FROM staging.municipality s WHERE s.osm_type = m.osm_type AND s.osm_id = m.osm_id
+      )
+  `;
+}
+
 async function upsertCities(tx: TransactionSql, countryCode: string): Promise<void> {
   await tx`
     INSERT INTO cities (osm_type, osm_id, wikidata_id, name_local, name_en, country_code,
-      region_1_id, region_2_id, settlement_type, capital_status, centre, boundary,
+      region_1_id, region_2_id, municipality_id, represents_municipality, settlement_type, capital_status, centre, boundary,
       boundary_osm_type, boundary_osm_id, boundary_match, population, population_year,
       population_source, wikipedia_url)
     SELECT c.osm_type, c.osm_id, c.wikidata_id, c.name_local, c.name_en, ${countryCode},
-           r1.id, r2.id, c.settlement_type, c.capital_status, c.centre, c.boundary,
+           r1.id, r2.id, m.id, c.represents_municipality, c.settlement_type, c.capital_status, c.centre, c.boundary,
            c.boundary_osm_type, c.boundary_osm_id, c.boundary_match, c.population, c.population_year,
            CASE WHEN c.population IS NOT NULL THEN 'openstreetmap' END, c.wikipedia_url
     FROM staging.city c
     JOIN regions r1 ON r1.osm_type = c.region_1_osm_type AND r1.osm_id = c.region_1_osm_id
     LEFT JOIN regions r2 ON r2.osm_type = c.region_2_osm_type AND r2.osm_id = c.region_2_osm_id
+    LEFT JOIN municipalities m
+      ON m.osm_type = c.municipality_osm_type AND m.osm_id = c.municipality_osm_id
     ON CONFLICT (osm_type, osm_id) DO UPDATE SET
       wikidata_id = excluded.wikidata_id, name_local = excluded.name_local, name_en = excluded.name_en,
       country_code = excluded.country_code, region_1_id = excluded.region_1_id,
-      region_2_id = excluded.region_2_id, settlement_type = excluded.settlement_type,
+      region_2_id = excluded.region_2_id, municipality_id = excluded.municipality_id,
+      represents_municipality = excluded.represents_municipality,
+      settlement_type = excluded.settlement_type,
       capital_status = excluded.capital_status, centre = excluded.centre, boundary = excluded.boundary,
       boundary_osm_type = excluded.boundary_osm_type, boundary_osm_id = excluded.boundary_osm_id,
       boundary_match = excluded.boundary_match, population = excluded.population,
