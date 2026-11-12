@@ -61,10 +61,10 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 ## Phase 3 — API foundation
 
-- [ ] Hono app with `@hono/zod-openapi`; OpenAPI 3.1 document generated from the schemas (CON-009, section 6.2).
-- [ ] Clerk token verification middleware, user sync through Clerk webhooks (FR-AUTH-003…005).
-- [ ] Roles and authorisation checks (FR-AUTH-010, NFR-SEC-003).
-- [ ] RFC 9457 error format, pagination helpers, rate limiting for write endpoints (NFR-SEC-004).
+- [x] Hono app with `@hono/zod-openapi`; OpenAPI 3.1 document generated from the schemas (CON-009, section 6.2).
+- [x] Clerk token verification middleware, user sync through Clerk webhooks (FR-AUTH-003…005).
+- [x] Roles and authorisation checks (FR-AUTH-010, NFR-SEC-003).
+- [x] RFC 9457 error format, pagination helpers, rate limiting for write endpoints (NFR-SEC-004).
 - [ ] Generated typed API client in `packages/shared` for the web app.
 
 **Done when:** a signed-in request reaches a protected endpoint, an unsigned one gets a 401 in Problem Details format, and the OpenAPI document is served.
