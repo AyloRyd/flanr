@@ -230,6 +230,136 @@ const countries: Record<string, CountryConfig> = {
     municipalityLevels: [],
     languages: ['it', 'la'],
   },
+  // Seven parishes, which are both the regions and the municipalities.
+  AD: {
+    code: 'AD',
+    name: 'Andorra',
+    nameEn: 'Andorra',
+    region1Level: 7,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['ca'],
+  },
+  // Qarqe (counties) and bashki (municipalities).
+  AL: {
+    code: 'AL',
+    name: 'Shqipëria',
+    nameEn: 'Albania',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['sq'],
+  },
+  // Districts and municipalities. The districts in the north have no ISO code and are not imported as regions.
+  CY: {
+    code: 'CY',
+    name: 'Κύπρος',
+    nameEn: 'Cyprus',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['el', 'tr'],
+  },
+  // Maakonnad (counties) and vallad or linnad (municipalities).
+  EE: {
+    code: 'EE',
+    name: 'Eesti',
+    nameEn: 'Estonia',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['et'],
+  },
+  // The sýslur have no ISO code, so there are no regions; kommunur are the municipalities.
+  FO: {
+    code: 'FO',
+    name: 'Føroyar',
+    nameEn: 'Faroe Islands',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['fo', 'da'],
+  },
+  // The sheadings have no ISO code, so there are no regions; parishes and towns are the municipalities.
+  IM: {
+    code: 'IM',
+    name: 'Isle of Man',
+    nameEn: 'Isle of Man',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['en', 'gv'],
+  },
+  // Regions and sveitarfélög (municipalities).
+  IS: {
+    code: 'IS',
+    name: 'Ísland',
+    nameEn: 'Iceland',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['is'],
+  },
+  // Apskritys (counties) and savivaldybės (municipalities).
+  LT: {
+    code: 'LT',
+    name: 'Lietuva',
+    nameEn: 'Lithuania',
+    region1Level: 4,
+    region2Level: 5,
+    municipalityLevels: [5],
+    languages: ['lt'],
+  },
+  // Novadi and state cities, which are both the regions and the municipalities.
+  LV: {
+    code: 'LV',
+    name: 'Latvija',
+    nameEn: 'Latvia',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [5],
+    languages: ['lv'],
+  },
+  // Raioane and municipii as regions, communes and towns as municipalities.
+  MD: {
+    code: 'MD',
+    name: 'Moldova',
+    nameEn: 'Moldova',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['ro', 'ru'],
+  },
+  // Opštine, which are both the regions and the municipalities.
+  ME: {
+    code: 'ME',
+    name: 'Crna Gora',
+    nameEn: 'Montenegro',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['sr'],
+  },
+  // Opštini, which are both the regions and the municipalities.
+  MK: {
+    code: 'MK',
+    name: 'Северна Македонија',
+    nameEn: 'North Macedonia',
+    region1Level: 7,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['mk', 'sq'],
+  },
+  // The districts have no ISO code, so there are no regions; komuna are the municipalities.
+  XK: {
+    code: 'XK',
+    name: 'Kosova',
+    nameEn: 'Kosovo',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['sq', 'sr'],
+  },
 };
 
 export function countryConfig(code: string): CountryConfig {
