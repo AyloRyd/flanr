@@ -181,12 +181,16 @@ describe('errors (RFC 9457)', () => {
 describe('GET /openapi.json (CON-009)', () => {
   it('serves an OpenAPI 3.1 document with the routes and the bearer scheme', async () => {
     const response = await createApp(dependencies).request('/openapi.json');
-    const document = await response.json();
+    const document = (await response.json()) as {
+      openapi: string;
+      paths: Record<string, { get: { security?: unknown } }>;
+      components: { securitySchemes: Record<string, unknown> };
+    };
 
     expect(response.status).toBe(200);
     expect(document.openapi).toBe('3.1.0');
     expect(Object.keys(document.paths)).toEqual(expect.arrayContaining(['/health', '/v1/me']));
-    expect(document.paths['/v1/me'].get.security).toEqual([{ bearerAuth: [] }]);
+    expect(document.paths['/v1/me']?.get.security).toEqual([{ bearerAuth: [] }]);
     expect(document.components.securitySchemes.bearerAuth).toMatchObject({ scheme: 'bearer' });
   });
 });
