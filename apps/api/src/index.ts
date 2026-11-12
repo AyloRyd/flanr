@@ -4,6 +4,7 @@ import { getCityTile } from './city-tiles.ts';
 import { createClerkTokenVerifier, createClerkWebhookReader } from './clerk.ts';
 import { createSql, isDatabaseReachable } from './db.ts';
 import { loadEnv } from './env.ts';
+import { createVisitStore } from './visits.ts';
 import { deleteUserByAuthProviderId, ensureUser, syncUserFromClerk } from './users.ts';
 
 const env = loadEnv();
@@ -19,6 +20,7 @@ const app = createApp({
     event.type === 'upsert'
       ? syncUserFromClerk(sql, event.profile)
       : deleteUserByAuthProviderId(sql, event.authProviderId),
+  visits: createVisitStore(sql),
 });
 
 if (!env.CLERK_SECRET_KEY) {

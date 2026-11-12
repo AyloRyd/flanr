@@ -10,6 +10,7 @@ const userWith = (roles: UserRole[]): CurrentUser => ({
   displayName: 'Ada',
   avatarUrl: null,
   roles,
+  registeredAt: '2026-03-01T12:00:00.000Z',
 });
 
 function appFor(roles: UserRole[]) {

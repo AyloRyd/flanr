@@ -2,6 +2,7 @@ import { gunzipSync } from 'node:zlib';
 import { healthResponseSchema, problemSchema, type CurrentUser } from '@flanr/shared';
 import { describe, expect, it } from 'vitest';
 import { createApp, type AppDependencies } from './app.ts';
+import { noVisitStore } from './visits.ts';
 
 const user: CurrentUser = {
   id: 1,
@@ -9,6 +10,7 @@ const user: CurrentUser = {
   displayName: 'Ada',
   avatarUrl: null,
   roles: ['user'],
+  registeredAt: '2026-03-01T12:00:00.000Z',
 };
 
 const dependencies: AppDependencies = {
@@ -19,6 +21,7 @@ const dependencies: AppDependencies = {
   resolveUser: async () => user,
   readWebhook: async () => null,
   applyUserEvent: async () => {},
+  visits: noVisitStore,
 };
 
 describe('GET /health', () => {
