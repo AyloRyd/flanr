@@ -19,6 +19,7 @@ const tilesPerZoom = 60;
 const repeats = 3;
 const browserRuns = 3;
 const views = [
+  { name: 'Europe, zoom 4', query: 'lng=10&lat=50&zoom=4' },
   { name: 'Germany, zoom 5.5', query: 'lng=10.4&lat=51.2&zoom=5.5' },
   { name: 'Cologne, zoom 11', query: 'lng=6.96&lat=50.94&zoom=11' },
 ];
