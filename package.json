@@ -20,6 +20,7 @@
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @flanr/db migrate",
     "db:generate": "pnpm --filter @flanr/db generate",
+    "api:contract": "pnpm --filter @flanr/api openapi:write && pnpm --filter @flanr/shared api:types",
     "import:osm": "pnpm --filter @flanr/data-import import:osm",
     "tiles:build": "pnpm --filter @flanr/data-import tiles:build",
     "import:wikidata": "pnpm --filter @flanr/data-import import:wikidata"

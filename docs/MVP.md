@@ -65,7 +65,7 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] Clerk token verification middleware, user sync through Clerk webhooks (FR-AUTH-003…005).
 - [x] Roles and authorisation checks (FR-AUTH-010, NFR-SEC-003).
 - [x] RFC 9457 error format, pagination helpers, rate limiting for write endpoints (NFR-SEC-004).
-- [ ] Generated typed API client in `packages/shared` for the web app.
+- [x] Generated typed API client in `packages/shared` for the web app. The OpenAPI document is committed as `packages/shared/openapi.json`; the types are generated from that file, not from the Hono app (`pnpm api:contract`), and tests fail when either is out of date.
 
 **Done when:** a signed-in request reaches a protected endpoint, an unsigned one gets a 401 in Problem Details format, and the OpenAPI document is served.
 

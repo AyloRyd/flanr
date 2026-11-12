@@ -10,3 +10,7 @@ docs/
 CLAUDE.md
 **/AGENTS.md
 apps/web/next-env.d.ts
+
+# Generated from the API contract by `pnpm api:contract`.
+packages/shared/openapi.json
+packages/shared/src/api/schema.ts
