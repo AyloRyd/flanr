@@ -9,7 +9,8 @@ import { importCities } from './pipeline/run.ts';
 const usage = `Usage: pnpm import:osm --country DE --pbf data/raw/geofabrik/germany-latest.osm.pbf
 
   --country       ISO 3166-1 alpha-2 code of the country to import
-  --pbf           OSM extract inside the data directory
+  --pbf           OSM extract inside the data directory; repeat it for a country that is
+                  spread over several extracts
   --skip-extract  reuse the files in data/work/<country> from an earlier run
   --files-of      use the extracted files of another country, for a small country that is
                   inside a neighbour's extract: --country VA --files-of IT --skip-extract
@@ -19,7 +20,7 @@ const usage = `Usage: pnpm import:osm --country DE --pbf data/raw/geofabrik/germ
 const { values } = parseArgs({
   options: {
     country: { type: 'string' },
-    pbf: { type: 'string' },
+    pbf: { type: 'string', multiple: true },
     'skip-extract': { type: 'boolean', default: false },
     'files-of': { type: 'string' },
     'extract-only': { type: 'boolean', default: false },
@@ -28,7 +29,7 @@ const { values } = parseArgs({
   },
 });
 
-if (values.help || !values.country || (!values.pbf && !values['skip-extract'])) {
+if (values.help || !values.country || (!values.pbf?.length && !values['skip-extract'])) {
   console.log(usage);
   process.exit(values.help ? 0 : 1);
 }
@@ -68,7 +69,7 @@ async function extract() {
   log('Extracting with osmium');
   const extracted = await extractOsm({
     repoRoot,
-    pbf: resolve(repoRoot, values.pbf ?? ''),
+    pbfs: (values.pbf ?? []).map((pbf) => resolve(repoRoot, pbf)),
     workDir,
   });
   // Remembered so that a later run with --skip-extract still knows how old the data is.
