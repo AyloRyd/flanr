@@ -1,6 +1,6 @@
 # City layer delivery: measurements
 
-Working notes for the MVP decision on how to deliver the city layer, and raw material for the theses (`docs/THESES.md`). Measured on 2026-11-11 with `tools/tile-bench`.
+Working notes for the MVP decision on how to deliver the city layer. Measured on 2026-11-11 with `tools/tile-bench`.
 
 ## Setup
 
@@ -59,4 +59,4 @@ The stand serves GeoJSON without compression; gzip would cut the transfer but no
 - A real network and a CDN in front of either approach.
 - Concurrent requests.
 - Europe-sized data.
-- The hybrid from the theses' hypothesis: static geometry plus user data applied with feature-state. The stand already highlights boundaries through feature-state, with city IDs as feature IDs in both tile sources.
+- The hybrid setup: static geometry plus user data applied with feature-state. The stand already highlights boundaries through feature-state, with city IDs as feature IDs in both tile sources.
