@@ -2,6 +2,10 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-12
+
+- **The API client is generated from the OpenAPI document, not from the Hono app (CON-009, NFR-PORT-001).** Hono's own typed client (`hc`) reads the types of the server code, which would tie the web client to this backend. Instead the document is written to `packages/shared/openapi.json`, `openapi-typescript` turns it into types, and `openapi-fetch` (a thin wrapper around `fetch`) uses them. A backend in another language only has to serve the same document. Both generated files are committed, so the web app builds without a generation step, and tests fail when they are out of date.
+
 ## 2026-11-11
 
 - **Countries without regions are allowed.** Monaco, Vatican City, Malta, Liechtenstein and San Marino have no first-level regions, so a city's region became optional (SRS 0.7).

@@ -29,16 +29,19 @@ pnpm dev
 
 ### Other commands
 
-| Command            | What it does                                 |
-| ------------------ | -------------------------------------------- |
-| `pnpm typecheck`   | Type-check all packages                      |
-| `pnpm lint`        | ESLint                                       |
-| `pnpm format`      | Prettier                                     |
-| `pnpm test`        | Unit and integration tests (Vitest)          |
-| `pnpm test:e2e`    | End-to-end tests (Playwright)                |
-| `pnpm db:down`     | Stop the database (data is kept in a volume) |
-| `pnpm db:migrate`  | Apply database migrations                    |
-| `pnpm db:generate` | Generate a migration from schema changes     |
+| Command             | What it does                                    |
+| ------------------- | ----------------------------------------------- |
+| `pnpm typecheck`    | Type-check all packages                         |
+| `pnpm lint`         | ESLint                                          |
+| `pnpm format`       | Prettier                                        |
+| `pnpm test`         | Unit and integration tests (Vitest)             |
+| `pnpm test:e2e`     | End-to-end tests (Playwright)                   |
+| `pnpm db:down`      | Stop the database (data is kept in a volume)    |
+| `pnpm db:migrate`   | Apply database migrations                       |
+| `pnpm db:generate`  | Generate a migration from schema changes        |
+| `pnpm api:contract` | Write the OpenAPI document and the client types |
+
+After changing an API route or its schemas, run `pnpm api:contract`. It writes the OpenAPI document to `packages/shared/openapi.json` and generates the types of the API client from it; both files are committed, and the tests fail when they are out of date. The web client calls the API through `createApiClient` from `@flanr/shared`.
 
 Before the first end-to-end run, install the browser: `pnpm --filter @flanr/web exec playwright install chromium`.
 
@@ -71,7 +74,7 @@ Unit and integration tests need the database to be running (`pnpm db:up`). They 
 ```
 apps/web               Next.js web client
 apps/api               Hono API
-packages/shared        Types and zod schemas shared by web and API
+packages/shared        Types and zod schemas shared by web and API, the API contract and client
 packages/db            Drizzle schema, migrations and database client
 packages/data-import   City data import from OpenStreetMap and Wikidata
 tools/osmium           Docker image with osmium for processing OSM extracts
