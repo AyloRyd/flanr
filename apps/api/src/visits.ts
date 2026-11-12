@@ -5,6 +5,7 @@ import {
   type VisitDatePrecision,
 } from '@flanr/shared';
 import type { TransactionSql } from 'postgres';
+import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
 
 /** The date of a visit as it is stored. `date` is null for an undated visit. */
@@ -66,10 +67,7 @@ export function createVisitStore(sql: Sql): VisitStore {
   });
 
   return {
-    async cityExists(cityId) {
-      const rows = await sql`SELECT 1 FROM cities WHERE id = ${cityId}`;
-      return rows.length > 0;
-    },
+    cityExists: (cityId) => cityExists(sql, cityId),
 
     async create(userId, cityId, dates) {
       const { date, precision } = stored(dates);

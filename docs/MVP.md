@@ -77,7 +77,7 @@ Each business rule gets unit tests before or together with its implementation (N
 
 - [x] Visits: create, edit, delete, date precision, no future dates, undated visits before registration, date required after registration (FR-VIS-001…006, BR-002, BR-003). API only; removing a city from the Planned list (BR-004) and deleting the rating with the last visit (BR-005) come with the lists and the ratings.
 - [x] Setting the number of undated visits directly (FR-VIS-005).
-- [ ] Lived-in cities, current and past (FR-VIS-010, BR-016).
+- [x] Lived-in cities, current and past, with an optional period (FR-VIS-010, BR-016). API only; that a lived-in city counts as visited and can be rated comes with the lists and the ratings, the home location with the profile.
 - [ ] Planned list and derived Visited list, automatic move on first visit (FR-LIST-001…002, BR-004).
 - [ ] Ratings: subjective rating, criteria, suggested value, change and delete, one per user and city, rating requires a visit (FR-RATE-001…004, BR-005…BR-008).
 - [ ] Criteria management for administrators (FR-RATE-006).

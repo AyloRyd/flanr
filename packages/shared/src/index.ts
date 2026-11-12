@@ -6,3 +6,4 @@ export * from './user.ts';
 export * from './pagination.ts';
 export * from './api/client.ts';
 export * from './visit.ts';
+export * from './lived-city.ts';

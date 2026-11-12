@@ -6,8 +6,6 @@ import {
   latestToday,
   paginationQuerySchema,
   parseVisitDate,
-  problemContentType,
-  problemSchema,
   toPage,
   undatedVisitCountSchema,
   updateVisitSchema,
@@ -19,24 +17,19 @@ import {
 import type { Context } from 'hono';
 import type { AuthEnv } from './auth.ts';
 import { problem } from './problem.ts';
+import {
+  bearerSecurity,
+  cityParams,
+  commonErrors,
+  idParam,
+  json,
+  problemResponse,
+} from './route-helpers.ts';
 import type { VisitDates, VisitStore } from './visits.ts';
 
-const security = [{ bearerAuth: [] }];
-const json = <Schema extends z.ZodType>(schema: Schema) => ({
-  content: { 'application/json': { schema } },
-});
-const problemResponse = (description: string) => ({
-  description,
-  content: { [problemContentType]: { schema: problemSchema } },
-});
-const commonErrors = {
-  400: problemResponse('Invalid request'),
-  401: problemResponse('No valid session token'),
-};
-
-const id = z.coerce.number().int().positive();
+const security = bearerSecurity;
+const id = idParam;
 const visitParams = z.object({ visitId: id });
-const cityParams = z.object({ cityId: id });
 
 const createVisitRoute = createRoute({
   method: 'post',
