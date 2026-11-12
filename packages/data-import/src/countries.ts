@@ -6,6 +6,12 @@ export interface CountryConfig {
   nameEn: string;
   /** OSM admin_level of first-level regions (states). Null for countries without regions. */
   region1Level: number | null;
+  /**
+   * Other OSM admin levels at which some first-level regions are mapped. Portugal's districts
+   * are at level 6, its autonomous regions at level 4. Like at region1Level, only boundaries
+   * with an ISO 3166-2 code of the country count.
+   */
+  region1ExtraLevels?: number[];
   /** OSM admin_level of second-level regions (districts), if any. */
   region2Level: number | null;
   /**
@@ -229,6 +235,296 @@ const countries: Record<string, CountryConfig> = {
     region2Level: null,
     municipalityLevels: [],
     languages: ['it', 'la'],
+  },
+  // Seven parishes, which are both the regions and the municipalities.
+  AD: {
+    code: 'AD',
+    name: 'Andorra',
+    nameEn: 'Andorra',
+    region1Level: 7,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['ca'],
+  },
+  // Qarqe (counties) and bashki (municipalities).
+  AL: {
+    code: 'AL',
+    name: 'Shqipëria',
+    nameEn: 'Albania',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['sq'],
+  },
+  // Districts and municipalities. The districts in the north have no ISO code and are not imported as regions.
+  CY: {
+    code: 'CY',
+    name: 'Κύπρος',
+    nameEn: 'Cyprus',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['el', 'tr'],
+  },
+  // Maakonnad (counties) and vallad or linnad (municipalities).
+  EE: {
+    code: 'EE',
+    name: 'Eesti',
+    nameEn: 'Estonia',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['et'],
+  },
+  // The sýslur have no ISO code, so there are no regions; kommunur are the municipalities.
+  FO: {
+    code: 'FO',
+    name: 'Føroyar',
+    nameEn: 'Faroe Islands',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['fo', 'da'],
+  },
+  // The sheadings have no ISO code, so there are no regions; parishes and towns are the municipalities.
+  IM: {
+    code: 'IM',
+    name: 'Isle of Man',
+    nameEn: 'Isle of Man',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['en', 'gv'],
+  },
+  // Regions and sveitarfélög (municipalities).
+  IS: {
+    code: 'IS',
+    name: 'Ísland',
+    nameEn: 'Iceland',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['is'],
+  },
+  // Apskritys (counties) and savivaldybės (municipalities).
+  LT: {
+    code: 'LT',
+    name: 'Lietuva',
+    nameEn: 'Lithuania',
+    region1Level: 4,
+    region2Level: 5,
+    municipalityLevels: [5],
+    languages: ['lt'],
+  },
+  // Novadi and state cities, which are both the regions and the municipalities.
+  LV: {
+    code: 'LV',
+    name: 'Latvija',
+    nameEn: 'Latvia',
+    region1Level: 5,
+    region2Level: null,
+    municipalityLevels: [5],
+    languages: ['lv'],
+  },
+  // Raioane and municipii as regions, communes and towns as municipalities.
+  MD: {
+    code: 'MD',
+    name: 'Moldova',
+    nameEn: 'Moldova',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['ro', 'ru'],
+  },
+  // Opštine, which are both the regions and the municipalities.
+  ME: {
+    code: 'ME',
+    name: 'Crna Gora',
+    nameEn: 'Montenegro',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['sr'],
+  },
+  // Opštini, which are both the regions and the municipalities.
+  MK: {
+    code: 'MK',
+    name: 'Северна Македонија',
+    nameEn: 'North Macedonia',
+    region1Level: 7,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['mk', 'sq'],
+  },
+  // The districts have no ISO code, so there are no regions; komuna are the municipalities.
+  XK: {
+    code: 'XK',
+    name: 'Kosova',
+    nameEn: 'Kosovo',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [6],
+    languages: ['sq', 'sr'],
+  },
+  // Entities and Brčko District, cantons (in the Federation only), općine and gradovi. A grad
+  // made of općine, such as Sarajevo, is not a municipality itself.
+  BA: {
+    code: 'BA',
+    name: 'Bosna i Hercegovina',
+    nameEn: 'Bosnia and Herzegovina',
+    region1Level: 4,
+    region2Level: 5,
+    municipalityLevels: [7, 6, 4],
+    languages: ['bs', 'hr', 'sr'],
+  },
+  // Oblasti and obshtini.
+  BG: {
+    code: 'BG',
+    name: 'България',
+    nameEn: 'Bulgaria',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [5],
+    languages: ['bg'],
+  },
+  // Voblasci (and Minsk), rajony, selsavety. Cities of regional subordination are at level 6.
+  BY: {
+    code: 'BY',
+    name: 'Беларусь',
+    nameEn: 'Belarus',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 6, 4],
+    languages: ['be', 'ru'],
+  },
+  // Comunidades autónomas, provincias, municipios. Mainland, Balearic Islands and Melilla: the
+  // Canary Islands are not in the extract, and Ceuta has no usable boundary in it.
+  ES: {
+    code: 'ES',
+    name: 'España',
+    nameEn: 'Spain',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 4],
+    languages: ['es', 'ca', 'gl', 'eu'],
+  },
+  // Maakunnat and kunnat.
+  FI: {
+    code: 'FI',
+    name: 'Suomi / Finland',
+    nameEn: 'Finland',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['fi', 'sv'],
+  },
+  // England, Scotland, Wales and Northern Ireland; counties and council areas; districts. A
+  // unitary authority (level 6) or a Northern Irish district (level 7) is its own municipality.
+  // Needs two extracts: Great Britain, and Ireland with Northern Ireland.
+  GB: {
+    code: 'GB',
+    name: 'United Kingdom',
+    nameEn: 'United Kingdom',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 7, 6],
+    languages: ['en', 'cy', 'gd', 'ga'],
+  },
+  // The islands have no ISO code, so there are no regions; parishes are the municipalities, and
+  // so are Alderney and Sark, which have none. From the Guernsey and Jersey extract.
+  GG: {
+    code: 'GG',
+    name: 'Guernsey',
+    nameEn: 'Guernsey',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8, 4],
+    languages: ['en', 'fr'],
+  },
+  // Periféreies, perifereiakés enótites, dímoi. Mount Athos is a region of its own at level 3
+  // and has no dímos.
+  GR: {
+    code: 'GR',
+    name: 'Ελλάδα',
+    nameEn: 'Greece',
+    region1Level: 5,
+    region1ExtraLevels: [3],
+    region2Level: 6,
+    municipalityLevels: [7, 3],
+    languages: ['el'],
+  },
+  // Županije and općine or gradovi. Zagreb is a county and a municipality at once.
+  HR: {
+    code: 'HR',
+    name: 'Hrvatska',
+    nameEn: 'Croatia',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [7, 4],
+    languages: ['hr'],
+  },
+  // Counties and local authorities. Dublin is one county with four local authorities; a county
+  // whose council is mapped only as the county is its own municipality.
+  IE: {
+    code: 'IE',
+    name: 'Éire / Ireland',
+    nameEn: 'Ireland',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [7, 6],
+    languages: ['en', 'ga'],
+  },
+  // Fylker and kommuner, with Svalbard and Jan Mayen. The extract has no country boundary.
+  NO: {
+    code: 'NO',
+    name: 'Norge',
+    nameEn: 'Norway',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['no', 'nn'],
+  },
+  // Distritos on the mainland and the autonomous regions of the Azores and Madeira, concelhos.
+  PT: {
+    code: 'PT',
+    name: 'Portugal',
+    nameEn: 'Portugal',
+    region1Level: 6,
+    region1ExtraLevels: [4],
+    region2Level: null,
+    municipalityLevels: [7],
+    languages: ['pt'],
+  },
+  // Județe (and București) and comune, orașe or municipii.
+  RO: {
+    code: 'RO',
+    name: 'România',
+    nameEn: 'Romania',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [8, 4],
+    languages: ['ro'],
+  },
+  // Okruzi (and Belgrade) and opštine. A grad made of city opštine, such as Belgrade, is not a
+  // municipality itself.
+  RS: {
+    code: 'RS',
+    name: 'Србија',
+    nameEn: 'Serbia',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [8, 7],
+    languages: ['sr'],
+  },
+  // Občine, which are both the regions and the municipalities.
+  SI: {
+    code: 'SI',
+    name: 'Slovenija',
+    nameEn: 'Slovenia',
+    region1Level: 8,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['sl'],
   },
 };
 

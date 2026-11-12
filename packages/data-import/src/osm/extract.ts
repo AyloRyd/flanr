@@ -18,35 +18,49 @@ export interface ExtractedFiles {
  */
 export async function extractOsm(options: {
   repoRoot: string;
-  pbf: string;
+  /** One extract, or several that together cover the country (the United Kingdom is in two). */
+  pbfs: string[];
   workDir: string;
 }): Promise<ExtractedFiles> {
   const inContainer = (path: string) => pathInDataDir(options.repoRoot, path);
   await mkdir(options.workDir, { recursive: true });
 
-  const pbf = inContainer(options.pbf);
   const filtered = inContainer(resolve(options.workDir, 'filtered.osm.pbf'));
   const features = resolve(options.workDir, 'features.geojsonseq');
   const relations = resolve(options.workDir, 'relations.opl');
 
   const osmium = (args: string[]) => runTool(options.repoRoot, 'osmium', args);
-  const timestamp = await osmium([
-    'fileinfo',
-    '-g',
-    'header.option.osmosis_replication_timestamp',
-    pbf,
-  ]);
-  await osmium([
-    'tags-filter',
-    pbf,
-    'nwr/place=city,town,village,hamlet',
-    // National capitals, whatever their place type (see settlementType).
-    'n/capital=yes',
-    'r/boundary=administrative',
-    '-o',
-    filtered,
-    '--overwrite',
-  ]);
+  const filter = (pbf: string, output: string) =>
+    osmium([
+      'tags-filter',
+      pbf,
+      'nwr/place=city,town,village,hamlet',
+      // National capitals, whatever their place type (see settlementType).
+      'n/capital=yes',
+      'r/boundary=administrative',
+      '-o',
+      output,
+      '--overwrite',
+    ]);
+
+  const pbfs = options.pbfs.map(inContainer);
+  const timestamps: Date[] = [];
+  for (const pbf of pbfs) {
+    timestamps.push(await replicationTimestamp(osmium, pbf));
+  }
+  const [onlyPbf] = pbfs;
+  if (pbfs.length === 1 && onlyPbf) {
+    await filter(onlyPbf, filtered);
+  } else {
+    // Merging also completes a boundary that each extract has only a part of.
+    const parts = pbfs.map((_, index) =>
+      inContainer(resolve(options.workDir, `filtered-${index}.osm.pbf`)),
+    );
+    for (const [index, pbf] of pbfs.entries()) {
+      await filter(pbf, parts[index] ?? '');
+    }
+    await osmium(['merge', ...parts, '-o', filtered, '--overwrite']);
+  }
   await osmium([
     'export',
     filtered,
@@ -70,6 +84,25 @@ export async function extractOsm(options: {
     '--overwrite',
   ]);
 
-  const parsed = new Date(timestamp.trim());
-  return { features, relations, sourceTimestamp: Number.isNaN(parsed.getTime()) ? null : parsed };
+  return { features, relations, sourceTimestamp: oldest(timestamps) };
+}
+
+async function replicationTimestamp(
+  osmium: (args: string[]) => Promise<string>,
+  pbf: string,
+): Promise<Date> {
+  const timestamp = await osmium([
+    'fileinfo',
+    '-g',
+    'header.option.osmosis_replication_timestamp',
+    pbf,
+  ]);
+  return new Date(timestamp.trim());
+}
+
+/** The data is as old as its oldest extract. Null if any extract does not say how old it is. */
+function oldest(timestamps: Date[]): Date | null {
+  const times = timestamps.map((timestamp) => timestamp.getTime());
+  if (times.length === 0 || times.some(Number.isNaN)) return null;
+  return new Date(Math.min(...times));
 }

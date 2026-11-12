@@ -47,7 +47,7 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 - [x] Drizzle schema for countries, regions, cities, city names (section 5.2), with PostGIS geometry columns and spatial indexes.
 - [x] Import from the chosen OSM extract: city, town, village, hamlet; exclude suburbs and boroughs (BR-001, FR-CITY-005).
-- [ ] Roll out in stages (CON-012): Germany first (done), then the other countries in the test data and a few small ones (done: 20 countries in all), then the rest of continental Europe. The whole world comes after the MVP.
+- [x] Roll out in stages (CON-012): Germany first, then the other countries in the test data and a few small ones, then the rest of continental Europe (47 countries in all). Not imported yet: Cyprus (fails validation, the northern districts have no ISO 3166-2 code; needs a decision), Jersey (no country boundary in the extract), the Canary Islands, Ceuta and Gibraltar (not in the extracts used), Russia, Turkey and Georgia (left out for now). The whole world comes after the MVP.
 - [x] Enrichment from Wikidata: population with year, Wikipedia link, English and alternative names, area, elevation, website and founding year (FR-CITY-002). Done through the Wikidata API instead of SPARQL or a dump. Capital status comes from OSM. Images, coats of arms and flags are left for later because they need author and licence data from Commons (NFR-LIC-003).
 - [x] Boundary simplification for different zoom levels.
 - [x] Vector tiles for the city layer (points and boundaries), either generated as PMTiles or served from PostGIS with `ST_AsMVT`. Both exist. The MVP map uses the API tiles; revisit after the Europe import (see DECISIONS.md and `docs/notes/tile-delivery.md`).

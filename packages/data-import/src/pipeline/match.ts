@@ -39,6 +39,11 @@ async function addMatchNames(sql: Sql, country: CountryConfig): Promise<void> {
   `;
 }
 
+function region1Levels(country: CountryConfig): number[] {
+  if (country.region1Level === null) return [];
+  return [country.region1Level, ...(country.region1ExtraLevels ?? [])];
+}
+
 async function indexStaging(sql: Sql): Promise<void> {
   await sql.unsafe(`
     CREATE INDEX ON staging.boundary USING gist (geom);
@@ -76,7 +81,8 @@ async function selectCountry(sql: Sql, country: CountryConfig): Promise<void> {
       SELECT 'relation', NULL, ${country.name}, ${sql.json({ 'name:en': country.nameEn })},
              ST_Multi(ST_Union(geom))
       FROM staging.boundary
-      WHERE admin_level = ${country.region1Level ?? -1} AND tags->>'ISO3166-2' LIKE ${country.code + '-%'}
+      WHERE admin_level = ANY(${region1Levels(country)}::smallint[])
+        AND tags->>'ISO3166-2' LIKE ${country.code + '-%'}
       HAVING count(*) > 0
     `;
     const [built] = await sql`SELECT count(*)::int AS count FROM staging.country`;
@@ -189,23 +195,24 @@ async function linkBoundaries(sql: Sql): Promise<void> {
 }
 
 async function selectRegions(sql: Sql, country: CountryConfig): Promise<void> {
-  const levels = [country.region1Level, country.region2Level].filter((level) => level !== null);
-  const region1Level = country.region1Level ?? -1;
+  const isoPattern = country.code + '-%';
+  // First-level regions have an ISO 3166-2 code. This keeps out other things mapped at the
+  // same level, such as small islands in Italy.
+  const isRegion1 = sql`
+    b.admin_level = ANY(${region1Levels(country)}::smallint[]) AND b.tags->>'ISO3166-2' LIKE ${isoPattern}
+  `;
   await sql`
     CREATE TABLE staging.region AS
     SELECT b.osm_type, b.osm_id,
-           CASE WHEN b.admin_level = ${region1Level} THEN 1 ELSE 2 END::smallint AS level,
+           CASE WHEN ${isRegion1} THEN 1 ELSE 2 END::smallint AS level,
            b.name AS name_local,
            coalesce(b.tags->>'name:en', b.name) AS name_en,
            b.tags->>'ISO3166-2' AS iso_code,
            b.tags->>'wikidata' AS wikidata_id,
            b.geom
     FROM staging.boundary b
-    WHERE b.admin_level = ANY(${levels}::smallint[])
-      AND b.name IS NOT NULL
-      -- First-level regions have an ISO 3166-2 code. This keeps out other things mapped at the
-      -- same level, such as small islands in Italy.
-      AND (b.admin_level <> ${region1Level} OR b.tags->>'ISO3166-2' LIKE ${country.code + '-%'})
+    WHERE b.name IS NOT NULL
+      AND ((${isRegion1}) OR b.admin_level = ${country.region2Level ?? -1})
       AND EXISTS (SELECT 1 FROM staging.country_part c WHERE ST_Intersects(c.geom, ST_PointOnSurface(b.geom)))
   `;
   await sql.unsafe(`

@@ -81,6 +81,42 @@ describe('First-level regions', () => {
   });
 });
 
+describe('First-level regions at more than one level', () => {
+  // Like Portugal: districts at one level, the autonomous regions at another.
+  const twoLevels: CountryConfig = { ...germany, region1ExtraLevels: [3] };
+
+  function features() {
+    return baseFeatures().map((f) =>
+      f.tags.name === 'Ost' ? { ...f, tags: { ...f.tags, admin_level: '3' } } : f,
+    );
+  }
+
+  it('takes a region with an ISO 3166-2 code from the extra level', async () => {
+    const result = await runImport(features(), baseRelations(), twoLevels);
+
+    expect(result.ok).toBe(true);
+    expect(await city('Weiler')).toMatchObject({ region_1: 'Ost' });
+    expect(await city('Großstadt')).toMatchObject({ region_1: 'West' });
+  });
+
+  it('builds a missing country boundary from the regions of both levels', async () => {
+    const withoutCountry = features().filter((f) => f.tags.admin_level !== '2');
+
+    const result = await runImport(withoutCountry, baseRelations(), twoLevels);
+
+    expect(result.ok).toBe(true);
+    const [country] = await sql`SELECT ST_Area(boundary) AS area FROM countries WHERE code = 'DE'`;
+    expect(country?.area).toBeCloseTo(100, 5);
+  });
+
+  it('ignores the other level in a country that does not name it', async () => {
+    const result = await runImport(features());
+
+    expect(result.ok).toBe(false);
+    expect(result.errors[0]).toMatch(/have no first-level region/);
+  });
+});
+
 describe('Country without regions', () => {
   // Like Monaco or Vatican City: no first-level regions and no municipalities.
   const microstate: CountryConfig = {
