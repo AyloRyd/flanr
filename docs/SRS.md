@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.7 |
+| Version | 0.8 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
