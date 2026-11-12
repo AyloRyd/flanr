@@ -15,8 +15,10 @@
     "tsx": "^4.23.15"
   },
   "dependencies": {
+    "@clerk/backend": "^3.27.0",
     "@flanr/shared": "workspace:*",
     "@hono/node-server": "^2.1.6",
+    "@hono/zod-openapi": "^1.6.3",
     "hono": "^4.13.17",
     "postgres": "^4.1.0",
     "zod": "^4.6.7"
