@@ -52,7 +52,7 @@ pnpm import:osm --country DE --pbf data/raw/geofabrik/germany-latest.osm.pbf
 pnpm import:wikidata --country DE
 ```
 
-Countries set up so far: Germany (`DE`), Denmark (`DK`), Italy (`IT`) and the Netherlands (`NL`). A new country needs an entry in `packages/data-import/src/countries.ts` that says at which OpenStreetMap admin levels its regions and municipalities are. `--extract-only` writes the filtered files without touching the database, which helps to look at the levels first.
+Countries set up so far are listed in `packages/data-import/src/countries.ts`. Vatican City and San Marino are inside the Italy extract and are imported from its files: `pnpm import:osm --country VA --files-of IT --skip-extract`. A new country needs an entry in `packages/data-import/src/countries.ts` that says at which OpenStreetMap admin levels its regions and municipalities are. `--extract-only` writes the filtered files without touching the database, which helps to look at the levels first.
 
 Every city is also linked to its municipality. A city that is its municipality (Cologne) gets the municipality's boundary; a village inside it (Worringen) stays a city of its own and is marked as part of it.
 

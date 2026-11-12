@@ -4,8 +4,8 @@ export interface CountryConfig {
   /** Used when the extract has no usable country boundary and it is built from the regions. */
   name: string;
   nameEn: string;
-  /** OSM admin_level of first-level regions (states). */
-  region1Level: number;
+  /** OSM admin_level of first-level regions (states). Null for countries without regions. */
+  region1Level: number | null;
   /** OSM admin_level of second-level regions (districts), if any. */
   region2Level: number | null;
   /**
@@ -26,6 +26,46 @@ export interface CountryConfig {
 }
 
 const countries: Record<string, CountryConfig> = {
+  // Bundesländer, Bezirke, Gemeinden. Vienna is a state and a municipality at once.
+  AT: {
+    code: 'AT',
+    name: 'Österreich',
+    nameEn: 'Austria',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 6, 4],
+    languages: ['de'],
+  },
+  // Gewesten, provincies, gemeenten. Brussels has no province.
+  BE: {
+    code: 'BE',
+    name: 'België / Belgique / Belgien',
+    nameEn: 'Belgium',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['nl', 'fr', 'de'],
+  },
+  // Kantone, Bezirke, Gemeinden.
+  CH: {
+    code: 'CH',
+    name: 'Schweiz / Suisse / Svizzera / Svizra',
+    nameEn: 'Switzerland',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['de', 'fr', 'it', 'rm'],
+  },
+  // Kraje, okresy, obce. Prague is a region and a municipality at once.
+  CZ: {
+    code: 'CZ',
+    name: 'Česko',
+    nameEn: 'Czechia',
+    region1Level: 4,
+    region2Level: 5,
+    municipalityLevels: [8, 4],
+    languages: ['cs'],
+  },
   // Länder, Kreise, Gemeinden. District-free cities and city-states have no Gemeinde level.
   DE: {
     code: 'DE',
@@ -47,6 +87,27 @@ const countries: Record<string, CountryConfig> = {
     municipalityNameEndings: ['s Kommune', ' Kommune'],
     languages: ['da'],
   },
+  // Régions, départements, communes. Metropolitan France only: the extract has no country
+  // boundary, because the relation of France also covers the overseas territories.
+  FR: {
+    code: 'FR',
+    name: 'France',
+    nameEn: 'France',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8],
+    languages: ['fr'],
+  },
+  // Megyék (and Budapest), járások, települések.
+  HU: {
+    code: 'HU',
+    name: 'Magyarország',
+    nameEn: 'Hungary',
+    region1Level: 6,
+    region2Level: 7,
+    municipalityLevels: [8],
+    languages: ['hu'],
+  },
   // Regioni, province and metropolitan cities, comuni.
   IT: {
     code: 'IT',
@@ -57,6 +118,46 @@ const countries: Record<string, CountryConfig> = {
     municipalityLevels: [8],
     languages: ['it'],
   },
+  // Gemeinden only. The two electoral districts are not regions.
+  LI: {
+    code: 'LI',
+    name: 'Liechtenstein',
+    nameEn: 'Liechtenstein',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['de'],
+  },
+  // Cantons, communes.
+  LU: {
+    code: 'LU',
+    name: 'Lëtzebuerg',
+    nameEn: 'Luxembourg',
+    region1Level: 6,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['lb', 'fr', 'de'],
+  },
+  // One commune that covers the whole country.
+  MC: {
+    code: 'MC',
+    name: 'Monaco',
+    nameEn: 'Monaco',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['fr'],
+  },
+  // Local councils only.
+  MT: {
+    code: 'MT',
+    name: 'Malta',
+    nameEn: 'Malta',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['mt', 'en'],
+  },
   // Provincies, gemeenten. Settlements (woonplaatsen) have their own boundaries at level 10.
   NL: {
     code: 'NL',
@@ -66,6 +167,68 @@ const countries: Record<string, CountryConfig> = {
     region2Level: null,
     municipalityLevels: [8],
     languages: ['nl'],
+  },
+  // Kraje, okresy, obce. Bratislava and Košice are cities at level 5, made of boroughs.
+  SK: {
+    code: 'SK',
+    name: 'Slovensko',
+    nameEn: 'Slovakia',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [8, 5],
+    languages: ['sk'],
+  },
+  // Län, kommuner. Most towns have no boundary of their own in OSM.
+  SE: {
+    code: 'SE',
+    name: 'Sverige',
+    nameEn: 'Sweden',
+    region1Level: 4,
+    region2Level: null,
+    municipalityLevels: [7],
+    // Most are "Malmö kommun" or "Stockholms kommun"; a few call themselves "Göteborgs Stad".
+    municipalityNameEndings: ['s kommun', ' kommun', 's Stad', ' Stad', 's stad', ' stad'],
+    languages: ['sv'],
+  },
+  // Województwa, powiaty, gminy. Settlements have their own boundaries at level 8.
+  PL: {
+    code: 'PL',
+    name: 'Polska',
+    nameEn: 'Poland',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [7],
+    languages: ['pl'],
+  },
+  // Castelli. Imported from the Italy extract.
+  SM: {
+    code: 'SM',
+    name: 'San Marino',
+    nameEn: 'San Marino',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [8],
+    languages: ['it'],
+  },
+  // Oblasts, raions, hromadas. Kyiv and Sevastopol are regions without hromadas.
+  UA: {
+    code: 'UA',
+    name: 'Україна',
+    nameEn: 'Ukraine',
+    region1Level: 4,
+    region2Level: 6,
+    municipalityLevels: [7, 4],
+    languages: ['uk'],
+  },
+  // No subdivisions. Imported from the Italy extract.
+  VA: {
+    code: 'VA',
+    name: 'Civitas Vaticana',
+    nameEn: 'Vatican City',
+    region1Level: null,
+    region2Level: null,
+    municipalityLevels: [],
+    languages: ['it', 'la'],
   },
 };
 

@@ -45,7 +45,7 @@ export async function importCities(sql: Sql, input: ImportInput): Promise<Import
     log('Validating');
     const validation = await validateCities(
       sql,
-      input.country.code,
+      input.country,
       input.validation ?? defaultValidationOptions,
     );
     Object.assign(stats, validation.stats);

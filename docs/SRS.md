@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.6 |
+| Version | 0.7 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
@@ -20,6 +20,7 @@
 | 0.4 | 2026-11-10 | A. Malyshkin | Resolved OI-002 (Geoapify localities extract) and OI-003 (settlements without a boundary are imported as points) |
 | 0.5 | 2026-11-10 | A. Malyshkin | OI-002 revised: Geofabrik OSM extracts instead of Geoapify localities |
 | 0.6 | 2026-11-11 | A. Malyshkin | Cities that are part of a municipality (BR-001, BR-017, Municipality entity), population made optional, external map links (FR-CITY-009), city districts for later (FR-CITY-010), OI-020 and OI-021 |
+| 0.7 | 2026-11-11 | A. Malyshkin | First-level region made optional for countries without regions (Monaco, Vatican City); the capital of a country is always a city (BR-001) |
 
 ---
 
@@ -228,7 +229,7 @@ A settlement is a city even when it is administratively part of a municipality, 
 
 A part of the continuous built-up area of another settlement, such as a district, suburb or borough (for example Wuppertal-Elberfeld), is not a city. A municipality that is not itself a settlement (for example Oldambt, which consists of Winschoten, Bad Nieuweschans and other settlements) is not a city either.
 
-The line between a separate settlement and a district follows the OpenStreetMap place classification: city, town, village and hamlet are settlements; suburb, quarter, neighbourhood and borough are districts.
+The line between a separate settlement and a district follows the OpenStreetMap place classification: city, town, village and hamlet are settlements; suburb, quarter, neighbourhood and borough are districts. The one exception is the capital of a country, which is always a city: OpenStreetMap maps Vatican City as a suburb of Rome.
 
 #### BR-002 — Dates of visits
 A visit that took place after the user's registration date MUST have a date. A visit that took place before the registration date MAY have no date. A visit MAY be added at any time, including long after registration.
@@ -413,7 +414,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-CITY-001 — City page with required data
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Cities
 
-**Description.** Every city MUST have a city page that shows its name, English name, country, first-level region, settlement type, capital status, a map with its boundary, and, where they are known, its population with the reference year, its municipality (when the city is part of one, see BR-017) and a link to Wikipedia.
+**Description.** Every city MUST have a city page that shows its name, English name, country, first-level region (where the country has regions), settlement type, capital status, a map with its boundary, and, where they are known, its population with the reference year, its municipality (when the city is part of one, see BR-017) and a link to Wikipedia.
 
 **Acceptance criteria.**
 1. Given a city with all required fields, when its page is opened, then all of them are shown.
@@ -1078,7 +1079,7 @@ The two default lists are not stored as list entries. Visited is derived from vi
 | name_local | yes | |
 | name_en | yes | Falls back to the local name if no English name exists |
 | country_code | yes | ISO 3166-1 alpha-2 |
-| region_1_id | yes | First-level region |
+| region_1_id | no | First-level region. Required in countries that have first-level regions; some small countries, such as Monaco and Vatican City, have none |
 | centre | yes | Point |
 | boundary | yes* | Polygon or multipolygon. *Required where OSM has one. Settlements without a mapped boundary are stored as points only (OI-003) |
 | population | no | Required where it is known. For a city that represents its municipality it is the population of the whole municipality, see BR-017 |

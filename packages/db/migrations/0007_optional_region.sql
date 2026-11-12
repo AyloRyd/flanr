@@ -1,0 +1,1 @@
+ALTER TABLE "cities" ALTER COLUMN "region_1_id" DROP NOT NULL;

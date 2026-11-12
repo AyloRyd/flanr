@@ -40,6 +40,8 @@ export async function extractOsm(options: {
     'tags-filter',
     pbf,
     'nwr/place=city,town,village,hamlet',
+    // National capitals, whatever their place type (see settlementType).
+    'n/capital=yes',
     'r/boundary=administrative',
     '-o',
     filtered,

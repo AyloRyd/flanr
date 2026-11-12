@@ -7,6 +7,7 @@ import {
   baseRelations,
   municipalityFeatures,
   municipalityRelations,
+  sharedWikidataFeatures,
   writeFixture,
 } from './fixture.ts';
 
@@ -19,7 +20,7 @@ afterAll(async () => {
 beforeAll(async () => {
   await sql`TRUNCATE wikidata_entities, city_tile_shapes, city_names, cities, municipalities, regions, countries, import_runs RESTART IDENTITY CASCADE`;
   const files = await writeFixture(
-    [...baseFeatures(), ...municipalityFeatures()],
+    [...baseFeatures(), ...municipalityFeatures(), ...sharedWikidataFeatures()],
     [...baseRelations(), ...municipalityRelations()],
   );
   await importCities(sql, { country: countryConfig('DE'), ...files, sourceTimestamp: null });
@@ -46,6 +47,7 @@ describe('Cities and municipalities (BR-001, BR-017)', () => {
       'Gemeinde Seeland',
       'Großstadt',
       'Kleinstadt',
+      'Neustadt',
     ]);
     expect(await city('Gemeinde Seeland')).toBeUndefined();
   });
@@ -81,6 +83,15 @@ describe('Cities and municipalities (BR-001, BR-017)', () => {
       boundary_osm_id: '104',
       boundary_match: 'wikidata',
       municipality: 'Altstadt',
+      represents_municipality: true,
+    });
+  });
+
+  it('prefers the municipality boundary when several boundaries share the Wikidata ID', async () => {
+    // Like Warsaw, whose gmina and settlement boundary have the same Wikidata ID.
+    expect(await city('Neustadt')).toMatchObject({
+      boundary_osm_id: '110',
+      municipality: 'Neustadt',
       represents_municipality: true,
     });
   });
