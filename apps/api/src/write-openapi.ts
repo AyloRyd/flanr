@@ -21,6 +21,7 @@ const app = createApp({
   checkDatabase: async () => false,
   getCityTile: async () => null,
   searchCities: async () => [],
+  geography: { countries: async () => [], regions: async () => [] },
   corsOrigins: [],
   verifyToken: async () => null,
   resolveUser: async () => {

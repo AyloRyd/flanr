@@ -253,6 +253,8 @@ describe('GET /v1/cities: telling cities apart (FR-SRCH-002)', () => {
         country: { code: 'DE', name: 'Germany' },
         region: 'Hesse',
         municipality: null,
+        rating: null,
+        ratingCount: 0,
       },
       expect.objectContaining({
         name: 'Frankfurt (Oder)',

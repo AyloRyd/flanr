@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { createAccountStore } from './accounts.ts';
 import { createApp } from './app.ts';
-import { createCitySearch } from './city-search.ts';
+import { createCitySearch, createGeography } from './city-search.ts';
 import { getCityTile } from './city-tiles.ts';
 import {
   createClerkAccountRemover,
@@ -28,6 +28,7 @@ const app = createApp({
   checkDatabase: () => isDatabaseReachable(sql),
   getCityTile: (params) => getCityTile(sql, params),
   searchCities: createCitySearch(sql),
+  geography: createGeography(sql),
   corsOrigins: env.CORS_ORIGINS,
   verifyToken: createClerkTokenVerifier(env.CLERK_SECRET_KEY),
   resolveUser: (authProviderId) => ensureUser(sql, authProviderId),

@@ -4,6 +4,7 @@ Decisions made while preparing the project, with the reasons behind them. The co
 
 ## 2026-11-13
 
+- **Minimum number of ratings (OI-011):** not a fixed threshold. The user sets it in the sorting form; it is 10 by default when sorting or filtering by community rating, and will be raised to 100 or more once there are real users.
 - **Visibility of the default lists:** two settings of the user, one for the Visited and one for the Planned list, because these lists are not stored as lists (FR-LIST-005).
 - **Username and display name are managed in Flanr.** Clerk supplies the first ones when the account is created; later changes at Clerk are not copied. The rules of FR-PROF-001 are checked by the API, which Clerk could not do (reserved names, uniqueness without letter case).
 - **Avatar in the MVP is the picture of the Clerk account.** Flanr stores its URL and has no file storage of its own yet.
