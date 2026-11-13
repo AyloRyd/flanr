@@ -17,6 +17,8 @@ import type { DefaultListStore } from './default-lists.ts';
 import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
 import type { LivedCityStore } from './lived-cities.ts';
 import { problem } from './problem.ts';
+import { ratingPaths, registerRatingRoutes } from './rating-routes.ts';
+import type { RatingStore } from './ratings.ts';
 import { rateLimitWrites, type RateLimitOptions } from './rate-limit.ts';
 import { registerVisitRoutes, visitPaths } from './visit-routes.ts';
 import type { VisitStore } from './visits.ts';
@@ -33,6 +35,7 @@ export interface AppDependencies {
   visits: VisitStore;
   livedCities: LivedCityStore;
   defaultLists: DefaultListStore;
+  ratings: RatingStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -89,6 +92,7 @@ export function createApp({
   visits,
   livedCities,
   defaultLists,
+  ratings,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -113,7 +117,13 @@ export function createApp({
 
   app.use(cors({ origin: corsOrigins }));
   // Everything under /v1 that reads or changes user data needs a signed-in user (NFR-SEC-003).
-  for (const path of ['/v1/me', ...visitPaths, ...livedCityPaths, ...defaultListPaths]) {
+  for (const path of [
+    '/v1/me',
+    ...visitPaths,
+    ...livedCityPaths,
+    ...defaultListPaths,
+    ...ratingPaths,
+  ]) {
     app.use(path, requireAuth(verifyToken, resolveUser));
   }
   app.use('/v1/*', rateLimitWrites(writeRateLimit));
@@ -142,6 +152,7 @@ export function createApp({
   registerVisitRoutes(app, visits, now);
   registerLivedCityRoutes(app, livedCities, now);
   registerDefaultListRoutes(app, defaultLists);
+  registerRatingRoutes(app, ratings);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {

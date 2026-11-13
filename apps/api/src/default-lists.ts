@@ -50,6 +50,20 @@ export async function leavePlannedList(
   await tx`DELETE FROM planned_cities WHERE user_id = ${userId} AND city_id = ${cityId}`;
 }
 
+/** Whether the city is in the user's Visited list: it has a visit or a lived-in mark (BR-004). */
+export async function isVisited(
+  sql: Sql | TransactionSql,
+  userId: number,
+  cityId: number,
+): Promise<boolean> {
+  const rows = await sql`
+    SELECT 1 FROM visits WHERE user_id = ${userId} AND city_id = ${cityId}
+    UNION ALL
+    SELECT 1 FROM lived_cities WHERE user_id = ${userId} AND city_id = ${cityId}
+    LIMIT 1`;
+  return rows.length > 0;
+}
+
 interface PlannedRow {
   city_id: number;
   created_at: Date;
@@ -103,12 +117,7 @@ export function createDefaultListStore(sql: Sql): DefaultListStore {
     async plan(userId, cityId) {
       return sql.begin(async (tx) => {
         await lockDefaultLists(tx, userId, cityId);
-        const visited = await tx`
-          SELECT 1 FROM visits WHERE user_id = ${userId} AND city_id = ${cityId}
-          UNION ALL
-          SELECT 1 FROM lived_cities WHERE user_id = ${userId} AND city_id = ${cityId}
-          LIMIT 1`;
-        if (visited.length > 0) return null;
+        if (await isVisited(tx, userId, cityId)) return null;
 
         // Planning a planned city again keeps the time it was first added.
         const [row] = await tx<PlannedRow[]>`

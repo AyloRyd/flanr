@@ -6,7 +6,12 @@ import {
 } from '@flanr/shared';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
-import { leavePlannedList } from './default-lists.ts';
+import { leavePlannedList, lockDefaultLists } from './default-lists.ts';
+import {
+  dropRatingIfNotVisited,
+  unlessRatingNeedsConfirmation,
+  type RemovalResult,
+} from './ratings.ts';
 
 export interface LivedCityInput {
   isCurrent: boolean;
@@ -30,7 +35,11 @@ export interface LivedCityStore {
    * one, which becomes a past city (FR-VIS-010).
    */
   set(userId: number, cityId: number, input: LivedCityInput): Promise<LivedCity>;
-  remove(userId: number, cityId: number): Promise<boolean>;
+  /**
+   * Removing the mark from a rated city without visits deletes the rating too, which the user
+   * has to confirm (BR-005).
+   */
+  remove(userId: number, cityId: number, confirmRatingDeletion: boolean): Promise<RemovalResult>;
 }
 
 interface LivedCityRow {
@@ -96,11 +105,18 @@ export function createLivedCityStore(sql: Sql): LivedCityStore {
       });
     },
 
-    async remove(userId, cityId) {
-      const rows = await sql`
-        DELETE FROM lived_cities WHERE user_id = ${userId} AND city_id = ${cityId}
-        RETURNING city_id`;
-      return rows.length > 0;
+    async remove(userId, cityId, confirmRatingDeletion) {
+      return unlessRatingNeedsConfirmation(() =>
+        sql.begin(async (tx): Promise<RemovalResult> => {
+          await lockDefaultLists(tx, userId, cityId);
+          const deleted = await tx`
+            DELETE FROM lived_cities WHERE user_id = ${userId} AND city_id = ${cityId}
+            RETURNING city_id`;
+          if (deleted.length === 0) return 'not_found';
+          await dropRatingIfNotVisited(tx, userId, cityId, confirmRatingDeletion);
+          return 'removed';
+        }),
+      );
     },
   };
 }

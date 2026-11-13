@@ -311,7 +311,9 @@ export interface paths {
         /** Delete a visit (FR-VIS-006) */
         delete: {
             parameters: {
-                query?: never;
+                query?: {
+                    confirmRatingDeletion?: "true" | "false";
+                };
                 header?: never;
                 path: {
                     visitId: number;
@@ -365,6 +367,24 @@ export interface paths {
                 };
                 /** @description Visit not found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The rating of the city would be deleted too, which needs a confirmation (BR-005) */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -564,6 +584,8 @@ export interface paths {
                         count: number;
                         /** @default false */
                         beforeRegistration?: boolean;
+                        /** @default false */
+                        confirmRatingDeletion?: boolean;
                     };
                 };
             };
@@ -617,6 +639,24 @@ export interface paths {
                 };
                 /** @description City not found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The rating of the city would be deleted too, which needs a confirmation (BR-005) */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -829,7 +869,9 @@ export interface paths {
         /** Remove the lived-in mark from a city (FR-VIS-010) */
         delete: {
             parameters: {
-                query?: never;
+                query?: {
+                    confirmRatingDeletion?: "true" | "false";
+                };
                 header?: never;
                 path: {
                     cityId: number;
@@ -883,6 +925,24 @@ export interface paths {
                 };
                 /** @description Not a lived-in city of the user */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The rating of the city would be deleted too, which needs a confirmation (BR-005) */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1235,6 +1295,425 @@ export interface paths {
                     };
                 };
                 /** @description Not in the Planned list of the user */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/criteria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The criteria a city can be rated by (FR-RATE-002) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The criteria in display order */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                key: string;
+                                name: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The city ratings of the signed-in user */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description One page of ratings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                cityId: number;
+                                subjective: number;
+                                criteria: {
+                                    [key: string]: number;
+                                };
+                                criteriaAverage: number | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/cities/{cityId}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in user's rating of a city */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The rating */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cityId: number;
+                            subjective: number;
+                            criteria: {
+                                [key: string]: number;
+                            };
+                            criteriaAverage: number | null;
+                            createdAt: string;
+                            updatedAt: string;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user has not rated the city */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        /**
+         * Rate a city or change the rating (FR-RATE-001, FR-RATE-002, FR-RATE-004)
+         * @description Replaces the whole rating (BR-008): criteria that are left out are no longer rated.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        subjective: number;
+                        /** @default {} */
+                        criteria?: {
+                            [key: string]: number;
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description The rating */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cityId: number;
+                            subjective: number;
+                            criteria: {
+                                [key: string]: number;
+                            };
+                            criteriaAverage: number | null;
+                            createdAt: string;
+                            updatedAt: string;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description City not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user has not visited the city (BR-005) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete the rating of a city (FR-RATE-004) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user has not rated the city */
                 404: {
                     headers: {
                         [name: string]: unknown;

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { createApp, type AppDependencies } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
+import { noRatingStore } from './ratings.ts';
 import { noVisitStore } from './visits.ts';
 
 const user = {
@@ -26,6 +27,7 @@ const dependencies: AppDependencies = {
   visits: noVisitStore,
   livedCities: noLivedCityStore,
   defaultLists: noDefaultListStore,
+  ratings: noRatingStore,
 };
 
 describe('API contract (CON-009, NFR-PORT-001)', () => {

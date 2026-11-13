@@ -6,6 +6,7 @@ import { createSql, isDatabaseReachable } from './db.ts';
 import { createDefaultListStore } from './default-lists.ts';
 import { loadEnv } from './env.ts';
 import { createLivedCityStore } from './lived-cities.ts';
+import { createRatingStore } from './ratings.ts';
 import { createVisitStore } from './visits.ts';
 import { deleteUserByAuthProviderId, ensureUser, syncUserFromClerk } from './users.ts';
 
@@ -25,6 +26,7 @@ const app = createApp({
   visits: createVisitStore(sql),
   livedCities: createLivedCityStore(sql),
   defaultLists: createDefaultListStore(sql),
+  ratings: createRatingStore(sql),
 });
 
 if (!env.CLERK_SECRET_KEY) {
