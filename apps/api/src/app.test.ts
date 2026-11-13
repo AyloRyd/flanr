@@ -28,6 +28,7 @@ const user: CurrentUser = {
 const dependencies: AppDependencies = {
   checkDatabase: async () => true,
   getCityTile: async () => null,
+  searchCities: async () => [],
   corsOrigins: ['http://localhost:3000'],
   verifyToken: async (token) => (token === 'valid-token' ? 'clerk_1' : null),
   resolveUser: async () => user,

@@ -18,6 +18,8 @@ import {
   type TokenVerifier,
   type UserResolver,
 } from './auth.ts';
+import { registerCitySearchRoutes } from './city-search-routes.ts';
+import type { CitySearch } from './city-search.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
 import { defaultListPaths, registerDefaultListRoutes } from './default-list-routes.ts';
@@ -40,6 +42,7 @@ import type { VisitStore } from './visits.ts';
 export interface AppDependencies {
   checkDatabase: () => Promise<boolean>;
   getCityTile: (params: TileParams) => Promise<Uint8Array | null>;
+  searchCities: CitySearch;
   /** Origins of web clients that may call the API from the browser. */
   corsOrigins: string[];
   verifyToken: TokenVerifier;
@@ -101,6 +104,7 @@ const tileCacheControl = 'public, max-age=3600, stale-while-revalidate=86400';
 export function createApp({
   checkDatabase,
   getCityTile,
+  searchCities,
   corsOrigins,
   verifyToken,
   resolveUser,
@@ -179,6 +183,7 @@ export function createApp({
   registerRatingRoutes(app, ratings);
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
+  registerCitySearchRoutes(app, searchCities);
   registerProfileRoutes(app, profiles);
   registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);
   registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });

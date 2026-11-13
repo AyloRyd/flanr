@@ -94,8 +94,8 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ## Phase 5 — Search
 
-- [ ] PostgreSQL search over all city names with `unaccent` and `pg_trgm` (FR-SRCH-001).
-- [ ] Results with country, region and settlement type (FR-SRCH-002).
+- [x] PostgreSQL search over all city names with `unaccent` and `pg_trgm` (FR-SRCH-001). `GET /v1/cities?q=`: exact names first, then main names that start with the query, then close spellings; the largest city first. Measured on the 47 imported countries (985,736 cities, 2.5 million names) with 1,382 typed-out queries: median 19 ms, 95th percentile 109 ms, slowest 368 ms, at the query, on the development machine (NFR-PERF-002).
+- [x] Results with country, region and settlement type (FR-SRCH-002), and the municipality for a city that is part of one.
 - [ ] Filters and sorting, including minimum rating and the minimum-ratings threshold (FR-SRCH-003).
 - [ ] Search over public custom lists (FR-SRCH-004, FR-LIST-006).
 

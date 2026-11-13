@@ -7,6 +7,7 @@ Decisions made while preparing the project, with the reasons behind them. The co
 - **Visibility of the default lists:** two settings of the user, one for the Visited and one for the Planned list, because these lists are not stored as lists (FR-LIST-005).
 - **Username and display name are managed in Flanr.** Clerk supplies the first ones when the account is created; later changes at Clerk are not copied. The rules of FR-PROF-001 are checked by the API, which Clerk could not do (reserved names, uniqueness without letter case).
 - **Avatar in the MVP is the picture of the Clerk account.** Flanr stores its URL and has no file storage of its own yet.
+- **City search stays in PostgreSQL** (`unaccent`, `pg_trgm`), without a search engine. Each name is stored once more in lower case and without diacritics (`city_names.search_name`, a generated column), so the indexes need no upkeep by the import. Names that start with the query and close spellings are only looked for among the main names of a city (its names in the various languages); nicknames, official and former names count when they are the whole query. Otherwise "St" found Berlin through "Stadt Berlin". A second query plan that walks the largest cities first was tried for very common beginnings ("la ") and dropped: it was fast for those and took 1.5 s for beginnings that are common only among small places ("le b").
 
 ## 2026-11-12
 
