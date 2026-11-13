@@ -9,7 +9,12 @@ import { createListStore } from './lists.ts';
 import { createLivedCityStore } from './lived-cities.ts';
 import { createRatingStore } from './ratings.ts';
 import { createVisitStore } from './visits.ts';
-import { deleteUserByAuthProviderId, ensureUser, syncUserFromClerk } from './users.ts';
+import {
+  createProfileStore,
+  deleteUserByAuthProviderId,
+  ensureUser,
+  syncUserFromClerk,
+} from './users.ts';
 
 const env = loadEnv();
 const sql = createSql(env.DATABASE_URL);
@@ -29,6 +34,7 @@ const app = createApp({
   defaultLists: createDefaultListStore(sql),
   ratings: createRatingStore(sql),
   lists: createListStore(sql),
+  profiles: createProfileStore(sql),
 });
 
 if (!env.CLERK_SECRET_KEY) {

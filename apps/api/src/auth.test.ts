@@ -9,6 +9,12 @@ const userWith = (roles: UserRole[]): CurrentUser => ({
   username: 'ada',
   displayName: 'Ada',
   avatarUrl: null,
+  bio: null,
+  homeCityId: null,
+  homeCityVisible: false,
+  profileVisibility: 'public' as const,
+  visitedVisibility: 'public' as const,
+  plannedVisibility: 'public' as const,
   roles,
   registeredAt: '2026-03-01T12:00:00.000Z',
 });

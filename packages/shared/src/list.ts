@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { paginated } from './pagination.ts';
+import { visibilitySchema } from './user.ts';
 
 export const maxListTitleLength = 100;
 export const maxListDescriptionLength = 2000;
 export const maxListNoteLength = 500;
 
-export const listVisibilities = ['public', 'private'] as const;
-export const listVisibilitySchema = z.enum(listVisibilities);
+/** A list is public unless its owner makes it private (FR-LIST-005). */
+export const listVisibilitySchema = visibilitySchema;
 
 const titleSchema = z.string().trim().min(1).max(maxListTitleLength);
 

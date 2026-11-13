@@ -5,4 +5,5 @@ export * from './visits.ts';
 export * from './lived-cities.ts';
 export * from './planned-cities.ts';
 export * from './ratings.ts';
+export * from './visibility.ts';
 export * from './lists.ts';

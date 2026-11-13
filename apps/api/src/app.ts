@@ -25,11 +25,13 @@ import type { LivedCityStore } from './lived-cities.ts';
 import { listPaths, registerListRoutes } from './list-routes.ts';
 import type { ListStore } from './lists.ts';
 import { problem } from './problem.ts';
+import { registerProfileRoutes } from './profile-routes.ts';
 import { criteriaAdminPaths, registerCriteriaAdminRoutes } from './criteria-admin-routes.ts';
 import { ratingPaths, registerRatingRoutes } from './rating-routes.ts';
 import type { RatingStore } from './ratings.ts';
 import { rateLimitWrites, type RateLimitOptions } from './rate-limit.ts';
 import { registerVisitRoutes, visitPaths } from './visit-routes.ts';
+import type { ProfileStore } from './users.ts';
 import type { VisitStore } from './visits.ts';
 
 export interface AppDependencies {
@@ -46,6 +48,7 @@ export interface AppDependencies {
   defaultLists: DefaultListStore;
   ratings: RatingStore;
   lists: ListStore;
+  profiles: ProfileStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -104,6 +107,7 @@ export function createApp({
   defaultLists,
   ratings,
   lists,
+  profiles,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -169,6 +173,7 @@ export function createApp({
   registerRatingRoutes(app, ratings);
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
+  registerProfileRoutes(app, profiles);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {

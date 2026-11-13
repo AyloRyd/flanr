@@ -5,6 +5,7 @@ import { noDefaultListStore } from './default-lists.ts';
 import { noListStore } from './lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
 import { noRatingStore } from './ratings.ts';
+import { noProfileStore } from './users.ts';
 import { noVisitStore } from './visits.ts';
 
 /**
@@ -30,6 +31,7 @@ const app = createApp({
   defaultLists: noDefaultListStore,
   ratings: noRatingStore,
   lists: noListStore,
+  profiles: noProfileStore,
 });
 
 const response = await app.request('/openapi.json');

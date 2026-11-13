@@ -113,6 +113,13 @@
       "when": 1794561674746,
       "tag": "0015_lists",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794562329297,
+      "tag": "0016_profile_settings",
+      "breakpoints": true
     }
   ]
 }
