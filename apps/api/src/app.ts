@@ -8,6 +8,8 @@ import {
   type HealthResponse,
 } from '@flanr/shared';
 import { cors } from 'hono/cors';
+import { registerAccountRoutes } from './account-routes.ts';
+import type { AccountStore } from './accounts.ts';
 import { HTTPException } from 'hono/http-exception';
 import {
   requireAuth,
@@ -50,6 +52,7 @@ export interface AppDependencies {
   ratings: RatingStore;
   lists: ListStore;
   profiles: ProfileStore;
+  accounts: AccountStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -109,6 +112,7 @@ export function createApp({
   ratings,
   lists,
   profiles,
+  accounts,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -135,6 +139,7 @@ export function createApp({
   // Everything under /v1 that reads or changes user data needs a signed-in user (NFR-SEC-003).
   for (const path of [
     '/v1/me',
+    '/v1/me/*',
     ...visitPaths,
     ...livedCityPaths,
     ...defaultListPaths,
@@ -175,6 +180,7 @@ export function createApp({
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
   registerProfileRoutes(app, profiles);
+  registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);
   registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).

@@ -10,3 +10,4 @@ export * from './lived-city.ts';
 export * from './default-lists.ts';
 export * from './rating.ts';
 export * from './list.ts';
+export * from './data-export.ts';

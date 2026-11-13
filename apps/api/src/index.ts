@@ -1,7 +1,12 @@
 import { serve } from '@hono/node-server';
+import { createAccountStore } from './accounts.ts';
 import { createApp } from './app.ts';
 import { getCityTile } from './city-tiles.ts';
-import { createClerkTokenVerifier, createClerkWebhookReader } from './clerk.ts';
+import {
+  createClerkAccountRemover,
+  createClerkTokenVerifier,
+  createClerkWebhookReader,
+} from './clerk.ts';
 import { createSql, isDatabaseReachable } from './db.ts';
 import { createDefaultListStore } from './default-lists.ts';
 import { loadEnv } from './env.ts';
@@ -35,6 +40,7 @@ const app = createApp({
   ratings: createRatingStore(sql),
   lists: createListStore(sql),
   profiles: createProfileStore(sql),
+  accounts: createAccountStore(sql, createClerkAccountRemover(env.CLERK_SECRET_KEY)),
 });
 
 if (!env.CLERK_SECRET_KEY) {

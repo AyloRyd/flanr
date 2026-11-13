@@ -525,6 +525,174 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "Delete the account of the signed-in user with all its data (FR-AUTH-009)",
+        "description": "Cannot be undone. The account is deleted at the sign-in provider too, so the user can no longer sign in.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            },
+            "required": true,
+            "name": "confirm",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The sign-in provider did not delete the account; nothing was deleted",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/visits": {
@@ -7001,6 +7169,463 @@
           },
           "404": {
             "description": "No user has this username",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/export": {
+      "get": {
+        "summary": "Everything Flanr stores about the signed-in user, as JSON (NFR-GDPR-003)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exportedAt": {
+                      "type": "string"
+                    },
+                    "profile": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "type": "string"
+                        },
+                        "avatarUrl": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "bio": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "homeCityId": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "homeCityVisible": {
+                          "type": "boolean"
+                        },
+                        "profileVisibility": {
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "private"
+                          ]
+                        },
+                        "visitedVisibility": {
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "private"
+                          ]
+                        },
+                        "plannedVisibility": {
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "private"
+                          ]
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "user",
+                              "moderator",
+                              "administrator"
+                            ]
+                          }
+                        },
+                        "registeredAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "displayName",
+                        "avatarUrl",
+                        "bio",
+                        "homeCityId",
+                        "homeCityVisible",
+                        "profileVisibility",
+                        "visitedVisibility",
+                        "plannedVisibility",
+                        "roles",
+                        "registeredAt"
+                      ]
+                    },
+                    "visits": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "date": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+                          },
+                          "datePrecision": {
+                            "type": "string",
+                            "enum": [
+                              "day",
+                              "month",
+                              "year",
+                              "none"
+                            ]
+                          },
+                          "beforeRegistration": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "cityId",
+                          "date",
+                          "datePrecision",
+                          "beforeRegistration",
+                          "createdAt"
+                        ]
+                      }
+                    },
+                    "livedCities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "isCurrent": {
+                            "type": "boolean"
+                          },
+                          "from": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+                          },
+                          "to": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "isCurrent",
+                          "from",
+                          "to"
+                        ]
+                      }
+                    },
+                    "plannedCities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "addedAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "addedAt"
+                        ]
+                      }
+                    },
+                    "ratings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "subjective": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 10
+                          },
+                          "criteria": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 10
+                            }
+                          },
+                          "criteriaAverage": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "subjective",
+                          "criteria",
+                          "criteriaAverage",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    },
+                    "lists": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "visibility": {
+                            "type": "string",
+                            "enum": [
+                              "public",
+                              "private"
+                            ]
+                          },
+                          "entryCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "entries": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "cityId": {
+                                  "type": "integer"
+                                },
+                                "position": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "cityId",
+                                "position",
+                                "note"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "description",
+                          "visibility",
+                          "entryCount",
+                          "createdAt",
+                          "entries"
+                        ]
+                      }
+                    },
+                    "cities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "countryCode": {
+                            "type": "string"
+                          },
+                          "osm": {
+                            "type": "string"
+                          },
+                          "wikidataId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "countryCode",
+                          "osm",
+                          "wikidataId"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "exportedAt",
+                    "profile",
+                    "visits",
+                    "livedCities",
+                    "plannedCities",
+                    "ratings",
+                    "lists",
+                    "cities"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
             "content": {
               "application/problem+json": {
                 "schema": {

@@ -1,4 +1,5 @@
 import { createApiClient, type ApiClient } from '@flanr/shared';
+import { createAccountStore } from '../src/accounts.ts';
 import { createApp } from '../src/app.ts';
 import type { Sql } from '../src/db.ts';
 import { createDefaultListStore } from '../src/default-lists.ts';
@@ -11,11 +12,21 @@ import { createVisitStore } from '../src/visits.ts';
 /** The time every API test runs at: noon on 12 November 2026. */
 export const testNow = () => new Date('2026-11-12T12:00:00Z');
 
+/** The sign-in provider of the tests fails to delete the account with this ID. */
+export const unremovableAuthAccount = 'clerk_stuck';
+
+export interface TestApi {
+  clientFor: (token: string | null) => ApiClient;
+  /** The IDs of the accounts that were deleted at the sign-in provider, oldest first. */
+  removedAuthAccounts: string[];
+}
+
 /**
  * The app on the test database, used through the generated client.
  * The session token `<name>-token` signs in the user with the Clerk ID `clerk_<name>`.
  */
-export function createTestApi(sql: Sql): { clientFor: (token: string | null) => ApiClient } {
+export function createTestApi(sql: Sql): TestApi {
+  const removedAuthAccounts: string[] = [];
   const app = createApp({
     checkDatabase: async () => true,
     getCityTile: async () => null,
@@ -33,10 +44,15 @@ export function createTestApi(sql: Sql): { clientFor: (token: string | null) => 
     ratings: createRatingStore(sql),
     lists: createListStore(sql),
     profiles: createProfileStore(sql),
+    accounts: createAccountStore(sql, async (authProviderId) => {
+      if (authProviderId === unremovableAuthAccount) throw new Error('Provider is down');
+      removedAuthAccounts.push(authProviderId);
+    }),
     now: testNow,
     writeRateLimit: { limit: 10_000, windowMs: 60_000 },
   });
   return {
+    removedAuthAccounts,
     clientFor: (token) =>
       createApiClient({
         baseUrl: 'http://api.test',

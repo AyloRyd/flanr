@@ -85,8 +85,8 @@ Each business rule gets unit tests before or together with its implementation (N
 - [x] Custom lists: create, rename, delete, entries, order, notes, visibility (FR-LIST-003…005). API only, for the owner: the visibility is stored and can be changed, but nobody else can read a list yet. Showing public lists to others, and the visibility of the two default lists, come with the profile and profile visibility items below.
 - [x] Profile: username, display name, avatar, bio, home location with visibility (FR-PROF-001…003). API only: `PATCH /v1/me` and the public profile `GET /v1/users/{username}`, which already shows only the names of a private profile. The settings for profile visibility and for the visibility of the Visited and Planned lists are stored here; the lists, ratings and visits of other users, and their filtering, are the next item.
 - [x] Profile visibility and filtering of private content everywhere (FR-PRIV-001…003). API only: the Visited and Planned lists, the ratings and the public custom lists of a user under `/v1/users/{username}/…`. A private profile shows none of them, a private list is hidden on a public profile. The Visited list of another user has only the cities, without visit counts and lived-in marks. Global statistics (FR-PRIV-003) come with phase 9.
-- [ ] Account deletion with removal of personal data (FR-AUTH-009, section 5.4).
-- [ ] Data export as JSON (NFR-GDPR-003).
+- [x] Account deletion with removal of personal data (FR-AUTH-009, section 5.4). `DELETE /v1/me?confirm=true` deletes the account at Clerk first and then everything Flanr stores; if Clerk fails, nothing is deleted. The call to Clerk is covered by a stand-in in the tests and has not been tried against the real Clerk application yet.
+- [x] Data export as JSON (NFR-GDPR-003). `GET /v1/me/export`: profile, visits, lived-in and planned cities, ratings, lists with entries, and what the city IDs stand for.
 
 **Done when:** all business rules in section 3 that apply to the MVP have passing tests and all endpoints are in the OpenAPI document.
 

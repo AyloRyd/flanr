@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { noAccountStore } from './accounts.ts';
 import { createApp } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
 import { noListStore } from './lists.ts';
@@ -32,6 +33,7 @@ const app = createApp({
   ratings: noRatingStore,
   lists: noListStore,
   profiles: noProfileStore,
+  accounts: noAccountStore,
 });
 
 const response = await app.request('/openapi.json');

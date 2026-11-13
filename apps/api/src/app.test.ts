@@ -1,6 +1,7 @@
 import { gunzipSync } from 'node:zlib';
 import { healthResponseSchema, problemSchema, type CurrentUser } from '@flanr/shared';
 import { describe, expect, it } from 'vitest';
+import { noAccountStore } from './accounts.ts';
 import { createApp, type AppDependencies } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
 import { noListStore } from './lists.ts';
@@ -38,6 +39,7 @@ const dependencies: AppDependencies = {
   ratings: noRatingStore,
   lists: noListStore,
   profiles: noProfileStore,
+  accounts: noAccountStore,
 };
 
 describe('GET /health', () => {
