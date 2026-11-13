@@ -1,4 +1,11 @@
-import { criteriaAverage, type CityRating, type Criterion } from '@flanr/shared';
+import {
+  criteriaAverage,
+  type CityRating,
+  type CreateCriterion,
+  type Criterion,
+  type ManagedCriterion,
+  type UpdateCriterion,
+} from '@flanr/shared';
 import type { TransactionSql } from 'postgres';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
@@ -30,6 +37,13 @@ export interface RatingStore {
   /** Creates the rating or replaces it as a whole (BR-008). */
   set(userId: number, cityId: number, input: RatingInput): Promise<SetRatingResult>;
   remove(userId: number, cityId: number): Promise<boolean>;
+
+  /** For administrators (FR-RATE-006): all criteria, also those that are switched off. */
+  listAllCriteria(): Promise<ManagedCriterion[]>;
+  /** Returns null if the key is taken. */
+  createCriterion(input: CreateCriterion): Promise<ManagedCriterion | null>;
+  /** Returns null if there is no criterion with this key. */
+  updateCriterion(key: string, changes: UpdateCriterion): Promise<ManagedCriterion | null>;
 }
 
 /** What removing a visit or a lived-in mark can come to. */
@@ -99,6 +113,8 @@ export function createRatingStore(sql: Sql): RatingStore {
         AND criterion_ratings.city_id = rating.city_id
     ), '{}') AS criteria`;
 
+  const managedColumns = sql`key, name, active, sort_order AS "sortOrder"`;
+
   async function find(db: Sql | TransactionSql, userId: number, cityId: number) {
     const [row] = await db<RatingRow[]>`
       SELECT ${columns} FROM city_ratings AS rating
@@ -166,6 +182,32 @@ export function createRatingStore(sql: Sql): RatingStore {
         DELETE FROM city_ratings WHERE user_id = ${userId} AND city_id = ${cityId}
         RETURNING city_id`;
       return rows.length > 0;
+    },
+
+    async listAllCriteria() {
+      return sql<ManagedCriterion[]>`
+        SELECT ${managedColumns} FROM criteria ORDER BY sort_order, id`;
+    },
+
+    async createCriterion({ key, name, sortOrder }) {
+      const [row] = await sql<ManagedCriterion[]>`
+        INSERT INTO criteria (key, name, sort_order)
+        VALUES (${key}, ${name},
+          ${sortOrder ?? sql`(SELECT COALESCE(max(sort_order), 0) + 10 FROM criteria)`})
+        ON CONFLICT (key) DO NOTHING
+        RETURNING ${managedColumns}`;
+      return row ?? null;
+    },
+
+    async updateCriterion(key, { name, active, sortOrder }) {
+      const [row] = await sql<ManagedCriterion[]>`
+        UPDATE criteria SET
+          name = COALESCE(${name ?? null}, name),
+          active = COALESCE(${active ?? null}, active),
+          sort_order = COALESCE(${sortOrder ?? null}, sort_order)
+        WHERE key = ${key}
+        RETURNING ${managedColumns}`;
+      return row ?? null;
     },
   };
 }

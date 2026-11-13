@@ -66,3 +66,44 @@ export const setCityRatingSchema = z.object({
 export type SetCityRating = z.infer<typeof setCityRatingSchema>;
 
 export const cityRatingPageSchema = paginated(cityRatingSchema);
+
+/** The stable name of a criterion: lower-case words joined by underscores. */
+export const criterionKeySchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9]*(_[a-z0-9]+)*$/)
+  .min(2)
+  .max(40);
+
+const criterionNameSchema = z.string().trim().min(1).max(60);
+
+/** A criterion as administrators see it (FR-RATE-006). */
+export const managedCriterionSchema = criterionSchema.extend({
+  /** A criterion that is switched off cannot be rated; its ratings stay stored. */
+  active: z.boolean(),
+  /** Criteria are shown in ascending order of this number. */
+  sortOrder: z.number().int(),
+});
+
+export type ManagedCriterion = z.infer<typeof managedCriterionSchema>;
+
+export const managedCriterionListSchema = z.object({ items: z.array(managedCriterionSchema) });
+
+export const createCriterionSchema = z.object({
+  key: criterionKeySchema,
+  name: criterionNameSchema,
+  /** Left out, the criterion goes to the end. */
+  sortOrder: z.number().int().min(0).max(100_000).optional(),
+});
+
+export type CreateCriterion = z.infer<typeof createCriterionSchema>;
+
+/** The key cannot be changed: stored ratings and clients refer to it. */
+export const updateCriterionSchema = z
+  .object({
+    name: criterionNameSchema,
+    active: z.boolean(),
+    sortOrder: z.number().int().min(0).max(100_000),
+  })
+  .partial();
+
+export type UpdateCriterion = z.infer<typeof updateCriterionSchema>;

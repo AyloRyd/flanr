@@ -1,6 +1,13 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSql } from '../src/db.ts';
-import { createTestApi, insertCity, registerUser, resetData } from './api.ts';
+import {
+  createTestApi,
+  initialCriteria,
+  insertCity,
+  registerUser,
+  resetCriteria,
+  resetData,
+} from './api.ts';
 import { testDatabaseUrl } from './database.ts';
 
 const sql = createSql(testDatabaseUrl);
@@ -44,15 +51,15 @@ const unmarkLived = (cityId: number, confirmRatingDeletion?: 'true') =>
 
 beforeEach(async () => {
   await resetData(sql);
-  await sql`UPDATE criteria SET active = true`;
-  await sql`DELETE FROM criteria WHERE key = 'nightlife'`;
+  await resetCriteria(sql);
   await insertCity(sql, wuppertal, 'Wuppertal');
   await insertCity(sql, aachen, 'Aachen');
   await registerUser(sql, 'ada', '2026-03-01T10:00:00Z');
   await registerUser(sql, 'bob', '2026-01-01T10:00:00Z');
 });
 afterAll(async () => {
-  await sql`UPDATE criteria SET active = true`;
+  await resetData(sql);
+  await resetCriteria(sql);
   await sql.end();
 });
 
@@ -60,14 +67,7 @@ describe('GET /v1/criteria (FR-RATE-002)', () => {
   it('lists the initial criteria in order, also for guests', async () => {
     const { data } = await clientFor(null).GET('/v1/criteria');
 
-    expect(data?.items).toEqual([
-      { key: 'architecture', name: 'Architecture' },
-      { key: 'urbanism', name: 'Urbanism' },
-      { key: 'greenery', name: 'Greenery' },
-      { key: 'public_transport', name: 'Public transport' },
-      { key: 'safety', name: 'Safety' },
-      { key: 'cleanliness', name: 'Cleanliness' },
-    ]);
+    expect(data?.items).toEqual(initialCriteria);
   });
 
   it('leaves out a criterion that is switched off (FR-RATE-006)', async () => {

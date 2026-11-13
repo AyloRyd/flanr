@@ -80,7 +80,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [x] Lived-in cities, current and past, with an optional period (FR-VIS-010, BR-016). API only; that a lived-in city counts as visited and can be rated comes with the lists and the ratings, the home location with the profile.
 - [x] Planned list and derived Visited list, automatic move on first visit (FR-LIST-001…002, BR-004). API only. A lived-in city is in the Visited list too; marking a city as lived-in also takes it off the Planned list.
 - [x] Ratings: subjective rating, criteria, suggested value, change and delete, one per user and city, rating requires a visit (FR-RATE-001…004, BR-005…BR-008). API only. Removing the last visit or the lived-in mark of a rated city is answered with 409 until the request carries the confirmation, then the rating is deleted with it. The suggested value is a function in `packages/shared` for the rating form.
-- [ ] Criteria management for administrators (FR-RATE-006).
+- [x] Criteria management for administrators (FR-RATE-006). API only: add, rename, reorder, switch off and on. A criterion is never deleted; switching it off keeps its ratings.
 - [ ] Community rating and per-criterion averages, including private profiles (FR-CITY-003, FR-RATE-005, BR-009, FR-PRIV-002).
 - [ ] Custom lists: create, rename, delete, entries, order, notes, visibility (FR-LIST-003…005).
 - [ ] Profile: username, display name, avatar, bio, home location with visibility (FR-PROF-001…003).
