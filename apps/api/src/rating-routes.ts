@@ -2,6 +2,7 @@ import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
 import {
   cityRatingPageSchema,
   cityRatingSchema,
+  communityRatingSchema,
   criterionListSchema,
   paginationQuerySchema,
   setCityRatingSchema,
@@ -83,11 +84,31 @@ const deleteRatingRoute = createRoute({
   },
 });
 
+const communityRatingRoute = createRoute({
+  method: 'get',
+  path: '/v1/cities/{cityId}/community-rating',
+  summary: 'The community rating of a city (FR-CITY-003, FR-RATE-005)',
+  description:
+    "The mean of all users' ratings and of each criterion, with the number of ratings (BR-009). Open to guests.",
+  request: { params: cityParams },
+  responses: {
+    200: { description: 'The community rating', ...json(communityRatingSchema) },
+    400: problemResponse('Invalid request'),
+    404: problemResponse('City not found'),
+  },
+});
+
 /** Paths that need a signed-in user; the app puts requireAuth in front of them. */
 export const ratingPaths = ['/v1/ratings', '/v1/cities/:cityId/rating'];
 
 export function registerRatingRoutes(app: OpenAPIHono<AuthEnv>, ratings: RatingStore): void {
   app.openapi(listCriteriaRoute, async (c) => c.json({ items: await ratings.listCriteria() }, 200));
+
+  app.openapi(communityRatingRoute, async (c) => {
+    const { cityId } = c.req.valid('param');
+    if (!(await ratings.cityExists(cityId))) return problem(c, 404, 'City not found') as never;
+    return c.json(await ratings.communityRating(cityId), 200);
+  });
 
   app.openapi(listRatingsRoute, async (c) => {
     const { limit, cursor } = c.req.valid('query');

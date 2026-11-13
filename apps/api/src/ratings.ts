@@ -1,6 +1,7 @@
 import {
   criteriaAverage,
   type CityRating,
+  type CommunityRating,
   type CreateCriterion,
   type Criterion,
   type ManagedCriterion,
@@ -37,6 +38,9 @@ export interface RatingStore {
   /** Creates the rating or replaces it as a whole (BR-008). */
   set(userId: number, cityId: number, input: RatingInput): Promise<SetRatingResult>;
   remove(userId: number, cityId: number): Promise<boolean>;
+
+  /** The ratings of all users together, without saying whose they are (BR-009, FR-PRIV-002). */
+  communityRating(cityId: number): Promise<CommunityRating>;
 
   /** For administrators (FR-RATE-006): all criteria, also those that are switched off. */
   listAllCriteria(): Promise<ManagedCriterion[]>;
@@ -182,6 +186,29 @@ export function createRatingStore(sql: Sql): RatingStore {
         DELETE FROM city_ratings WHERE user_id = ${userId} AND city_id = ${cityId}
         RETURNING city_id`;
       return rows.length > 0;
+    },
+
+    async communityRating(cityId) {
+      // Rounded in the database, where the ratings are exact decimals.
+      const [overall] = await sql<{ average: number | null; count: number }[]>`
+        SELECT round(avg(subjective), 2)::float8 AS average, count(*)::int AS count
+        FROM city_ratings WHERE city_id = ${cityId}`;
+      const criteria = await sql<CommunityRating['criteria']>`
+        SELECT criteria.key, criteria.name,
+          round(avg(criterion_ratings.value), 2)::float8 AS average,
+          count(criterion_ratings.value)::int AS count
+        FROM criteria
+        LEFT JOIN criterion_ratings
+          ON criterion_ratings.criterion_id = criteria.id AND criterion_ratings.city_id = ${cityId}
+        WHERE criteria.active
+        GROUP BY criteria.id
+        ORDER BY criteria.sort_order, criteria.id`;
+      return {
+        cityId,
+        average: overall?.average ?? null,
+        count: overall?.count ?? 0,
+        criteria: [...criteria],
+      };
     },
 
     async listAllCriteria() {

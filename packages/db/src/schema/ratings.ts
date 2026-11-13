@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   foreignKey,
+  index,
   integer,
   numeric,
   pgTable,
@@ -48,6 +49,8 @@ export const cityRatings = pgTable(
   (table) => [
     primaryKey({ columns: [table.userId, table.cityId] }),
     check('city_ratings_subjective_on_scale', onRatingScale(table.subjective)),
+    // The community rating reads all ratings of one city (BR-009).
+    index('city_ratings_city_idx').on(table.cityId),
   ],
 );
 
@@ -73,5 +76,6 @@ export const criterionRatings = pgTable(
       foreignColumns: [cityRatings.userId, cityRatings.cityId],
     }).onDelete('cascade'),
     check('criterion_ratings_value_on_scale', onRatingScale(table.value)),
+    index('criterion_ratings_city_criterion_idx').on(table.cityId, table.criterionId),
   ],
 );

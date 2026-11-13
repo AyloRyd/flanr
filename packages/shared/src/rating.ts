@@ -107,3 +107,29 @@ export const updateCriterionSchema = z
   .partial();
 
 export type UpdateCriterion = z.infer<typeof updateCriterionSchema>;
+
+/** A community average: rounded to two decimal places, null without ratings (BR-009). */
+const communityAverageSchema = z.number().nullable();
+
+/**
+ * What all users together think of a city (BR-009, FR-RATE-005). It counts the ratings of
+ * private profiles too and never says whose ratings they are (FR-PRIV-002).
+ */
+export const communityRatingSchema = z.object({
+  cityId: z.number().int(),
+  /** The mean of all subjective ratings. */
+  average: communityAverageSchema,
+  /** The number of ratings. */
+  count: z.number().int().min(0),
+  /** One entry per criterion that can be rated, in display order. */
+  criteria: z.array(
+    z.object({
+      key: z.string(),
+      name: z.string(),
+      average: communityAverageSchema,
+      count: z.number().int().min(0),
+    }),
+  ),
+});
+
+export type CommunityRating = z.infer<typeof communityRatingSchema>;
