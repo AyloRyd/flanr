@@ -1,53 +1,16 @@
-import { createApiClient, type CurrentUser } from '@flanr/shared';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { createApp } from '../src/app.ts';
 import { createSql } from '../src/db.ts';
-import { ensureUser } from '../src/users.ts';
-import { createVisitStore } from '../src/visits.ts';
+import { createTestApi, insertCity, registerUser, resetData } from './api.ts';
 import { testDatabaseUrl } from './database.ts';
 
 const sql = createSql(testDatabaseUrl);
 const cologne = 1;
 const bonn = 2;
 
-// Ada registered on 2026-03-01; "now" is noon on 2026-11-12.
-const now = () => new Date('2026-11-12T12:00:00Z');
-const tokens: Record<string, string> = { 'ada-token': 'clerk_ada', 'bob-token': 'clerk_bob' };
-
-const app = createApp({
-  checkDatabase: async () => true,
-  getCityTile: async () => null,
-  corsOrigins: [],
-  verifyToken: async (token) => tokens[token] ?? null,
-  resolveUser: (authProviderId) => ensureUser(sql, authProviderId),
-  readWebhook: async () => null,
-  applyUserEvent: async () => {},
-  visits: createVisitStore(sql),
-  now,
-  writeRateLimit: { limit: 10_000, windowMs: 60_000 },
-});
-
-const clientFor = (token: string | null) =>
-  createApiClient({
-    baseUrl: 'http://api.test',
-    fetch: async (request) => app.fetch(request),
-    getToken: async () => token,
-  });
+// Ada registered on 2026-03-01; the tests run on 2026-11-12.
+const { clientFor } = createTestApi(sql);
 const ada = clientFor('ada-token');
 const bob = clientFor('bob-token');
-
-async function insertCity(id: number, name: string) {
-  await sql`
-    INSERT INTO cities (id, osm_type, osm_id, name_local, name_en, country_code, settlement_type, centre)
-    OVERRIDING SYSTEM VALUE
-    VALUES (${id}, 'node', ${id}, ${name}, ${name}, 'DE', 'city', ST_SetSRID(ST_MakePoint(7, 51), 4326))`;
-}
-
-async function register(authProviderId: string, registeredAt: string): Promise<CurrentUser> {
-  const user = await ensureUser(sql, authProviderId);
-  await sql`UPDATE users SET registered_at = ${registeredAt} WHERE id = ${user.id}`;
-  return user;
-}
 
 async function logVisit(date: string | null, cityId = cologne, beforeRegistration = date === null) {
   const { data } = await ada.POST('/v1/visits', { body: { cityId, date, beforeRegistration } });
@@ -56,12 +19,11 @@ async function logVisit(date: string | null, cityId = cologne, beforeRegistratio
 }
 
 beforeEach(async () => {
-  await sql`TRUNCATE users, city_tile_shapes, city_names, cities, municipalities, regions, countries RESTART IDENTITY CASCADE`;
-  await sql`INSERT INTO countries (code, name_local, name_en) VALUES ('DE', 'Deutschland', 'Germany')`;
-  await insertCity(cologne, 'Köln');
-  await insertCity(bonn, 'Bonn');
-  await register('clerk_ada', '2026-03-01T10:00:00Z');
-  await register('clerk_bob', '2026-01-01T10:00:00Z');
+  await resetData(sql);
+  await insertCity(sql, cologne, 'Köln');
+  await insertCity(sql, bonn, 'Bonn');
+  await registerUser(sql, 'ada', '2026-03-01T10:00:00Z');
+  await registerUser(sql, 'bob', '2026-01-01T10:00:00Z');
 });
 afterAll(async () => {
   await sql.end();

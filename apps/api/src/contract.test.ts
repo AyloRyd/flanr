@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { createApiClient } from '@flanr/shared';
 import { describe, expect, it } from 'vitest';
 import { createApp, type AppDependencies } from './app.ts';
+import { noLivedCityStore } from './lived-cities.ts';
 import { noVisitStore } from './visits.ts';
 
 const user = {
@@ -22,6 +23,7 @@ const dependencies: AppDependencies = {
   readWebhook: async () => null,
   applyUserEvent: async () => {},
   visits: noVisitStore,
+  livedCities: noLivedCityStore,
 };
 
 describe('API contract (CON-009, NFR-PORT-001)', () => {

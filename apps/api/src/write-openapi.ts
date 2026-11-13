@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createApp } from './app.ts';
+import { noLivedCityStore } from './lived-cities.ts';
 import { noVisitStore } from './visits.ts';
 
 /**
@@ -22,6 +23,7 @@ const app = createApp({
   readWebhook: async () => null,
   applyUserEvent: async () => {},
   visits: noVisitStore,
+  livedCities: noLivedCityStore,
 });
 
 const response = await app.request('/openapi.json');

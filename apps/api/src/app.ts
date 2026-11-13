@@ -12,6 +12,8 @@ import { HTTPException } from 'hono/http-exception';
 import { requireAuth, type AuthEnv, type TokenVerifier, type UserResolver } from './auth.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
+import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
+import type { LivedCityStore } from './lived-cities.ts';
 import { problem } from './problem.ts';
 import { rateLimitWrites, type RateLimitOptions } from './rate-limit.ts';
 import { registerVisitRoutes, visitPaths } from './visit-routes.ts';
@@ -27,6 +29,7 @@ export interface AppDependencies {
   readWebhook: WebhookReader;
   applyUserEvent: (event: UserEvent) => Promise<void>;
   visits: VisitStore;
+  livedCities: LivedCityStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -81,6 +84,7 @@ export function createApp({
   readWebhook,
   applyUserEvent,
   visits,
+  livedCities,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -105,7 +109,7 @@ export function createApp({
 
   app.use(cors({ origin: corsOrigins }));
   // Everything under /v1 that reads or changes user data needs a signed-in user (NFR-SEC-003).
-  for (const path of ['/v1/me', ...visitPaths]) {
+  for (const path of ['/v1/me', ...visitPaths, ...livedCityPaths]) {
     app.use(path, requireAuth(verifyToken, resolveUser));
   }
   app.use('/v1/*', rateLimitWrites(writeRateLimit));
@@ -132,6 +136,7 @@ export function createApp({
   app.openapi(meRoute, (c) => c.json(c.get('user'), 200));
 
   registerVisitRoutes(app, visits, now);
+  registerLivedCityRoutes(app, livedCities, now);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {
