@@ -3,6 +3,7 @@ import { healthResponseSchema, problemSchema, type CurrentUser } from '@flanr/sh
 import { describe, expect, it } from 'vitest';
 import { createApp, type AppDependencies } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
+import { noListStore } from './lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
 import { noRatingStore } from './ratings.ts';
 import { noVisitStore } from './visits.ts';
@@ -28,6 +29,7 @@ const dependencies: AppDependencies = {
   livedCities: noLivedCityStore,
   defaultLists: noDefaultListStore,
   ratings: noRatingStore,
+  lists: noListStore,
 };
 
 describe('GET /health', () => {

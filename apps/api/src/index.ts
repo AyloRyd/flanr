@@ -5,6 +5,7 @@ import { createClerkTokenVerifier, createClerkWebhookReader } from './clerk.ts';
 import { createSql, isDatabaseReachable } from './db.ts';
 import { createDefaultListStore } from './default-lists.ts';
 import { loadEnv } from './env.ts';
+import { createListStore } from './lists.ts';
 import { createLivedCityStore } from './lived-cities.ts';
 import { createRatingStore } from './ratings.ts';
 import { createVisitStore } from './visits.ts';
@@ -27,6 +28,7 @@ const app = createApp({
   livedCities: createLivedCityStore(sql),
   defaultLists: createDefaultListStore(sql),
   ratings: createRatingStore(sql),
+  lists: createListStore(sql),
 });
 
 if (!env.CLERK_SECRET_KEY) {
