@@ -26,6 +26,7 @@ import { listPaths, registerListRoutes } from './list-routes.ts';
 import type { ListStore } from './lists.ts';
 import { problem } from './problem.ts';
 import { registerProfileRoutes } from './profile-routes.ts';
+import { registerUserContentRoutes } from './user-content-routes.ts';
 import { criteriaAdminPaths, registerCriteriaAdminRoutes } from './criteria-admin-routes.ts';
 import { ratingPaths, registerRatingRoutes } from './rating-routes.ts';
 import type { RatingStore } from './ratings.ts';
@@ -174,6 +175,7 @@ export function createApp({
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
   registerProfileRoutes(app, profiles);
+  registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {
