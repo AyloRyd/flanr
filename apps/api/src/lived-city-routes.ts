@@ -17,6 +17,8 @@ import {
   bearerSecurity,
   cityParams,
   commonErrors,
+  idFromCursor,
+  invalidCursor,
   json,
   problemResponse,
 } from './route-helpers.ts';
@@ -69,12 +71,8 @@ export function registerLivedCityRoutes(
 ): void {
   app.openapi(listLivedCitiesRoute, async (c) => {
     const { limit, cursor } = c.req.valid('query');
-    const afterCityId = cursor === undefined ? undefined : Number(cursor);
-    if (afterCityId !== undefined && !Number.isSafeInteger(afterCityId)) {
-      return problem(c, 400, 'Invalid request', undefined, [
-        { path: 'cursor', message: 'Not a cursor returned by this endpoint' },
-      ]) as never;
-    }
+    const afterCityId = idFromCursor(cursor);
+    if (afterCityId === null) return invalidCursor(c) as never;
 
     // One row more than the page size shows whether another page exists.
     const rows = await livedCities.list(c.get('user').id, { afterCityId, limit: limit + 1 });

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { createApiClient } from '@flanr/shared';
 import { describe, expect, it } from 'vitest';
 import { createApp, type AppDependencies } from './app.ts';
+import { noDefaultListStore } from './default-lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
 import { noVisitStore } from './visits.ts';
 
@@ -24,6 +25,7 @@ const dependencies: AppDependencies = {
   applyUserEvent: async () => {},
   visits: noVisitStore,
   livedCities: noLivedCityStore,
+  defaultLists: noDefaultListStore,
 };
 
 describe('API contract (CON-009, NFR-PORT-001)', () => {

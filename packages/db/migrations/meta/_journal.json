@@ -78,6 +78,13 @@
       "when": 1794514032296,
       "tag": "0010_lived_cities",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794559043155,
+      "tag": "0011_planned_cities",
+      "breakpoints": true
     }
   ]
 }

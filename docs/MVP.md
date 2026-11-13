@@ -17,13 +17,13 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 
 - [x] OI-002 — choose the OSM extract for the import. Decided: Geofabrik regional extracts processed with osmium. Geoapify localities was chosen first and dropped after checking its data, see DECISIONS.md.
 - [x] OI-003 — settlements without a boundary: import as point only (recommended) or skip.
-- [ ] OI-005 — what happens to a rating when all visits to the city are deleted (recommended: the rating is deleted too, since BR-005 requires a visit).
-- [ ] OI-007 — confirm rounding of the suggested rating to 0.5.
+- [x] OI-005 — what happens to a rating when all visits to the city are deleted. Decided: the rating is deleted too, after a confirmation (BR-005).
+- [x] OI-007 — rounding of the suggested rating. Decided: to the nearest 0.5, halves up (BR-007).
 - [ ] OI-008 — approximate dates in the calendar (recommended for MVP: not shown, only counted in the coverage note).
-- [ ] OI-010 — username rules.
+- [x] OI-010 — username rules. Decided: 3–30 characters, changeable at any time, see FR-PROF-001.
 - [ ] OI-011 — minimum number of ratings for sorting by community rating (recommended: 3).
 - [ ] OI-017 — hosting (recommended: one VPS in Germany with about 8 GB RAM running web, API and database in Docker, plus a cheap domain; see the hosting discussion).
-- [ ] OI-019 — whether lived-in cities have a period (from, to). Lived-in cities themselves are specified in BR-016 and FR-VIS-010.
+- [x] OI-019 — whether lived-in cities have a period (from, to). Decided: an optional period that is not part of time-based statistics (BR-016).
 
 **Done when:** all items above have a decision written into the spec.
 
@@ -78,7 +78,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [x] Visits: create, edit, delete, date precision, no future dates, undated visits before registration, date required after registration (FR-VIS-001…006, BR-002, BR-003). API only; removing a city from the Planned list (BR-004) and deleting the rating with the last visit (BR-005) come with the lists and the ratings.
 - [x] Setting the number of undated visits directly (FR-VIS-005).
 - [x] Lived-in cities, current and past, with an optional period (FR-VIS-010, BR-016). API only; that a lived-in city counts as visited and can be rated comes with the lists and the ratings, the home location with the profile.
-- [ ] Planned list and derived Visited list, automatic move on first visit (FR-LIST-001…002, BR-004).
+- [x] Planned list and derived Visited list, automatic move on first visit (FR-LIST-001…002, BR-004). API only. A lived-in city is in the Visited list too; marking a city as lived-in also takes it off the Planned list.
 - [ ] Ratings: subjective rating, criteria, suggested value, change and delete, one per user and city, rating requires a visit (FR-RATE-001…004, BR-005…BR-008).
 - [ ] Criteria management for administrators (FR-RATE-006).
 - [ ] Community rating and per-criterion averages, including private profiles (FR-CITY-003, FR-RATE-005, BR-009, FR-PRIV-002).

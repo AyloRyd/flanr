@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.8 |
+| Version | 0.9 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
@@ -22,6 +22,7 @@
 | 0.6 | 2026-11-11 | A. Malyshkin | Cities that are part of a municipality (BR-001, BR-017, Municipality entity), population made optional, external map links (FR-CITY-009), city districts for later (FR-CITY-010), OI-020 and OI-021 |
 | 0.7 | 2026-11-11 | A. Malyshkin | First-level region made optional for countries without regions (Monaco, Vatican City); the capital of a country is always a city (BR-001) |
 | 0.8 | 2026-11-12 | A. Malyshkin | Resolved OI-005 (a rating is deleted with the last visit, BR-005), OI-007 (suggested rating rounds halves up, BR-007), OI-010 (username rules, FR-PROF-001) and OI-019 (lived-in periods, BR-016) |
+| 0.9 | 2026-11-13 | A. Malyshkin | FR-LIST-001 brought in line with BR-004: the Visited list also has the lived-in cities |
 
 ---
 
@@ -672,7 +673,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-LIST-001 — Default lists
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Every user MUST have the default lists Visited and Planned, which cannot be deleted or renamed. The Visited list MUST consist exactly of the cities the user has at least one visit to.
+**Description.** Every user MUST have the default lists Visited and Planned, which cannot be deleted or renamed. The Visited list MUST consist exactly of the cities the user has at least one visit to or has marked as a lived-in city (BR-004).
 
 **Acceptance criteria.**
 1. Given a new user, then both default lists exist and are empty.
