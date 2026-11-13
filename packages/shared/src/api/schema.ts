@@ -87,6 +87,15 @@ export interface paths {
                             username: string;
                             displayName: string;
                             avatarUrl: string | null;
+                            bio: string | null;
+                            homeCityId: number | null;
+                            homeCityVisible: boolean;
+                            /** @enum {string} */
+                            profileVisibility: "public" | "private";
+                            /** @enum {string} */
+                            visitedVisibility: "public" | "private";
+                            /** @enum {string} */
+                            plannedVisibility: "public" | "private";
                             roles: ("user" | "moderator" | "administrator")[];
                             registeredAt: string;
                         };
@@ -117,7 +126,115 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Change the profile and the settings of the signed-in user (FR-PROF-001…003)
+         * @description Only the given fields change. The avatar is the picture of the account at the authentication provider and is changed there.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        username?: string;
+                        displayName?: string;
+                        bio?: string | null;
+                        homeCityVisible?: boolean;
+                        /** @enum {string} */
+                        profileVisibility?: "public" | "private";
+                        /** @enum {string} */
+                        visitedVisibility?: "public" | "private";
+                        /** @enum {string} */
+                        plannedVisibility?: "public" | "private";
+                    };
+                };
+            };
+            responses: {
+                /** @description The signed-in user */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            username: string;
+                            displayName: string;
+                            avatarUrl: string | null;
+                            bio: string | null;
+                            homeCityId: number | null;
+                            homeCityVisible: boolean;
+                            /** @enum {string} */
+                            profileVisibility: "public" | "private";
+                            /** @enum {string} */
+                            visitedVisibility: "public" | "private";
+                            /** @enum {string} */
+                            plannedVisibility: "public" | "private";
+                            roles: ("user" | "moderator" | "administrator")[];
+                            registeredAt: string;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The username is taken */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/v1/visits": {
@@ -2971,6 +3088,90 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/v1/users/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The profile of a user as everyone sees it (FR-PROF-004)
+         * @description Open to guests. The username is matched without letter case. Of a private profile only the username and the display name are returned (FR-PRIV-001).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    username: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The profile */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            username: string;
+                            displayName: string;
+                            isPrivate: boolean;
+                            avatarUrl: string | null;
+                            bio: string | null;
+                            homeCityId: number | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No user has this username */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }

@@ -5,7 +5,7 @@ import { createDefaultListStore } from '../src/default-lists.ts';
 import { createListStore } from '../src/lists.ts';
 import { createLivedCityStore } from '../src/lived-cities.ts';
 import { createRatingStore } from '../src/ratings.ts';
-import { ensureUser } from '../src/users.ts';
+import { createProfileStore, ensureUser } from '../src/users.ts';
 import { createVisitStore } from '../src/visits.ts';
 
 /** The time every API test runs at: noon on 12 November 2026. */
@@ -32,6 +32,7 @@ export function createTestApi(sql: Sql): { clientFor: (token: string | null) => 
     defaultLists: createDefaultListStore(sql),
     ratings: createRatingStore(sql),
     lists: createListStore(sql),
+    profiles: createProfileStore(sql),
     now: testNow,
     writeRateLimit: { limit: 10_000, windowMs: 60_000 },
   });

@@ -1,8 +1,7 @@
-import { index, integer, pgEnum, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { cities } from './cities.ts';
 import { users } from './users.ts';
-
-export const listVisibilityEnum = pgEnum('list_visibility', ['public', 'private']);
+import { listVisibilityEnum } from './visibility.ts';
 
 /**
  * A custom list of a user (SRS 5.2, FR-LIST-003). The default lists Visited and Planned are

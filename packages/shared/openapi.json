@@ -114,6 +114,42 @@
                         "null"
                       ]
                     },
+                    "bio": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "homeCityId": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "homeCityVisible": {
+                      "type": "boolean"
+                    },
+                    "profileVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
+                    "visitedVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
+                    "plannedVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
                     "roles": {
                       "type": "array",
                       "items": {
@@ -134,6 +170,12 @@
                     "username",
                     "displayName",
                     "avatarUrl",
+                    "bio",
+                    "homeCityId",
+                    "homeCityVisible",
+                    "profileVisibility",
+                    "visitedVisibility",
+                    "plannedVisibility",
                     "roles",
                     "registeredAt"
                   ]
@@ -143,6 +185,300 @@
           },
           "401": {
             "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Change the profile and the settings of the signed-in user (FR-PROF-001…003)",
+        "description": "Only the given fields change. The avatar is the picture of the account at the authentication provider and is changed there.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50
+                  },
+                  "bio": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 300
+                  },
+                  "homeCityVisible": {
+                    "type": "boolean"
+                  },
+                  "profileVisibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ]
+                  },
+                  "visitedVisibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ]
+                  },
+                  "plannedVisibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The signed-in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "avatarUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "bio": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "homeCityId": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "homeCityVisible": {
+                      "type": "boolean"
+                    },
+                    "profileVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
+                    "visitedVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
+                    "plannedVisibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "user",
+                          "moderator",
+                          "administrator"
+                        ]
+                      }
+                    },
+                    "registeredAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "username",
+                    "displayName",
+                    "avatarUrl",
+                    "bio",
+                    "homeCityId",
+                    "homeCityVisible",
+                    "profileVisibility",
+                    "visitedVisibility",
+                    "plannedVisibility",
+                    "roles",
+                    "registeredAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The username is taken",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -6504,6 +6840,167 @@
           },
           "404": {
             "description": "The city is not in such a list of the user",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{username}": {
+      "get": {
+        "summary": "The profile of a user as everyone sees it (FR-PROF-004)",
+        "description": "Open to guests. The username is matched without letter case. Of a private profile only the username and the display name are returned (FR-PRIV-001).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": true,
+            "name": "username",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "isPrivate": {
+                      "type": "boolean"
+                    },
+                    "avatarUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "bio": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "homeCityId": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "username",
+                    "displayName",
+                    "isPrivate",
+                    "avatarUrl",
+                    "bio",
+                    "homeCityId"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No user has this username",
             "content": {
               "application/problem+json": {
                 "schema": {

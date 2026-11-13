@@ -1,3 +1,4 @@
+import { checkUsername } from '@flanr/shared';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSql } from '../src/db.ts';
 import { deleteUserByAuthProviderId, ensureUser, syncUserFromClerk } from '../src/users.ts';
@@ -17,7 +18,8 @@ describe('ensureUser', () => {
     const user = await ensureUser(sql, 'clerk_1');
 
     expect(user.roles).toEqual(['user']);
-    expect(user.username).toMatch(/^user-[0-9a-f]{10}$/);
+    expect(user.username).toMatch(/^user_[0-9a-f]{10}$/);
+    expect(checkUsername(user.username)).toBeNull();
     expect(user.displayName).toBe(user.username);
   });
 
@@ -50,23 +52,56 @@ describe('syncUserFromClerk (FR-AUTH-003…005)', () => {
     });
   });
 
-  it('updates a user that already signed in and keeps the internal ID', async () => {
+  it('gives a user that signed in before the report the names from Clerk, and keeps the ID', async () => {
     const before = await ensureUser(sql, 'clerk_1');
 
     await syncUserFromClerk(sql, profile);
 
-    expect(await ensureUser(sql, 'clerk_1')).toMatchObject({ id: before.id, username: 'ada' });
+    expect(await ensureUser(sql, 'clerk_1')).toMatchObject({
+      id: before.id,
+      username: 'ada',
+      displayName: 'Ada Lovelace',
+    });
   });
 
-  it('keeps the username when Clerk sends none', async () => {
+  it('keeps the names the user has in Flanr when Clerk reports a change (FR-PROF-001)', async () => {
     await syncUserFromClerk(sql, profile);
 
-    await syncUserFromClerk(sql, { ...profile, username: null, displayName: null });
+    await syncUserFromClerk(sql, { ...profile, username: 'countess', displayName: 'A. King' });
 
     expect(await ensureUser(sql, 'clerk_1')).toMatchObject({
       username: 'ada',
       displayName: 'Ada Lovelace',
     });
+  });
+
+  it('follows a change of the avatar at Clerk (FR-PROF-002)', async () => {
+    await syncUserFromClerk(sql, profile);
+
+    await syncUserFromClerk(sql, { ...profile, avatarUrl: 'https://example.com/new.png' });
+
+    expect((await ensureUser(sql, 'clerk_1')).avatarUrl).toBe('https://example.com/new.png');
+  });
+
+  it.each([
+    ['is not allowed in Flanr', 'ada-lovelace'],
+    ['is reserved', 'admin'],
+    ['is taken in another letter case', 'ADA'],
+  ])('generates a username when the one from Clerk %s (FR-PROF-001)', async (_case, username) => {
+    await syncUserFromClerk(sql, profile);
+
+    await syncUserFromClerk(sql, { ...profile, authProviderId: 'clerk_2', username });
+
+    const user = await ensureUser(sql, 'clerk_2');
+    expect(user.username).toMatch(/^user_[0-9a-f]{10}$/);
+    expect(user.displayName).toBe('Ada Lovelace');
+  });
+
+  it('uses the generated username as display name when Clerk sends no name', async () => {
+    await syncUserFromClerk(sql, { ...profile, username: null, displayName: null });
+
+    const user = await ensureUser(sql, 'clerk_1');
+    expect(user.displayName).toBe(user.username);
   });
 
   it('removes the user when the account is deleted', async () => {

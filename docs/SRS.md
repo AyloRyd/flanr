@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
@@ -23,6 +23,7 @@
 | 0.7 | 2026-11-11 | A. Malyshkin | First-level region made optional for countries without regions (Monaco, Vatican City); the capital of a country is always a city (BR-001) |
 | 0.8 | 2026-11-12 | A. Malyshkin | Resolved OI-005 (a rating is deleted with the last visit, BR-005), OI-007 (suggested rating rounds halves up, BR-007), OI-010 (username rules, FR-PROF-001) and OI-019 (lived-in periods, BR-016) |
 | 0.9 | 2026-11-13 | A. Malyshkin | FR-LIST-001 brought in line with BR-004: the Visited list also has the lived-in cities |
+| 0.10 | 2026-11-13 | A. Malyshkin | Visibility of the two default lists stored as two user settings (FR-LIST-005, User entity); username and display name are managed in Flanr, the avatar comes from the Clerk account (FR-PROF-001, FR-PROF-002) |
 
 ---
 
@@ -379,7 +380,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-001 — Username
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Accounts and guests
 
-**Description.** Every user MUST have a unique username, which is part of their profile URL. A username has 3 to 30 characters: Latin letters, digits and underscores. Uniqueness does not depend on letter case, and names on the reserved list (such as `admin` or `settings`) cannot be chosen. Users MUST be able to change their username at any time if the new one is not taken. The old profile URL does not redirect, and the old username is free for others at once.
+**Description.** Every user MUST have a unique username, which is part of their profile URL. A username has 3 to 30 characters: Latin letters, digits and underscores. Uniqueness does not depend on letter case, and names on the reserved list (such as `admin` or `settings`) cannot be chosen. Users MUST be able to change their username at any time if the new one is not taken. The old profile URL does not redirect, and the old username is free for others at once. The username is managed in Flanr: the authentication provider only supplies the first one when the account is created, and an account without a usable one gets a generated username.
 
 **Acceptance criteria.**
 1. Given a username that is already taken, when a user tries to choose it, then the system rejects it.
@@ -390,7 +391,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-002 — Profile information
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Accounts and guests
 
-**Description.** A profile MUST contain a display name and MAY contain an avatar and a short bio. The exact set of fields will be refined in a later version.
+**Description.** A profile MUST contain a display name and MAY contain an avatar and a short bio. The exact set of fields will be refined in a later version. The display name and the bio are managed in Flanr. In the MVP the avatar is the picture of the user's account at the authentication provider and is changed there; Flanr stores only its URL.
 
 **Acceptance criteria.**
 1. Given a user, when they set a display name, avatar and bio, then these are shown on their profile.
@@ -710,7 +711,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-LIST-005 — List visibility
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Every list, default or custom, MUST be either public or private, and MUST be public by default. Private lists MUST be visible only to their owner.
+**Description.** Every list, default or custom, MUST be either public or private, and MUST be public by default. Private lists MUST be visible only to their owner. The visibility of the two default lists is a setting of the user, one for the Visited list and one for the Planned list, because these lists are not stored as lists (section 5.1).
 
 **Acceptance criteria.**
 1. Given a new custom list, then it is public.
@@ -1064,13 +1065,15 @@ The two default lists are not stored as list entries. Visited is derived from vi
 |---|---|---|
 | id | yes | Internal ID |
 | auth_provider_id | yes | Clerk user ID |
-| username | yes | Unique, changeable |
+| username | yes | Unique regardless of letter case, changeable, see FR-PROF-001 |
 | display_name | yes | |
-| avatar | no | |
+| avatar | no | URL of the picture of the Clerk account, see FR-PROF-002 |
 | bio | no | |
 | home_city_id | no | Derived from the current lived-in city, see BR-016 |
 | home_city_visible | yes | Default false |
 | profile_visibility | yes | public / private, default public |
+| visited_visibility | yes | Visibility of the Visited list: public / private, default public, see FR-LIST-005 |
+| planned_visibility | yes | Visibility of the Planned list: public / private, default public, see FR-LIST-005 |
 | roles | yes | user, moderator, administrator |
 | registered_at | yes | Basis for BR-002 |
 

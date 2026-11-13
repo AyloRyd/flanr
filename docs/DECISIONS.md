@@ -2,6 +2,12 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-13
+
+- **Visibility of the default lists:** two settings of the user, one for the Visited and one for the Planned list, because these lists are not stored as lists (FR-LIST-005).
+- **Username and display name are managed in Flanr.** Clerk supplies the first ones when the account is created; later changes at Clerk are not copied. The rules of FR-PROF-001 are checked by the API, which Clerk could not do (reserved names, uniqueness without letter case).
+- **Avatar in the MVP is the picture of the Clerk account.** Flanr stores its URL and has no file storage of its own yet.
+
 ## 2026-11-12
 
 - **The API client is generated from the OpenAPI document, not from the Hono app (CON-009, NFR-PORT-001).** Hono's own typed client (`hc`) reads the types of the server code, which would tie the web client to this backend. Instead the document is written to `packages/shared/openapi.json`, `openapi-typescript` turns it into types, and `openapi-fetch` (a thin wrapper around `fetch`) uses them. A backend in another language only has to serve the same document. Both generated files are committed, so the web app builds without a generation step, and tests fail when they are out of date.

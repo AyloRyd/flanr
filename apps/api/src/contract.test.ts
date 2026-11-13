@@ -6,6 +6,7 @@ import { noDefaultListStore } from './default-lists.ts';
 import { noListStore } from './lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
 import { noRatingStore } from './ratings.ts';
+import { noProfileStore } from './users.ts';
 import { noVisitStore } from './visits.ts';
 
 const user = {
@@ -13,6 +14,12 @@ const user = {
   username: 'ada',
   displayName: 'Ada',
   avatarUrl: null,
+  bio: null,
+  homeCityId: null,
+  homeCityVisible: false,
+  profileVisibility: 'public' as const,
+  visitedVisibility: 'public' as const,
+  plannedVisibility: 'public' as const,
   roles: ['user' as const],
   registeredAt: '2026-03-01T12:00:00.000Z',
 };
@@ -30,6 +37,7 @@ const dependencies: AppDependencies = {
   defaultLists: noDefaultListStore,
   ratings: noRatingStore,
   lists: noListStore,
+  profiles: noProfileStore,
 };
 
 describe('API contract (CON-009, NFR-PORT-001)', () => {
