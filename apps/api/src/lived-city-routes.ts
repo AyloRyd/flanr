@@ -21,6 +21,9 @@ import {
   invalidCursor,
   json,
   problemResponse,
+  ratingDeletionQuery,
+  ratingNeedsConfirmation,
+  ratingNeedsConfirmationResponse,
 } from './route-helpers.ts';
 
 const listLivedCitiesRoute = createRoute({
@@ -53,11 +56,12 @@ const removeLivedCityRoute = createRoute({
   path: '/v1/lived-cities/{cityId}',
   summary: 'Remove the lived-in mark from a city (FR-VIS-010)',
   security: bearerSecurity,
-  request: { params: cityParams },
+  request: { params: cityParams, query: ratingDeletionQuery },
   responses: {
     204: { description: 'Removed' },
     ...commonErrors,
     404: problemResponse('Not a lived-in city of the user'),
+    409: ratingNeedsConfirmationResponse,
   },
 });
 
@@ -102,8 +106,15 @@ export function registerLivedCityRoutes(
   });
 
   app.openapi(removeLivedCityRoute, async (c) => {
-    const removed = await livedCities.remove(c.get('user').id, c.req.valid('param').cityId);
-    if (!removed) return problem(c, 404, 'Not a lived-in city of the user') as never;
+    const result = await livedCities.remove(
+      c.get('user').id,
+      c.req.valid('param').cityId,
+      c.req.valid('query').confirmRatingDeletion === 'true',
+    );
+    if (result === 'not_found') {
+      return problem(c, 404, 'Not a lived-in city of the user') as never;
+    }
+    if (result === 'rating_needs_confirmation') return ratingNeedsConfirmation(c) as never;
     return c.body(null, 204);
   });
 }

@@ -26,6 +26,9 @@ import {
   invalidCursor,
   json,
   problemResponse,
+  ratingDeletionQuery,
+  ratingNeedsConfirmation,
+  ratingNeedsConfirmationResponse,
 } from './route-helpers.ts';
 import type { VisitDates, VisitStore } from './visits.ts';
 
@@ -76,11 +79,12 @@ const deleteVisitRoute = createRoute({
   path: '/v1/visits/{visitId}',
   summary: 'Delete a visit (FR-VIS-006)',
   security,
-  request: { params: visitParams },
+  request: { params: visitParams, query: ratingDeletionQuery },
   responses: {
     204: { description: 'Deleted' },
     ...commonErrors,
     404: problemResponse('Visit not found'),
+    409: ratingNeedsConfirmationResponse,
   },
 });
 
@@ -108,6 +112,8 @@ const setUndatedVisitsRoute = createRoute({
         undatedVisitCountSchema.extend({
           /** Needed to add visits: confirms that they took place before the registration. */
           beforeRegistration: z.boolean().default(false),
+          /** Needed to remove the last visits to a rated city: the rating goes too (BR-005). */
+          confirmRatingDeletion: z.boolean().default(false),
         }),
       ),
       required: true,
@@ -117,6 +123,7 @@ const setUndatedVisitsRoute = createRoute({
     200: { description: 'The new number of undated visits', ...json(undatedVisitCountSchema) },
     ...commonErrors,
     404: problemResponse('City not found'),
+    409: ratingNeedsConfirmationResponse,
   },
 });
 
@@ -194,8 +201,13 @@ export function registerVisitRoutes(
   });
 
   app.openapi(deleteVisitRoute, async (c) => {
-    const removed = await visits.remove(c.get('user').id, c.req.valid('param').visitId);
-    if (!removed) return problem(c, 404, 'Visit not found') as never;
+    const result = await visits.remove(
+      c.get('user').id,
+      c.req.valid('param').visitId,
+      c.req.valid('query').confirmRatingDeletion === 'true',
+    );
+    if (result === 'not_found') return problem(c, 404, 'Visit not found') as never;
+    if (result === 'rating_needs_confirmation') return ratingNeedsConfirmation(c) as never;
     return c.body(null, 204);
   });
 
@@ -207,14 +219,15 @@ export function registerVisitRoutes(
   app.openapi(setUndatedVisitsRoute, async (c) => {
     const userId = c.get('user').id;
     const { cityId } = c.req.valid('param');
-    const { count, beforeRegistration } = c.req.valid('json');
+    const { count, beforeRegistration, confirmRatingDeletion } = c.req.valid('json');
     if (!(await visits.cityExists(cityId))) return problem(c, 404, 'City not found') as never;
     // Adding undated visits needs the same confirmation as a single one (FR-VIS-003).
     if (!beforeRegistration && count > (await visits.countUndated(userId, cityId))) {
       return invalidDate(c, visitDateProblemMessages.date_required) as never;
     }
 
-    await visits.setUndatedCount(userId, cityId, count);
+    const result = await visits.setUndatedCount(userId, cityId, count, confirmRatingDeletion);
+    if (result === 'rating_needs_confirmation') return ratingNeedsConfirmation(c) as never;
     return c.json({ count }, 200);
   });
 }

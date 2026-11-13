@@ -8,6 +8,11 @@ import type { TransactionSql } from 'postgres';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
 import { leavePlannedList, lockDefaultLists } from './default-lists.ts';
+import {
+  dropRatingIfNotVisited,
+  unlessRatingNeedsConfirmation,
+  type RemovalResult,
+} from './ratings.ts';
 
 /** The date of a visit as it is stored. `date` is null for an undated visit. */
 export interface VisitDates {
@@ -33,10 +38,22 @@ export interface VisitStore {
   list(userId: number, options: VisitListOptions): Promise<Visit[]>;
   find(userId: number, visitId: number): Promise<Visit | null>;
   update(userId: number, visitId: number, dates: VisitDates): Promise<Visit | null>;
-  remove(userId: number, visitId: number): Promise<boolean>;
+  /**
+   * Deleting the last visit to a rated city that is not lived-in deletes the rating too, which
+   * the user has to confirm (BR-005).
+   */
+  remove(userId: number, visitId: number, confirmRatingDeletion: boolean): Promise<RemovalResult>;
   countUndated(userId: number, cityId: number): Promise<number>;
-  /** Adds or removes undated visits until the user has `count` of them in the city (FR-VIS-005). */
-  setUndatedCount(userId: number, cityId: number, count: number): Promise<void>;
+  /**
+   * Adds or removes undated visits until the user has `count` of them in the city (FR-VIS-005).
+   * Removing the last visits needs the same confirmation as `remove`.
+   */
+  setUndatedCount(
+    userId: number,
+    cityId: number,
+    count: number,
+    confirmRatingDeletion: boolean,
+  ): Promise<'done' | 'rating_needs_confirmation'>;
 }
 
 interface VisitRow {
@@ -112,36 +129,50 @@ export function createVisitStore(sql: Sql): VisitStore {
       return row ? toVisit(row) : null;
     },
 
-    async remove(userId, visitId) {
-      const rows = await sql`
-        DELETE FROM visits WHERE id = ${visitId} AND user_id = ${userId} RETURNING id`;
-      return rows.length > 0;
+    async remove(userId, visitId, confirmRatingDeletion) {
+      return unlessRatingNeedsConfirmation(() =>
+        sql.begin(async (tx): Promise<RemovalResult> => {
+          const [visit] = await tx<{ city_id: number }[]>`
+            SELECT city_id FROM visits WHERE id = ${visitId} AND user_id = ${userId}`;
+          if (!visit) return 'not_found';
+          await lockDefaultLists(tx, userId, visit.city_id);
+          const deleted = await tx`
+            DELETE FROM visits WHERE id = ${visitId} AND user_id = ${userId} RETURNING id`;
+          if (deleted.length === 0) return 'not_found';
+          await dropRatingIfNotVisited(tx, userId, visit.city_id, confirmRatingDeletion);
+          return 'removed';
+        }),
+      );
     },
 
     async countUndated(userId, cityId) {
       return countUndated(sql, userId, cityId);
     },
 
-    async setUndatedCount(userId, cityId, count) {
-      await sql.begin(async (tx) => {
-        // Two requests for the same user and city must not both add or both remove visits.
-        await lockDefaultLists(tx, userId, cityId);
-        const current = await countUndated(tx, userId, cityId);
-        if (count > current) {
-          await leavePlannedList(tx, userId, cityId);
-          await tx`
-            INSERT INTO visits (user_id, city_id, date_precision, before_registration)
-            SELECT ${userId}, ${cityId}, 'none', true FROM generate_series(1, ${count - current})`;
-        } else if (count < current) {
-          await tx`
-            DELETE FROM visits WHERE id IN (
-              SELECT id FROM visits
-              WHERE user_id = ${userId} AND city_id = ${cityId} AND date_precision = 'none'
-              ORDER BY id DESC
-              LIMIT ${current - count}
-            )`;
-        }
-      });
+    async setUndatedCount(userId, cityId, count, confirmRatingDeletion) {
+      return unlessRatingNeedsConfirmation(() =>
+        sql.begin(async (tx) => {
+          // Two requests for the same user and city must not both add or both remove visits.
+          await lockDefaultLists(tx, userId, cityId);
+          const current = await countUndated(tx, userId, cityId);
+          if (count > current) {
+            await leavePlannedList(tx, userId, cityId);
+            await tx`
+              INSERT INTO visits (user_id, city_id, date_precision, before_registration)
+              SELECT ${userId}, ${cityId}, 'none', true FROM generate_series(1, ${count - current})`;
+          } else if (count < current) {
+            await tx`
+              DELETE FROM visits WHERE id IN (
+                SELECT id FROM visits
+                WHERE user_id = ${userId} AND city_id = ${cityId} AND date_precision = 'none'
+                ORDER BY id DESC
+                LIMIT ${current - count}
+              )`;
+            await dropRatingIfNotVisited(tx, userId, cityId, confirmRatingDeletion);
+          }
+          return 'done' as const;
+        }),
+      );
     },
   };
 }

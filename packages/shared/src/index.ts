@@ -8,3 +8,4 @@ export * from './api/client.ts';
 export * from './visit.ts';
 export * from './lived-city.ts';
 export * from './default-lists.ts';
+export * from './rating.ts';
