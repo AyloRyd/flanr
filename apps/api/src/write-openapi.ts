@@ -20,6 +20,7 @@ const contractFile = resolve(import.meta.dirname, '../../../packages/shared/open
 const app = createApp({
   checkDatabase: async () => false,
   getCityTile: async () => null,
+  searchCities: async () => [],
   corsOrigins: [],
   verifyToken: async () => null,
   resolveUser: async () => {

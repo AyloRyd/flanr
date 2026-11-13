@@ -120,6 +120,20 @@
       "when": 1794562329297,
       "tag": "0016_profile_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794580048720,
+      "tag": "0017_city_search",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794580612381,
+      "tag": "0018_city_search_names",
+      "breakpoints": true
     }
   ]
 }

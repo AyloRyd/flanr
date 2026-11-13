@@ -3167,6 +3167,84 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/cities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find cities by name (FR-SRCH-001, FR-SRCH-002)
+         * @description Searches the local, English, alternative and former names in all languages, without letter case and diacritics, and tolerates small typos. Exact names come first, then names that start with the query, then close spellings; within each group the largest city first. Open to guests.
+         */
+        get: {
+            parameters: {
+                query: {
+                    limit?: number;
+                    cursor?: string;
+                    q: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description One page of cities, best match first */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                nameEn: string;
+                                matchedName: string | null;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                                country: {
+                                    code: string;
+                                    name: string;
+                                };
+                                region: string | null;
+                                municipality: string | null;
+                            }[];
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users/{username}": {
         parameters: {
             query?: never;

@@ -138,12 +138,25 @@ export const cities = pgTable(
     index('cities_municipality_idx').on(t.municipalityId),
     // Low-zoom map tiles select the few cities and towns of a large area by type.
     index('cities_settlement_type_idx').on(t.settlementType),
+    // The search sorts thousands of found cities by size; with this index it reads their
+    // population without reading the cities themselves.
+    index('cities_search_rank_idx')
+      .on(t.id, t.population)
+      .where(sql`in_source`),
     index('cities_centre_gix').using('gist', t.centre),
     index('cities_boundary_gix').using('gist', t.boundary),
   ],
 );
 
 /** Names of a city: local, English, other languages, alternative and historical names. Used by search. */
+/**
+ * The names a city is known by in some language, as opposed to alternative, former, official
+ * and short names and nicknames. Only main names are searched by their beginning and for close
+ * spellings; otherwise "St" would find Berlin through "Stadt Berlin". The search query has to
+ * repeat this condition word for word to use the partial indexes below.
+ */
+const isMainCityName = sql`kind in ('name', 'int_name', 'wikidata_label')`;
+
 export const cityNames = pgTable(
   'city_names',
   {
@@ -156,9 +169,26 @@ export const cityNames = pgTable(
     lang: text('lang'),
     /** OSM key family the name comes from: name, alt_name, old_name, official_name, short_name, loc_name, int_name. */
     kind: text('kind').notNull(),
+    /**
+     * The name as the search compares it: lower case, without diacritics (FR-SRCH-001).
+     * search_text() comes from migration 0017.
+     */
+    searchName: text('search_name')
+      .notNull()
+      .generatedAlwaysAs(sql`search_text(name)`),
   },
   (t) => [
     index('city_names_city_idx').on(t.cityId),
+    // Names that are exactly the query; has the city, so the table is not read.
+    index('city_names_search_exact_idx').on(t.searchName.op('text_pattern_ops'), t.cityId),
+    // Main names that start with the query.
+    index('city_names_search_prefix_idx')
+      .on(t.searchName.op('text_pattern_ops'), t.cityId)
+      .where(isMainCityName),
+    // Main names that are spelled almost like the query.
+    index('city_names_search_trgm_idx')
+      .using('gin', t.searchName.op('gin_trgm_ops'))
+      .where(isMainCityName),
     unique('city_names_uq').on(t.cityId, t.name, t.kind, t.lang).nullsNotDistinct(),
   ],
 );

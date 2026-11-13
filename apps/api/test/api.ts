@@ -1,6 +1,7 @@
 import { createApiClient, type ApiClient } from '@flanr/shared';
 import { createAccountStore } from '../src/accounts.ts';
 import { createApp } from '../src/app.ts';
+import { createCitySearch } from '../src/city-search.ts';
 import type { Sql } from '../src/db.ts';
 import { createDefaultListStore } from '../src/default-lists.ts';
 import { createListStore } from '../src/lists.ts';
@@ -30,6 +31,7 @@ export function createTestApi(sql: Sql): TestApi {
   const app = createApp({
     checkDatabase: async () => true,
     getCityTile: async () => null,
+    searchCities: createCitySearch(sql),
     corsOrigins: [],
     verifyToken: async (token) => {
       const name = /^(\w+)-token$/.exec(token)?.[1];
