@@ -61,3 +61,23 @@ export async function registerUser(sql: Sql, name: string, registeredAt: string)
   const user = await ensureUser(sql, `clerk_${name}`);
   await sql`UPDATE users SET registered_at = ${registeredAt} WHERE id = ${user.id}`;
 }
+
+/** The criteria of migration 0013. They are not user data, so resetData keeps them. */
+export const initialCriteria = [
+  { key: 'architecture', name: 'Architecture' },
+  { key: 'urbanism', name: 'Urbanism' },
+  { key: 'greenery', name: 'Greenery' },
+  { key: 'public_transport', name: 'Public transport' },
+  { key: 'safety', name: 'Safety' },
+  { key: 'cleanliness', name: 'Cleanliness' },
+];
+
+/** Undoes what a test did to the criteria. Call it after resetData, which removes the ratings. */
+export async function resetCriteria(sql: Sql): Promise<void> {
+  await sql`DELETE FROM criteria WHERE key <> ALL(${initialCriteria.map(({ key }) => key)})`;
+  for (const [index, { key, name }] of initialCriteria.entries()) {
+    await sql`
+      UPDATE criteria SET name = ${name}, active = true, sort_order = ${(index + 1) * 10}
+      WHERE key = ${key}`;
+  }
+}

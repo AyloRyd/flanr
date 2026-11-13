@@ -1738,6 +1738,334 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/criteria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All rating criteria, also those that are switched off (FR-RATE-006) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The criteria in display order */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                key: string;
+                                name: string;
+                                active: boolean;
+                                sortOrder: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user is not an administrator */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Add a rating criterion (FR-RATE-006) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        key: string;
+                        name: string;
+                        sortOrder?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description The new criterion */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            key: string;
+                            name: string;
+                            active: boolean;
+                            sortOrder: number;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user is not an administrator */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description A criterion with this key exists */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/criteria/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Rename, reorder, switch off or switch on a criterion (FR-RATE-006)
+         * @description A criterion is removed by switching it off. Its ratings stay stored and count again when it is switched on.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        active?: boolean;
+                        sortOrder?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description The changed criterion */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            key: string;
+                            name: string;
+                            active: boolean;
+                            sortOrder: number;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The user is not an administrator */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Criterion not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {

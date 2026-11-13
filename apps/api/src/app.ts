@@ -9,7 +9,13 @@ import {
 } from '@flanr/shared';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-import { requireAuth, type AuthEnv, type TokenVerifier, type UserResolver } from './auth.ts';
+import {
+  requireAuth,
+  requireRole,
+  type AuthEnv,
+  type TokenVerifier,
+  type UserResolver,
+} from './auth.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
 import { defaultListPaths, registerDefaultListRoutes } from './default-list-routes.ts';
@@ -17,6 +23,7 @@ import type { DefaultListStore } from './default-lists.ts';
 import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
 import type { LivedCityStore } from './lived-cities.ts';
 import { problem } from './problem.ts';
+import { criteriaAdminPaths, registerCriteriaAdminRoutes } from './criteria-admin-routes.ts';
 import { ratingPaths, registerRatingRoutes } from './rating-routes.ts';
 import type { RatingStore } from './ratings.ts';
 import { rateLimitWrites, type RateLimitOptions } from './rate-limit.ts';
@@ -123,9 +130,11 @@ export function createApp({
     ...livedCityPaths,
     ...defaultListPaths,
     ...ratingPaths,
+    ...criteriaAdminPaths,
   ]) {
     app.use(path, requireAuth(verifyToken, resolveUser));
   }
+  for (const path of criteriaAdminPaths) app.use(path, requireRole('administrator'));
   app.use('/v1/*', rateLimitWrites(writeRateLimit));
 
   app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
@@ -153,6 +162,7 @@ export function createApp({
   registerLivedCityRoutes(app, livedCities, now);
   registerDefaultListRoutes(app, defaultLists);
   registerRatingRoutes(app, ratings);
+  registerCriteriaAdminRoutes(app, ratings);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {
