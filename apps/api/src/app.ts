@@ -22,6 +22,8 @@ import { defaultListPaths, registerDefaultListRoutes } from './default-list-rout
 import type { DefaultListStore } from './default-lists.ts';
 import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
 import type { LivedCityStore } from './lived-cities.ts';
+import { listPaths, registerListRoutes } from './list-routes.ts';
+import type { ListStore } from './lists.ts';
 import { problem } from './problem.ts';
 import { criteriaAdminPaths, registerCriteriaAdminRoutes } from './criteria-admin-routes.ts';
 import { ratingPaths, registerRatingRoutes } from './rating-routes.ts';
@@ -43,6 +45,7 @@ export interface AppDependencies {
   livedCities: LivedCityStore;
   defaultLists: DefaultListStore;
   ratings: RatingStore;
+  lists: ListStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -100,6 +103,7 @@ export function createApp({
   livedCities,
   defaultLists,
   ratings,
+  lists,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -130,6 +134,7 @@ export function createApp({
     ...livedCityPaths,
     ...defaultListPaths,
     ...ratingPaths,
+    ...listPaths,
     ...criteriaAdminPaths,
   ]) {
     app.use(path, requireAuth(verifyToken, resolveUser));
@@ -163,6 +168,7 @@ export function createApp({
   registerDefaultListRoutes(app, defaultLists);
   registerRatingRoutes(app, ratings);
   registerCriteriaAdminRoutes(app, ratings);
+  registerListRoutes(app, lists);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {

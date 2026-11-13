@@ -82,7 +82,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [x] Ratings: subjective rating, criteria, suggested value, change and delete, one per user and city, rating requires a visit (FR-RATE-001…004, BR-005…BR-008). API only. Removing the last visit or the lived-in mark of a rated city is answered with 409 until the request carries the confirmation, then the rating is deleted with it. The suggested value is a function in `packages/shared` for the rating form.
 - [x] Criteria management for administrators (FR-RATE-006). API only: add, rename, reorder, switch off and on. A criterion is never deleted; switching it off keeps its ratings.
 - [x] Community rating and per-criterion averages, including private profiles (FR-CITY-003, FR-RATE-005, BR-009, FR-PRIV-002). API only. The averages are computed on request from all ratings; private profiles do not exist yet, so the test for them comes with profile visibility.
-- [ ] Custom lists: create, rename, delete, entries, order, notes, visibility (FR-LIST-003…005).
+- [x] Custom lists: create, rename, delete, entries, order, notes, visibility (FR-LIST-003…005). API only, for the owner: the visibility is stored and can be changed, but nobody else can read a list yet. Showing public lists to others, and the visibility of the two default lists, come with the profile and profile visibility items below.
 - [ ] Profile: username, display name, avatar, bio, home location with visibility (FR-PROF-001…003).
 - [ ] Profile visibility and filtering of private content everywhere (FR-PRIV-001…003).
 - [ ] Account deletion with removal of personal data (FR-AUTH-009, section 5.4).

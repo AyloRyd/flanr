@@ -106,6 +106,13 @@
       "when": 1794561461638,
       "tag": "0014_rating_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794561674746,
+      "tag": "0015_lists",
+      "breakpoints": true
     }
   ]
 }

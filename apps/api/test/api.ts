@@ -2,6 +2,7 @@ import { createApiClient, type ApiClient } from '@flanr/shared';
 import { createApp } from '../src/app.ts';
 import type { Sql } from '../src/db.ts';
 import { createDefaultListStore } from '../src/default-lists.ts';
+import { createListStore } from '../src/lists.ts';
 import { createLivedCityStore } from '../src/lived-cities.ts';
 import { createRatingStore } from '../src/ratings.ts';
 import { ensureUser } from '../src/users.ts';
@@ -30,6 +31,7 @@ export function createTestApi(sql: Sql): { clientFor: (token: string | null) => 
     livedCities: createLivedCityStore(sql),
     defaultLists: createDefaultListStore(sql),
     ratings: createRatingStore(sql),
+    lists: createListStore(sql),
     now: testNow,
     writeRateLimit: { limit: 10_000, windowMs: 60_000 },
   });

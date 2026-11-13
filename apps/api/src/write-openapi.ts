@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createApp } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
+import { noListStore } from './lists.ts';
 import { noLivedCityStore } from './lived-cities.ts';
 import { noRatingStore } from './ratings.ts';
 import { noVisitStore } from './visits.ts';
@@ -28,6 +29,7 @@ const app = createApp({
   livedCities: noLivedCityStore,
   defaultLists: noDefaultListStore,
   ratings: noRatingStore,
+  lists: noListStore,
 });
 
 const response = await app.request('/openapi.json');
