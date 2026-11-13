@@ -6,6 +6,7 @@ import {
 } from '@flanr/shared';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
+import { leavePlannedList } from './default-lists.ts';
 
 export interface LivedCityInput {
   isCurrent: boolean;
@@ -77,6 +78,8 @@ export function createLivedCityStore(sql: Sql): LivedCityStore {
             UPDATE lived_cities SET is_current = false
             WHERE user_id = ${userId} AND is_current AND city_id <> ${cityId}`;
         }
+        // A lived-in city counts as visited, so it cannot stay planned (BR-004).
+        await leavePlannedList(tx, userId, cityId);
         const [row] = await tx<LivedCityRow[]>`
           INSERT INTO lived_cities
             (user_id, city_id, is_current, from_date, from_precision, to_date, to_precision)

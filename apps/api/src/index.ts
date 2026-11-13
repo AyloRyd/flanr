@@ -3,6 +3,7 @@ import { createApp } from './app.ts';
 import { getCityTile } from './city-tiles.ts';
 import { createClerkTokenVerifier, createClerkWebhookReader } from './clerk.ts';
 import { createSql, isDatabaseReachable } from './db.ts';
+import { createDefaultListStore } from './default-lists.ts';
 import { loadEnv } from './env.ts';
 import { createLivedCityStore } from './lived-cities.ts';
 import { createVisitStore } from './visits.ts';
@@ -23,6 +24,7 @@ const app = createApp({
       : deleteUserByAuthProviderId(sql, event.authProviderId),
   visits: createVisitStore(sql),
   livedCities: createLivedCityStore(sql),
+  defaultLists: createDefaultListStore(sql),
 });
 
 if (!env.CLERK_SECRET_KEY) {

@@ -12,6 +12,8 @@ import { HTTPException } from 'hono/http-exception';
 import { requireAuth, type AuthEnv, type TokenVerifier, type UserResolver } from './auth.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
+import { defaultListPaths, registerDefaultListRoutes } from './default-list-routes.ts';
+import type { DefaultListStore } from './default-lists.ts';
 import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
 import type { LivedCityStore } from './lived-cities.ts';
 import { problem } from './problem.ts';
@@ -30,6 +32,7 @@ export interface AppDependencies {
   applyUserEvent: (event: UserEvent) => Promise<void>;
   visits: VisitStore;
   livedCities: LivedCityStore;
+  defaultLists: DefaultListStore;
   /** The current time; replaced in tests. */
   now?: () => Date;
   writeRateLimit?: RateLimitOptions;
@@ -85,6 +88,7 @@ export function createApp({
   applyUserEvent,
   visits,
   livedCities,
+  defaultLists,
   now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
@@ -109,7 +113,7 @@ export function createApp({
 
   app.use(cors({ origin: corsOrigins }));
   // Everything under /v1 that reads or changes user data needs a signed-in user (NFR-SEC-003).
-  for (const path of ['/v1/me', ...visitPaths, ...livedCityPaths]) {
+  for (const path of ['/v1/me', ...visitPaths, ...livedCityPaths, ...defaultListPaths]) {
     app.use(path, requireAuth(verifyToken, resolveUser));
   }
   app.use('/v1/*', rateLimitWrites(writeRateLimit));
@@ -137,6 +141,7 @@ export function createApp({
 
   registerVisitRoutes(app, visits, now);
   registerLivedCityRoutes(app, livedCities, now);
+  registerDefaultListRoutes(app, defaultLists);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {

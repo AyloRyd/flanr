@@ -1,6 +1,7 @@
 import { createApiClient, type ApiClient } from '@flanr/shared';
 import { createApp } from '../src/app.ts';
 import type { Sql } from '../src/db.ts';
+import { createDefaultListStore } from '../src/default-lists.ts';
 import { createLivedCityStore } from '../src/lived-cities.ts';
 import { ensureUser } from '../src/users.ts';
 import { createVisitStore } from '../src/visits.ts';
@@ -26,6 +27,7 @@ export function createTestApi(sql: Sql): { clientFor: (token: string | null) => 
     applyUserEvent: async () => {},
     visits: createVisitStore(sql),
     livedCities: createLivedCityStore(sql),
+    defaultLists: createDefaultListStore(sql),
     now: testNow,
     writeRateLimit: { limit: 10_000, windowMs: 60_000 },
   });

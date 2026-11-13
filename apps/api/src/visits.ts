@@ -7,6 +7,7 @@ import {
 import type { TransactionSql } from 'postgres';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
+import { leavePlannedList, lockDefaultLists } from './default-lists.ts';
 
 /** The date of a visit as it is stored. `date` is null for an undated visit. */
 export interface VisitDates {
@@ -71,12 +72,16 @@ export function createVisitStore(sql: Sql): VisitStore {
 
     async create(userId, cityId, dates) {
       const { date, precision } = stored(dates);
-      const [row] = await sql<VisitRow[]>`
-        INSERT INTO visits (user_id, city_id, date, date_precision, before_registration)
-        VALUES (${userId}, ${cityId}, ${date}, ${precision}::visit_date_precision, ${dates.beforeRegistration})
-        RETURNING ${columns}`;
-      if (!row) throw new Error('Visit could not be created');
-      return toVisit(row);
+      return sql.begin(async (tx) => {
+        // The first visit moves a planned city to the Visited list (FR-LIST-002).
+        await leavePlannedList(tx, userId, cityId);
+        const [row] = await tx<VisitRow[]>`
+          INSERT INTO visits (user_id, city_id, date, date_precision, before_registration)
+          VALUES (${userId}, ${cityId}, ${date}, ${precision}::visit_date_precision, ${dates.beforeRegistration})
+          RETURNING ${columns}`;
+        if (!row) throw new Error('Visit could not be created');
+        return toVisit(row);
+      });
     },
 
     async list(userId, { cityId, beforeId, limit }) {
@@ -120,9 +125,10 @@ export function createVisitStore(sql: Sql): VisitStore {
     async setUndatedCount(userId, cityId, count) {
       await sql.begin(async (tx) => {
         // Two requests for the same user and city must not both add or both remove visits.
-        await tx`SELECT pg_advisory_xact_lock(${userId}, ${cityId})`;
+        await lockDefaultLists(tx, userId, cityId);
         const current = await countUndated(tx, userId, cityId);
         if (count > current) {
+          await leavePlannedList(tx, userId, cityId);
           await tx`
             INSERT INTO visits (user_id, city_id, date_precision, before_registration)
             SELECT ${userId}, ${cityId}, 'none', true FROM generate_series(1, ${count - current})`;
