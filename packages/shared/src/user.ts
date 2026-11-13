@@ -13,6 +13,8 @@ export const currentUserSchema = z.object({
   displayName: z.string(),
   avatarUrl: z.string().nullable(),
   roles: z.array(userRoleSchema),
+  /** When the account was created, as an ISO 8601 timestamp. Visits after it need a date (BR-002). */
+  registeredAt: z.string(),
 });
 
 export type CurrentUser = z.infer<typeof currentUserSchema>;

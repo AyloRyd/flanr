@@ -6,6 +6,11 @@ Decisions made while preparing the project, with the reasons behind them. The co
 
 - **The API client is generated from the OpenAPI document, not from the Hono app (CON-009, NFR-PORT-001).** Hono's own typed client (`hc`) reads the types of the server code, which would tie the web client to this backend. Instead the document is written to `packages/shared/openapi.json`, `openapi-typescript` turns it into types, and `openapi-fetch` (a thin wrapper around `fetch`) uses them. A backend in another language only has to serve the same document. Both generated files are committed, so the web app builds without a generation step, and tests fail when they are out of date.
 
+- **A rating is deleted with the last visit (OI-005, BR-005).** Hiding it until the next visit was considered and rejected: it needs an inactive state and a retention rule for little gain. The user is warned and confirms.
+- **The suggested rating rounds halves up (OI-007, BR-007).** 7.25 becomes 7.5.
+- **Usernames (OI-010, FR-PROF-001):** 3–30 Latin letters, digits and underscores, unique regardless of case, with a reserved list. They can be changed at any time; old profile URLs do not redirect and the old name is free at once.
+- **Lived-in cities can have a period (OI-019, BR-016),** optional and with the precision rules of visit dates. It is shown with the city and stays out of time-based statistics, which count dated visits only.
+
 ## 2026-11-11
 
 - **Countries without regions are allowed.** Monaco, Vatican City, Malta, Liechtenstein and San Marino have no first-level regions, so a city's region became optional (SRS 0.7).

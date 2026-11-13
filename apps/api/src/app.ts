@@ -14,6 +14,8 @@ import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
 import { problem } from './problem.ts';
 import { rateLimitWrites, type RateLimitOptions } from './rate-limit.ts';
+import { registerVisitRoutes, visitPaths } from './visit-routes.ts';
+import type { VisitStore } from './visits.ts';
 
 export interface AppDependencies {
   checkDatabase: () => Promise<boolean>;
@@ -24,6 +26,9 @@ export interface AppDependencies {
   resolveUser: UserResolver;
   readWebhook: WebhookReader;
   applyUserEvent: (event: UserEvent) => Promise<void>;
+  visits: VisitStore;
+  /** The current time; replaced in tests. */
+  now?: () => Date;
   writeRateLimit?: RateLimitOptions;
 }
 
@@ -75,6 +80,8 @@ export function createApp({
   resolveUser,
   readWebhook,
   applyUserEvent,
+  visits,
+  now = () => new Date(),
   writeRateLimit = defaultWriteRateLimit,
 }: AppDependencies) {
   const app = new OpenAPIHono<AuthEnv>({
@@ -98,7 +105,9 @@ export function createApp({
 
   app.use(cors({ origin: corsOrigins }));
   // Everything under /v1 that reads or changes user data needs a signed-in user (NFR-SEC-003).
-  app.use('/v1/me', requireAuth(verifyToken, resolveUser));
+  for (const path of ['/v1/me', ...visitPaths]) {
+    app.use(path, requireAuth(verifyToken, resolveUser));
+  }
   app.use('/v1/*', rateLimitWrites(writeRateLimit));
 
   app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
@@ -121,6 +130,8 @@ export function createApp({
   });
 
   app.openapi(meRoute, (c) => c.json(c.get('user'), 200));
+
+  registerVisitRoutes(app, visits, now);
 
   // Clerk reports created, changed and deleted accounts here (FR-AUTH-003…005, FR-AUTH-009).
   app.post('/webhooks/clerk', async (c) => {

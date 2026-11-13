@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.7 |
+| Version | 0.8 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
@@ -21,6 +21,7 @@
 | 0.5 | 2026-11-10 | A. Malyshkin | OI-002 revised: Geofabrik OSM extracts instead of Geoapify localities |
 | 0.6 | 2026-11-11 | A. Malyshkin | Cities that are part of a municipality (BR-001, BR-017, Municipality entity), population made optional, external map links (FR-CITY-009), city districts for later (FR-CITY-010), OI-020 and OI-021 |
 | 0.7 | 2026-11-11 | A. Malyshkin | First-level region made optional for countries without regions (Monaco, Vatican City); the capital of a country is always a city (BR-001) |
+| 0.8 | 2026-11-12 | A. Malyshkin | Resolved OI-005 (a rating is deleted with the last visit, BR-005), OI-007 (suggested rating rounds halves up, BR-007), OI-010 (username rules, FR-PROF-001) and OI-019 (lived-in periods, BR-016) |
 
 ---
 
@@ -241,13 +242,13 @@ A visit date has one of three precisions: day, month or year. A visit date MUST 
 A city can be in at most one of the two default lists, Visited and Planned. A city is in the Visited list if and only if the user has at least one visit to it or has marked it as a lived-in city. Logging a visit to a city in the Planned list removes it from the Planned list. A city that is already visited cannot be added to the Planned list. To plan a repeat visit, the user can use a custom list.
 
 #### BR-005 — Rating requires a visit
-A user can rate a city only if they have at least one visit to it or have marked it as a lived-in city.
+A user can rate a city only if they have at least one visit to it or have marked it as a lived-in city. When this stops being true, because the user deletes their last visit to a city that is not a lived-in city or removes the lived-in mark from a city without visits, the user's rating of the city is deleted together with its criteria ratings. The user is warned and has to confirm.
 
 #### BR-006 — Rating scale
 City ratings use a scale from 1 to 10 in steps of 0.5. The subjective rating is required for a rating to exist. Criteria ratings are optional.
 
 #### BR-007 — Criteria average
-The criteria average is the arithmetic mean of the criteria the user has rated for a city. Criteria that are not rated are not counted. When the user sets the subjective rating, the criteria average, if it exists, is suggested as its initial value.
+The criteria average is the arithmetic mean of the criteria the user has rated for a city. Criteria that are not rated are not counted. When the user sets the subjective rating, the criteria average, if it exists, is suggested as its initial value, rounded to the nearest 0.5. An average exactly between two steps is rounded up: 7.25 becomes 7.5.
 
 #### BR-008 — One rating per user and city
 Each user has at most one rating per city. Changing it replaces the previous value.
@@ -274,7 +275,7 @@ Importing external location history MUST NOT create, change or delete visits.
 Core functionality, including logging visits, rating cities, lists, the map and basic statistics, MUST always be free and MUST NOT be limited, for example by the number of visited cities.
 
 #### BR-016 — Lived-in cities
-A user can mark any number of cities as lived-in cities: at most one as the current city and any number as past cities. The user decides what counts as having lived somewhere. A lived-in city counts as a visited city but does not require visits. The user can still log visits to it. The current lived-in city is the user's home location (FR-PROF-003).
+A user can mark any number of cities as lived-in cities: at most one as the current city and any number as past cities. The user decides what counts as having lived somewhere. A lived-in city counts as a visited city but does not require visits. The user can still log visits to it. The current lived-in city is the user's home location (FR-PROF-003). A lived-in city can have an optional period (from, to) with the same precision rules as visit dates (BR-003). The period is shown with the city but is not part of time-based statistics, which count dated visits only.
 
 #### BR-017 — Cities and municipalities
 A city MAY belong to one municipality. The municipality is reference data, like a region: it cannot be visited or rated.
@@ -377,13 +378,13 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-001 — Username
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Accounts and guests
 
-**Description.** Every user MUST have a unique username, which is part of their profile URL. Users MUST be able to change their username if the new one is not taken.
+**Description.** Every user MUST have a unique username, which is part of their profile URL. A username has 3 to 30 characters: Latin letters, digits and underscores. Uniqueness does not depend on letter case, and names on the reserved list (such as `admin` or `settings`) cannot be chosen. Users MUST be able to change their username at any time if the new one is not taken. The old profile URL does not redirect, and the old username is free for others at once.
 
 **Acceptance criteria.**
 1. Given a username that is already taken, when a user tries to choose it, then the system rejects it.
-2. Given a user who changes their username, then their profile is available under the new username.
-
-**Related.** OI-010.
+2. Given a user who changes their username, then their profile is available under the new username and the old URL returns Not Found.
+3. Given the username `Ada_1`, when another user tries to choose `ada_1`, then the system rejects it.
+4. Given the names `ab`, `ada lovelace` and `admin`, when a user tries to choose one of them, then the system rejects it.
 
 #### FR-PROF-002 — Profile information
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Accounts and guests
@@ -557,8 +558,9 @@ Whether a city and its municipality are the same thing is taken from the source 
 **Acceptance criteria.**
 1. Given a user's visit, when they change its date, then the new date is saved.
 2. Given a user's only visit to a city, when they delete it, then the city is removed from their Visited list.
+3. Given a user's only visit to a rated city that is not a lived-in city, when they confirm deleting it, then the rating is deleted too (BR-005).
 
-**Related.** OI-005.
+**Related.** BR-005.
 
 #### FR-VIS-007 — Onboarding of past visits
 **Priority:** Should · **Release:** MVP · **Status:** Draft · **Source:** Concept §Visits and dates
@@ -593,7 +595,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 2. Given Wuppertal as the current city, when the user marks Aachen as current, then Wuppertal becomes a past lived-in city.
 3. Given a lived-in city, when the user logs a dated visit to it, then the visit is saved and counted in the statistics.
 
-**Related.** BR-004, BR-005, BR-016, OI-019.
+**Related.** BR-004, BR-005, BR-016.
 
 ### 4.5 City ratings (`FR-RATE`)
 
@@ -623,8 +625,9 @@ Whether a city and its municipality are the same thing is taken from the source 
 **Acceptance criteria.**
 1. Given criteria ratings of 7, 8 and 9, when the user opens the subjective rating, then 8 is suggested.
 2. Given the suggested value, when the user changes it to 9.5, then 9.5 is saved as the subjective rating.
+3. Given criteria ratings of 7 and 7.5, when the user opens the subjective rating, then 7.5 is suggested.
 
-**Related.** OI-007.
+**Related.** BR-007.
 
 #### FR-RATE-004 — Change and delete a rating
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Rating cities
@@ -1136,7 +1139,7 @@ Alternative names, transliterations and names in other languages, each with a la
 |---|---|---|
 | user_id, city_id | yes | Unique pair |
 | is_current | yes | At most one current city per user |
-| from, to | no | Optional period, same precision rules as visit dates, see OI-019 |
+| from, to | no | Optional period, same precision rules as visit dates, see BR-016 |
 
 #### CityRating
 | Attribute | Required | Notes |
@@ -1321,12 +1324,12 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Resolved 2026-11-10: Geofabrik regional extracts, see §5.3 |
 | OI-003 | How to treat settlements without a mapped boundary: import them as points only, or skip them. | Data | Resolved 2026-11-10: import as points only, see §5.3 |
 | OI-004 | How the community rating should take into account that cities change over time. | Ratings | Open |
-| OI-005 | What happens to a rating when the user deletes all their visits to the city. | Ratings | Open |
+| OI-005 | What happens to a rating when the user deletes all their visits to the city. | Ratings | Resolved 2026-11-12: the rating is deleted after a confirmation, see BR-005 |
 | OI-006 | How text reviews relate to visit posts in the social part. | Ratings, Social | Open, before R2 |
-| OI-007 | Confirm that the suggested subjective rating is the criteria average rounded to the nearest 0.5. | Ratings | Open |
+| OI-007 | Confirm that the suggested subjective rating is the criteria average rounded to the nearest 0.5. | Ratings | Resolved 2026-11-12: confirmed, halves round up, see BR-007 |
 | OI-008 | Whether and how visits with month or year precision appear in the trip calendar or in a separate monthly view. | Statistics | Open |
 | OI-009 | Detailed role model and moderation process. | Moderation | Open, before R2 |
-| OI-010 | Username rules: allowed characters, how often it can be changed, whether old profile URLs redirect. | Profile | Open |
+| OI-010 | Username rules: allowed characters, how often it can be changed, whether old profile URLs redirect. | Profile | Resolved 2026-11-12: see FR-PROF-001 |
 | OI-011 | Whether sorting by community rating requires a minimum number of ratings. | Search | Open |
 | OI-012 | Whether friends can see a private profile. | Privacy | Open, before R2 |
 | OI-013 | Limits for photos: formats, size, number per user and city. | Photos | Open, before R2 |
@@ -1334,7 +1337,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-015 | Whether a Timeline.json file is processed on the client or on the server, and whether it is stored. | Import | Open |
 | OI-016 | What happens to comments and approved photos when a user deletes their account. | Data | Open, before R2 |
 | OI-017 | Hosting provider for the web client, API and database. | Operations | Open |
-| OI-019 | Whether a lived-in city can have a period (from, to), and how lived-in periods appear in time-based statistics. | Visits | Open |
+| OI-019 | Whether a lived-in city can have a period (from, to), and how lived-in periods appear in time-based statistics. | Visits | Resolved 2026-11-12: optional period, not part of time-based statistics, see BR-016 |
 | OI-018 | Whether planned trips can have dates, or the Planned list stays a simple set of cities. | Lists | Open |
 | OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
 | OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Open |

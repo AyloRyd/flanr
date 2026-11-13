@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createApp } from './app.ts';
+import { noVisitStore } from './visits.ts';
 
 /**
  * Writes the OpenAPI document to packages/shared/openapi.json. That file is the API contract
@@ -20,6 +21,7 @@ const app = createApp({
   },
   readWebhook: async () => null,
   applyUserEvent: async () => {},
+  visits: noVisitStore,
 });
 
 const response = await app.request('/openapi.json');

@@ -8,6 +8,7 @@ interface UserRow {
   display_name: string;
   avatar_url: string | null;
   roles: UserRole[];
+  registered_at: Date;
 }
 
 const toCurrentUser = (row: UserRow): CurrentUser => ({
@@ -16,6 +17,7 @@ const toCurrentUser = (row: UserRow): CurrentUser => ({
   displayName: row.display_name,
   avatarUrl: row.avatar_url,
   roles: row.roles,
+  registeredAt: row.registered_at.toISOString(),
 });
 
 /** A username for an account that has not chosen one yet. The user can change it later. */
@@ -32,7 +34,7 @@ export async function ensureUser(sql: Sql, authProviderId: string): Promise<Curr
     INSERT INTO users (auth_provider_id, username, display_name)
     VALUES (${authProviderId}, ${username}, ${username})
     ON CONFLICT (auth_provider_id) DO UPDATE SET auth_provider_id = EXCLUDED.auth_provider_id
-    RETURNING id, username, display_name, avatar_url, roles::text[] AS roles`;
+    RETURNING id, username, display_name, avatar_url, roles::text[] AS roles, registered_at`;
   if (!row) throw new Error('User could not be created');
   return toCurrentUser(row);
 }
