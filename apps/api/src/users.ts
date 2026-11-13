@@ -112,12 +112,22 @@ export async function deleteUserByAuthProviderId(sql: Sql, authProviderId: strin
   await sql`DELETE FROM users WHERE auth_provider_id = ${authProviderId}`;
 }
 
+/** Whose content a request for another user's lists or ratings is about. */
+export interface ContentOwner {
+  id: number;
+  profileVisibility: Visibility;
+  visitedVisibility: Visibility;
+  plannedVisibility: Visibility;
+}
+
 /** Profiles: the user's own settings and what everyone sees of a user. */
 export interface ProfileStore {
   /** Changes the given fields. Another user having the username, in any letter case, is reported. */
   update(userId: number, changes: UpdateProfile): Promise<CurrentUser | 'username_taken'>;
   /** The profile under this username, in any letter case, as others see it. */
   findPublic(username: string): Promise<PublicProfile | null>;
+  /** The user under this username, in any letter case, with what decides who sees their content. */
+  findContentOwner(username: string): Promise<ContentOwner | null>;
 }
 
 export function createProfileStore(sql: Sql): ProfileStore {
@@ -154,6 +164,14 @@ export function createProfileStore(sql: Sql): ProfileStore {
         if (isUniqueViolation(error)) return 'username_taken';
         throw error;
       }
+    },
+
+    async findContentOwner(username) {
+      const [owner] = await sql<ContentOwner[]>`
+        SELECT id, profile_visibility AS "profileVisibility",
+          visited_visibility AS "visitedVisibility", planned_visibility AS "plannedVisibility"
+        FROM users WHERE lower(username) = lower(${username})`;
+      return owner ?? null;
     },
 
     async findPublic(username) {

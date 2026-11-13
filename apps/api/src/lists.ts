@@ -17,6 +17,18 @@ export type UpdateEntryResult =
   { entry: ListEntry } | { problem: 'not_found' | 'position_out_of_range' };
 
 /**
+ * Who a read is for. The owner sees all their lists; everyone else only the public ones, and
+ * a private list looks to them as if it did not exist (FR-LIST-005).
+ */
+export type Audience = 'owner' | 'others';
+
+interface ListOptions {
+  limit: number;
+  /** The owner unless said otherwise. */
+  audience?: Audience | undefined;
+}
+
+/**
  * Reads and changes custom lists (FR-LIST-003, FR-LIST-004). Every method takes the user and
  * only ever touches that user's lists, so a handler cannot reach someone else's by ID
  * (NFR-SEC-003).
@@ -24,8 +36,8 @@ export type UpdateEntryResult =
 export interface ListStore {
   create(userId: number, input: CreateList): Promise<List>;
   /** Newest first. `beforeId` starts the next page. */
-  list(userId: number, options: { beforeId?: number | undefined; limit: number }): Promise<List[]>;
-  find(userId: number, listId: number): Promise<List | null>;
+  list(userId: number, options: ListOptions & { beforeId?: number | undefined }): Promise<List[]>;
+  find(userId: number, listId: number, audience?: Audience): Promise<List | null>;
   update(userId: number, listId: number, changes: UpdateList): Promise<List | null>;
   remove(userId: number, listId: number): Promise<boolean>;
 
@@ -33,7 +45,7 @@ export interface ListStore {
   listEntries(
     userId: number,
     listId: number,
-    options: { afterPosition?: number | undefined; limit: number },
+    options: ListOptions & { afterPosition?: number | undefined },
   ): Promise<ListEntry[] | null>;
   /** Adds the city at the end of the list. */
   addEntry(userId: number, listId: number, input: AddListEntry): Promise<AddEntryResult>;
@@ -82,9 +94,18 @@ export function createListStore(sql: Sql): ListStore {
     (SELECT count(*)::int FROM list_entries WHERE list_entries.list_id = lists.id) AS entry_count`;
   const entryColumns = sql`city_id, position, note`;
 
-  async function find(db: Sql | TransactionSql, userId: number, listId: number) {
+  const visibleTo = (audience: Audience) =>
+    audience === 'owner' ? sql`` : sql`AND visibility = 'public'`;
+
+  async function find(
+    db: Sql | TransactionSql,
+    userId: number,
+    listId: number,
+    audience: Audience = 'owner',
+  ) {
     const [row] = await db<ListRow[]>`
-      SELECT ${listColumns} FROM lists WHERE id = ${listId} AND user_id = ${userId}`;
+      SELECT ${listColumns} FROM lists
+      WHERE id = ${listId} AND user_id = ${userId} ${visibleTo(audience)}`;
     return row ? toList(row) : null;
   }
 
@@ -136,17 +157,17 @@ export function createListStore(sql: Sql): ListStore {
       return toList(row);
     },
 
-    async list(userId, { beforeId, limit }) {
+    async list(userId, { beforeId, limit, audience = 'owner' }) {
       const rows = await sql<ListRow[]>`
         SELECT ${listColumns} FROM lists
-        WHERE user_id = ${userId}
+        WHERE user_id = ${userId} ${visibleTo(audience)}
           ${beforeId === undefined ? sql`` : sql`AND id < ${beforeId}`}
         ORDER BY id DESC
         LIMIT ${limit}`;
       return rows.map(toList);
     },
 
-    find: (userId, listId) => find(sql, userId, listId),
+    find: (userId, listId, audience) => find(sql, userId, listId, audience),
 
     async update(userId, listId, { title, description, visibility }) {
       const [row] = await sql<ListRow[]>`
@@ -165,8 +186,8 @@ export function createListStore(sql: Sql): ListStore {
       return rows.length > 0;
     },
 
-    async listEntries(userId, listId, { afterPosition, limit }) {
-      if (!(await find(sql, userId, listId))) return null;
+    async listEntries(userId, listId, { afterPosition, limit, audience }) {
+      if (!(await find(sql, userId, listId, audience))) return null;
       const rows = await sql<EntryRow[]>`
         SELECT ${entryColumns} FROM list_entries
         WHERE list_id = ${listId}

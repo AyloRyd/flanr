@@ -25,3 +25,14 @@ export const visitedCitySchema = z.object({
 export type VisitedCity = z.infer<typeof visitedCitySchema>;
 
 export const visitedCityPageSchema = paginated(visitedCitySchema);
+
+/**
+ * A city in the Visited list of another user. Only the city: the number of visits and the
+ * lived-in mark stay with the owner, because a city without visits would give away where
+ * the user lives or lived, also when the home location is hidden (FR-PROF-003).
+ */
+export const publicVisitedCitySchema = visitedCitySchema.pick({ cityId: true });
+
+export type PublicVisitedCity = z.infer<typeof publicVisitedCitySchema>;
+
+export const publicVisitedCityPageSchema = paginated(publicVisitedCitySchema);
