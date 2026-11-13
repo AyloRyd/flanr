@@ -1,5 +1,6 @@
-import { verifyToken } from '@clerk/backend';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import { verifyWebhook } from '@clerk/backend/webhooks';
+import type { AuthAccountRemover } from './accounts.ts';
 import type { TokenVerifier } from './auth.ts';
 import type { ClerkProfile } from './users.ts';
 
@@ -13,6 +14,15 @@ export function createClerkTokenVerifier(secretKey: string | undefined): TokenVe
     } catch {
       return null;
     }
+  };
+}
+
+/** Deletes accounts at Clerk (FR-AUTH-009). Without a secret key every deletion fails. */
+export function createClerkAccountRemover(secretKey: string | undefined): AuthAccountRemover {
+  const clerk = secretKey ? createClerkClient({ secretKey }) : null;
+  return async (authProviderId) => {
+    if (!clerk) throw new Error('CLERK_SECRET_KEY is not set: the account cannot be deleted');
+    await clerk.users.deleteUser(authProviderId);
   };
 }
 

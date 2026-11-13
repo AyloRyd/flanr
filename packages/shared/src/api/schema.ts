@@ -123,7 +123,84 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete the account of the signed-in user with all its data (FR-AUTH-009)
+         * @description Cannot be undone. The account is deleted at the sign-in provider too, so the user can no longer sign in.
+         */
+        delete: {
+            parameters: {
+                query: {
+                    confirm: "true";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The sign-in provider did not delete the account; nothing was deleted */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         /**
@@ -3148,6 +3225,147 @@ export interface paths {
                 };
                 /** @description No user has this username */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everything Flanr stores about the signed-in user, as JSON (NFR-GDPR-003) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The data export */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            exportedAt: string;
+                            profile: {
+                                id: number;
+                                username: string;
+                                displayName: string;
+                                avatarUrl: string | null;
+                                bio: string | null;
+                                homeCityId: number | null;
+                                homeCityVisible: boolean;
+                                /** @enum {string} */
+                                profileVisibility: "public" | "private";
+                                /** @enum {string} */
+                                visitedVisibility: "public" | "private";
+                                /** @enum {string} */
+                                plannedVisibility: "public" | "private";
+                                roles: ("user" | "moderator" | "administrator")[];
+                                registeredAt: string;
+                            };
+                            visits: {
+                                id: number;
+                                cityId: number;
+                                date: string | null;
+                                /** @enum {string} */
+                                datePrecision: "day" | "month" | "year" | "none";
+                                beforeRegistration: boolean;
+                                createdAt: string;
+                            }[];
+                            livedCities: {
+                                cityId: number;
+                                isCurrent: boolean;
+                                from: string | null;
+                                to: string | null;
+                            }[];
+                            plannedCities: {
+                                cityId: number;
+                                addedAt: string;
+                            }[];
+                            ratings: {
+                                cityId: number;
+                                subjective: number;
+                                criteria: {
+                                    [key: string]: number;
+                                };
+                                criteriaAverage: number | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            lists: {
+                                id: number;
+                                title: string;
+                                description: string | null;
+                                /** @enum {string} */
+                                visibility: "public" | "private";
+                                entryCount: number;
+                                createdAt: string;
+                                entries: {
+                                    cityId: number;
+                                    position: number;
+                                    note: string | null;
+                                }[];
+                            }[];
+                            cities: {
+                                id: number;
+                                name: string;
+                                countryCode: string;
+                                osm: string;
+                                wikidataId: string | null;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
