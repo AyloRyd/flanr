@@ -1,0 +1,2 @@
+CREATE INDEX "city_ratings_city_idx" ON "city_ratings" USING btree ("city_id");--> statement-breakpoint
+CREATE INDEX "criterion_ratings_city_criterion_idx" ON "criterion_ratings" USING btree ("city_id","criterion_id");
