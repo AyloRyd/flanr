@@ -14,7 +14,7 @@ const searchListsRoute = createRoute({
   path: '/v1/public-lists',
   summary: 'Find public custom lists by their title and description (FR-SRCH-004, FR-LIST-006)',
   description:
-    'Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists of public profiles are found. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.',
+    'Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists are found, also those of private profiles. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.',
   request: { query: listSearchQuerySchema },
   responses: {
     200: { description: 'One page of lists', ...json(listSearchPageSchema) },
