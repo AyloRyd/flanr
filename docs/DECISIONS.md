@@ -2,6 +2,10 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-14
+
+- **List search looks for words, not close spellings (FR-SRCH-004).** A list is found when its title or description contains every word of the query, a word possibly being part of a longer one ("timber" finds "Half-timbered towns"). Hyphens and other punctuation separate words, so "half-timbered" also finds "half timbered". Close spellings, as in city search, are left out for now: list titles are free text, and a typo-tolerant match on a few words finds too much. Lists of private profiles are not found, because a private profile shows nothing but its name (FR-PRIV-001).
+
 ## 2026-11-13
 
 - **Minimum number of ratings (OI-011):** not a fixed threshold. The user sets it in the sorting form; it is 10 by default when sorting or filtering by community rating, and will be raised to 100 or more once there are real users.

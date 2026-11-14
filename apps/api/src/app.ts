@@ -27,6 +27,7 @@ import type { DefaultListStore } from './default-lists.ts';
 import { livedCityPaths, registerLivedCityRoutes } from './lived-city-routes.ts';
 import type { LivedCityStore } from './lived-cities.ts';
 import { listPaths, registerListRoutes } from './list-routes.ts';
+import { registerListSearchRoutes } from './list-search-routes.ts';
 import type { ListStore } from './lists.ts';
 import { problem } from './problem.ts';
 import { registerProfileRoutes } from './profile-routes.ts';
@@ -185,6 +186,7 @@ export function createApp({
   registerRatingRoutes(app, ratings);
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
+  registerListSearchRoutes(app, lists);
   registerCitySearchRoutes(app, searchCities, geography);
   registerProfileRoutes(app, profiles);
   registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);

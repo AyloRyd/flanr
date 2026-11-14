@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { cities } from './cities.ts';
 import { users } from './users.ts';
@@ -19,7 +20,15 @@ export const lists = pgTable(
     visibility: listVisibilityEnum('visibility').notNull().default('public'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('lists_user_idx').on(table.userId)],
+  (table) => [
+    index('lists_user_idx').on(table.userId),
+    // Words of the title or the description, for the list search (FR-SRCH-004). The search
+    // query has to write the expression the same way. search_text() comes from migration 0017.
+    index('lists_search_idx').using(
+      'gin',
+      sql`search_text(${table.title} || ' ' || coalesce(${table.description}, '')) gin_trgm_ops`,
+    ),
+  ],
 );
 
 /** A city in a custom list. The primary key keeps a city from being in a list twice (FR-LIST-004). */

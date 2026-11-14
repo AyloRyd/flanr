@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { addListEntrySchema, createListSchema, updateListSchema } from './list.ts';
+import {
+  addListEntrySchema,
+  createListSchema,
+  listSearchQuerySchema,
+  listSearchWords,
+  updateListSchema,
+} from './list.ts';
 
 describe('createListSchema (FR-LIST-003, FR-LIST-005)', () => {
   it('needs only a title; the list is public and has no description', () => {
@@ -42,5 +48,31 @@ describe('addListEntrySchema (FR-LIST-004)', () => {
 
   it('rejects a note that is too long', () => {
     expect(addListEntrySchema.safeParse({ cityId: 1, note: 'x'.repeat(501) }).success).toBe(false);
+  });
+});
+
+describe('listSearchWords (FR-SRCH-004)', () => {
+  it.each([
+    ['half-timbered', ['half', 'timbered']],
+    ['  Städte am  Rhein ', ['Städte', 'am', 'Rhein']],
+    ['tow%n_s', ['tow', 'n', 's']],
+    ['Київ 2026', ['Київ', '2026']],
+    ['-–!', []],
+  ])('splits %j into %j', (query, words) => {
+    expect(listSearchWords(query)).toEqual(words);
+  });
+});
+
+describe('listSearchQuerySchema (FR-SRCH-004)', () => {
+  it('trims the query and pages by default', () => {
+    expect(listSearchQuerySchema.parse({ q: ' trams ' })).toEqual({ q: 'trams', limit: 20 });
+  });
+
+  it.each(['', '   ', '%', 'x'.repeat(101)])('rejects the query %j', (q) => {
+    expect(listSearchQuerySchema.safeParse({ q }).success).toBe(false);
+  });
+
+  it('needs a query', () => {
+    expect(listSearchQuerySchema.safeParse({}).success).toBe(false);
   });
 });

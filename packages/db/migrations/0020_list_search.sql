@@ -1,0 +1,1 @@
+CREATE INDEX "lists_search_idx" ON "lists" USING gin (search_text("title" || ' ' || coalesce("description", '')) gin_trgm_ops);

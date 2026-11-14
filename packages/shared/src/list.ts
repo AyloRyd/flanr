@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { paginated } from './pagination.ts';
+import { paginated, paginationQuerySchema } from './pagination.ts';
 import { visibilitySchema } from './user.ts';
 
 export const maxListTitleLength = 100;
@@ -79,3 +79,40 @@ export const updateListEntrySchema = z.object({
 });
 
 export type UpdateListEntry = z.infer<typeof updateListEntrySchema>;
+
+export const maxListSearchQueryLength = 100;
+
+/**
+ * The words of a list search: runs of letters and digits. Everything else separates words,
+ * so "half-timbered" looks for "half" and "timbered", and the query can never carry a pattern
+ * character such as `%` into the search.
+ */
+export function listSearchWords(query: string): string[] {
+  return query.split(/[^\p{L}\p{N}]+/u).filter((word) => word.length > 0);
+}
+
+/** Query of the search over public custom lists (FR-SRCH-004). */
+export const listSearchQuerySchema = paginationQuerySchema.extend({
+  /** Words of the title or the description of a list. */
+  q: z
+    .string()
+    .trim()
+    .min(1)
+    .max(maxListSearchQueryLength)
+    .refine((query) => listSearchWords(query).length > 0, {
+      message: 'The query needs at least one letter or digit.',
+    }),
+});
+
+/** Who a found list belongs to, so that it can be opened through the user's lists. */
+export const listOwnerSchema = z.object({
+  username: z.string(),
+  displayName: z.string(),
+});
+
+/** A public custom list that the search found (FR-LIST-006). */
+export const listSearchResultSchema = listSchema.extend({ owner: listOwnerSchema });
+
+export type ListSearchResult = z.infer<typeof listSearchResultSchema>;
+
+export const listSearchPageSchema = paginated(listSearchResultSchema);
