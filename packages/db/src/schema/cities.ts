@@ -138,10 +138,17 @@ export const cities = pgTable(
     index('cities_municipality_idx').on(t.municipalityId),
     // Low-zoom map tiles select the few cities and towns of a large area by type.
     index('cities_settlement_type_idx').on(t.settlementType),
-    // The search sorts thousands of found cities by size; with this index it reads their
-    // population without reading the cities themselves.
+    // The search sorts and filters thousands of found cities; with this index it reads what
+    // it sorts and filters by without reading the cities themselves.
     index('cities_search_rank_idx')
-      .on(t.id, t.population)
+      .on(t.id, t.population, t.countryCode, t.settlementType, t.region1Id, t.region2Id)
+      .where(sql`in_source`),
+    // The city list without a search text, in its two orders that start at an end of all cities.
+    index('cities_by_population_idx')
+      .on(t.population.desc().nullsLast(), t.id)
+      .where(sql`in_source`),
+    index('cities_by_name_idx')
+      .on(t.nameLocal, t.id)
       .where(sql`in_source`),
     index('cities_centre_gix').using('gist', t.centre),
     index('cities_boundary_gix').using('gist', t.boundary),

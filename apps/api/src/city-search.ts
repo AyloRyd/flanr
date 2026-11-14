@@ -47,7 +47,7 @@ export function createCitySearch(sql: Sql): CitySearch {
   const isMainName = sql`n.kind in ('name', 'int_name', 'wikidata_label')`;
 
   /** The cities that a search text finds, with how well each one matches. */
-  function matchesOf(text: string, needed: number) {
+  function matchesOf(text: string, needed: number, withCloseSpellings: boolean) {
     // Main names that start with the query, as a range of the index on search_name.
     const startsWithQuery = sql`
       n.search_name ~>=~ ${text} AND n.search_name ~<~ (${text} || chr(1114111))
@@ -67,7 +67,8 @@ export function createCitySearch(sql: Sql): CitySearch {
       fuzzy AS (
         SELECT n.city_id, 2 AS tier, max(similarity(n.search_name, ${text})) AS score
         FROM city_names n
-        WHERE (SELECT count(*) FROM strict) < ${needed}
+        WHERE ${withCloseSpellings}
+          AND (SELECT count(*) FROM strict) < ${needed}
           AND ${text.length >= minFuzzyLength}
           AND n.search_name % ${text}
           AND ${isMainName}
@@ -99,7 +100,10 @@ export function createCitySearch(sql: Sql): CitySearch {
       if (!normalized?.text) return [];
       text = normalized.text;
     }
-    const named = text === undefined ? undefined : matchesOf(text, offset + limit);
+    // Close spellings belong at the end of a list sorted by relevance. In a list sorted by
+    // anything else they would stand among the real matches, so they are left out there.
+    const named =
+      text === undefined ? undefined : matchesOf(text, offset + limit, sort === 'relevance');
 
     // The community rating of every rated city (BR-009). Only joined when the list is sorted
     // or filtered by it; the ratings shown with each city are read for the page alone.
@@ -133,7 +137,8 @@ export function createCitySearch(sql: Sql): CitySearch {
       rating: sql`rated.rating ${direction}, rated.rating_count DESC NULLS LAST, ${largestFirst}`,
       ratings: sql`rated.rating_count ${direction}, rated.rating DESC NULLS LAST, ${largestFirst}`,
       population: sql`c.population ${direction}, c.id`,
-      name: sql`c.name_local ${direction}, c.id`,
+      // A name is never missing, and without NULLS LAST the index can be read backwards.
+      name: params.descending ? sql`c.name_local DESC, c.id DESC` : sql`c.name_local, c.id`,
     }[sort];
 
     return sql<CitySearchResult[]>`
