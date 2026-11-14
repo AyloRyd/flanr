@@ -3,6 +3,7 @@ import type {
   CreateList,
   List,
   ListEntry,
+  ListSearchResult,
   UpdateList,
   UpdateListEntry,
 } from '@flanr/shared';
@@ -29,9 +30,9 @@ interface ListOptions {
 }
 
 /**
- * Reads and changes custom lists (FR-LIST-003, FR-LIST-004). Every method takes the user and
- * only ever touches that user's lists, so a handler cannot reach someone else's by ID
- * (NFR-SEC-003).
+ * Reads and changes custom lists (FR-LIST-003, FR-LIST-004). Every method but `search` takes
+ * the user and only ever touches that user's lists, so a handler cannot reach someone else's by
+ * ID (NFR-SEC-003). `search` reads only what everyone may see.
  */
 export interface ListStore {
   create(userId: number, input: CreateList): Promise<List>;
@@ -56,6 +57,12 @@ export interface ListStore {
     changes: UpdateListEntry,
   ): Promise<UpdateEntryResult>;
   removeEntry(userId: number, listId: number, cityId: number): Promise<boolean>;
+
+  /**
+   * Public custom lists of public profiles whose title or description contains every word
+   * (FR-SRCH-004, FR-LIST-006). The only method that reads the lists of all users.
+   */
+  search(words: string[], options: { limit: number; offset: number }): Promise<ListSearchResult[]>;
 }
 
 interface ListRow {
@@ -65,6 +72,11 @@ interface ListRow {
   visibility: List['visibility'];
   entry_count: number;
   created_at: Date;
+}
+
+interface SearchRow extends ListRow {
+  username: string;
+  display_name: string;
 }
 
 const toList = (row: ListRow): List => ({
@@ -239,6 +251,33 @@ export function createListStore(sql: Sql): ListStore {
           },
         };
       });
+    },
+
+    async search(words, { limit, offset }) {
+      const title = sql`search_text(lists.title)`;
+      // Written as in the index lists_search_idx, so that the index can be used.
+      const titleAndDescription = sql`
+        search_text(lists.title || ' ' || coalesce(lists.description, ''))`;
+      // Each word is its own condition, so that the trigram index can serve each of them.
+      const contains = (text: typeof title) =>
+        words.reduce(
+          (condition, word) =>
+            sql`${condition} AND ${text} LIKE '%' || search_text(${word}) || '%'`,
+          sql`TRUE`,
+        );
+      const rows = await sql<SearchRow[]>`
+        SELECT ${listColumns}, users.username, users.display_name,
+          ${contains(title)} AS in_title
+        FROM lists JOIN users ON users.id = lists.user_id
+        WHERE lists.visibility = 'public' AND users.profile_visibility = 'public'
+          AND ${contains(titleAndDescription)}
+        -- Lists that have all words in the title first, then the longer lists.
+        ORDER BY in_title DESC, entry_count DESC, lists.id DESC
+        LIMIT ${limit} OFFSET ${offset}`;
+      return rows.map((row) => ({
+        ...toList(row),
+        owner: { username: row.username, displayName: row.display_name },
+      }));
     },
 
     async removeEntry(userId, listId, cityId) {

@@ -3167,6 +3167,82 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/public-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find public custom lists by their title and description (FR-SRCH-004, FR-LIST-006)
+         * @description Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists of public profiles are found. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.
+         */
+        get: {
+            parameters: {
+                query: {
+                    limit?: number;
+                    cursor?: string;
+                    q: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description One page of lists */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                title: string;
+                                description: string | null;
+                                /** @enum {string} */
+                                visibility: "public" | "private";
+                                entryCount: number;
+                                createdAt: string;
+                                owner: {
+                                    username: string;
+                                    displayName: string;
+                                };
+                            }[];
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/cities": {
         parameters: {
             query?: never;
