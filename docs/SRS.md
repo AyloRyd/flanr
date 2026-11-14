@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.11 |
+| Version | 0.12 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-11 |
+| Date | 2026-11-14 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -25,6 +25,7 @@
 | 0.9 | 2026-11-13 | A. Malyshkin | FR-LIST-001 brought in line with BR-004: the Visited list also has the lived-in cities |
 | 0.10 | 2026-11-13 | A. Malyshkin | Visibility of the two default lists stored as two user settings (FR-LIST-005, User entity); username and display name are managed in Flanr, the avatar comes from the Clerk account (FR-PROF-001, FR-PROF-002) |
 | 0.11 | 2026-11-13 | A. Malyshkin | Resolved OI-011: the user sets the minimum number of ratings when sorting or filtering by community rating, 10 by default (FR-SRCH-003) |
+| 0.12 | 2026-11-14 | A. Malyshkin | Public custom lists stay visible and findable when the profile is private (FR-PRIV-001, FR-PRIV-003, FR-LIST-005, FR-LIST-006) |
 
 ---
 
@@ -712,21 +713,23 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-LIST-005 — List visibility
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Every list, default or custom, MUST be either public or private, and MUST be public by default. Private lists MUST be visible only to their owner. The visibility of the two default lists is a setting of the user, one for the Visited list and one for the Planned list, because these lists are not stored as lists (section 5.1).
+**Description.** Every list, default or custom, MUST be either public or private, and MUST be public by default. Private lists MUST be visible only to their owner. The visibility of the two default lists is a setting of the user, one for the Visited list and one for the Planned list, because these lists are not stored as lists (section 5.1). A public custom list stays public when the profile is private; the default lists of a private profile are hidden (FR-PRIV-001).
 
 **Acceptance criteria.**
 1. Given a new custom list, then it is public.
 2. Given a private list, when another user opens the owner's profile, then the list is not shown.
+3. Given a public custom list of a private profile, when a guest opens the list, then it is shown.
 
 **Related.** BR-013, FR-PRIV-001.
 
 #### FR-LIST-006 — List discovery
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Public default lists MUST be visible on the owner's profile. Public custom lists MUST be visible on the owner's profile and MUST be findable through search.
+**Description.** Public default lists MUST be visible on the owner's profile, unless the profile is private. Public custom lists MUST be visible on the owner's profile and MUST be findable through search, also when the profile is private (FR-PRIV-001).
 
 **Acceptance criteria.**
 1. Given a public custom list titled "Half-timbered towns", when a guest searches lists for "half-timbered", then the list is found.
+2. Given the same list of a private profile, when a guest searches lists for "half-timbered", then the list is found.
 
 #### FR-LIST-007 — Like and save lists
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Lists
@@ -939,10 +942,15 @@ The social part is the least worked-out area. The requirements below describe th
 #### FR-PRIV-001 — Profile visibility
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Privacy
 
-**Description.** The user MUST be able to set their whole profile to public or private. A profile MUST be public by default. There MUST NOT be separate visibility settings for individual visits or ratings.
+**Description.** The user MUST be able to set their profile to public or private. A profile MUST be public by default. There MUST NOT be separate visibility settings for individual visits or ratings.
+
+A private profile MUST show only the username, the display name, a note that the profile is private, and the user's public custom lists. Everything else MUST be hidden: visits, ratings, lived-in cities, the home city, the bio, the avatar and the two default lists, whatever their own visibility settings are. Opening a private profile is not an error; it simply shows less.
+
+**Rationale.** A custom list is made to be shared, and the user decides about each one (FR-LIST-005). The default lists are the user's travel record, which the private profile is there to hide.
 
 **Acceptance criteria.**
-1. Given a private profile, when a guest or another user opens it, then only the username and display name are shown, with a note that the profile is private.
+1. Given a private profile, when a guest or another user opens it, then only the username, the display name and the public custom lists are shown, with a note that the profile is private.
+2. Given a private profile with a public Visited list, when a guest opens it, then the Visited list is not shown.
 
 **Related.** OI-012.
 
@@ -957,7 +965,7 @@ The social part is the least worked-out area. The requirements below describe th
 #### FR-PRIV-003 — Private content in global statistics
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Privacy
 
-**Description.** Content from private profiles MAY be included in aggregated global statistics, but MUST NOT be shown individually anywhere except to its owner.
+**Description.** Content from private profiles MAY be included in aggregated global statistics, but MUST NOT be shown individually anywhere except to its owner. Public custom lists are the exception, see FR-PRIV-001.
 
 **Acceptance criteria.**
 1. Given a private user's visit to a city, then the visit is not shown in any list or feed visible to other users.
