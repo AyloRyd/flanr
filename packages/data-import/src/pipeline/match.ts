@@ -11,8 +11,8 @@ export async function matchCities(sql: Sql, country: CountryConfig): Promise<voi
   await selectCountry(sql, country);
   await selectSettlements(sql);
   await selectMunicipalities(sql, country);
-  await linkBoundaries(sql);
   await selectRegions(sql, country);
+  await linkBoundaries(sql);
   await buildCities(sql);
 }
 
@@ -50,6 +50,7 @@ async function indexStaging(sql: Sql): Promise<void> {
     CREATE INDEX ON staging.boundary USING gin (match_names);
     CREATE INDEX ON staging.boundary ((tags->>'wikidata'));
     CREATE INDEX ON staging.boundary_member (member_type, member_id);
+    CREATE INDEX ON staging.boundary_member (boundary_osm_id);
     CREATE INDEX ON staging.place_name (osm_type, osm_id);
     ANALYZE staging.place;
     ANALYZE staging.boundary;
@@ -145,9 +146,22 @@ async function selectSettlements(sql: Sql): Promise<void> {
  * Within a method a municipality's boundary wins, then the most specific one (highest
  * admin_level). Warsaw has the same Wikidata ID on its powiat, its gmina and its settlement
  * boundary; it gets the gmina's. The candidate must always contain the settlement's centre.
- * A boundary is given to one settlement only.
+ *
+ * A name alone does not tell a settlement from the area that is named after it or like it.
+ * Methods 4 and 5 therefore never take the boundary of a region, unless the region is also a
+ * municipality: the province of Ferrara is not the boundary of a hamlet called Ferrara, nor
+ * the state of Bavaria that of a hamlet called Bayern. Method 5 also leaves a boundary alone
+ * that names another settlement as its centre: the municipality of Time has its seat in Bryne
+ * and is not the boundary of the hamlet Time.
+ *
+ * A boundary is given to one settlement only: the one found by the most trusted method, then
+ * the one with the boundary's name, then the larger kind of settlement.
  */
 async function linkBoundaries(sql: Sql): Promise<void> {
+  const notOnlyARegion = `(
+    NOT EXISTS (SELECT 1 FROM staging.region r WHERE r.osm_type = b.osm_type AND r.osm_id = b.osm_id)
+    OR EXISTS (SELECT 1 FROM staging.municipality m WHERE m.osm_type = b.osm_type AND m.osm_id = b.osm_id)
+  )`;
   await sql.unsafe(`
     CREATE TABLE staging.boundary_candidate AS
     SELECT s.osm_type, s.osm_id, b.osm_type AS b_type, b.osm_id AS b_id, b.admin_level,
@@ -173,24 +187,36 @@ async function linkBoundaries(sql: Sql): Promise<void> {
       ON m.member_type = s.osm_type AND m.member_id = s.osm_id AND m.role = 'admin_centre'
     JOIN staging.boundary b ON b.osm_type = 'relation' AND b.osm_id = m.boundary_osm_id
     WHERE s.name = ANY(b.match_names) AND ST_Covers(b.geom, s.centre)
+      AND ${notOnlyARegion}
     UNION ALL
     SELECT s.osm_type, s.osm_id, b.osm_type, b.osm_id, b.admin_level, 'name_and_location', 5
     FROM staging.settlement s
     JOIN staging.boundary b ON b.match_names @> ARRAY[s.name] AND ST_Covers(b.geom, s.centre)
-    WHERE coalesce(b.admin_level, 99) > 2;
+    WHERE coalesce(b.admin_level, 99) > 2
+      AND ${notOnlyARegion}
+      AND NOT EXISTS (
+        SELECT 1 FROM staging.boundary_member centre_of
+        JOIN staging.settlement centre
+          ON centre.osm_type = centre_of.member_type AND centre.osm_id = centre_of.member_id
+        WHERE b.osm_type = 'relation' AND centre_of.boundary_osm_id = b.osm_id
+          AND centre_of.role IN ('admin_centre', 'label')
+          AND (centre.osm_type, centre.osm_id) <> (s.osm_type, s.osm_id)
+      );
 
     CREATE TABLE staging.boundary_choice AS
     SELECT DISTINCT ON (b_type, b_id) *
     FROM (
       SELECT DISTINCT ON (c.osm_type, c.osm_id) c.*,
+             coalesce(s.name = ANY(b.match_names), false) AS same_name,
              array_position(ARRAY['city', 'town', 'village', 'hamlet'], s.settlement_type::text) AS rank
       FROM staging.boundary_candidate c
       JOIN staging.settlement s USING (osm_type, osm_id)
+      JOIN staging.boundary b ON b.osm_type = c.b_type AND b.osm_id = c.b_id
       LEFT JOIN staging.municipality m ON m.osm_type = c.b_type AND m.osm_id = c.b_id
       ORDER BY c.osm_type, c.osm_id, c.priority, (m.osm_id IS NOT NULL) DESC,
                c.admin_level DESC NULLS LAST
     ) best
-    ORDER BY b_type, b_id, priority, rank;
+    ORDER BY b_type, b_id, priority, same_name DESC, rank;
   `);
 }
 
@@ -287,5 +313,42 @@ async function buildCities(sql: Sql): Promise<void> {
       WHERE ST_Intersects(mp.geom, s.centre) LIMIT 1
     ) m ON true;
     ALTER TABLE staging.city ADD PRIMARY KEY (osm_type, osm_id);
+  `);
+  await keepOneCityPerWikidataItem(sql);
+}
+
+/**
+ * A Wikidata item describes one thing, but mappers also put a town's item on its parts: the
+ * villages of Homburg carry the item of Homburg and would get its population, its English
+ * name and its aliases. Where several settlements have the same item, it stays with the one
+ * whose boundary carries it too, and among those with the larger kind of settlement. If that
+ * does not single one out, none of them keeps it: no data is better than someone else's.
+ */
+async function keepOneCityPerWikidataItem(sql: Sql): Promise<void> {
+  await sql.unsafe(`
+    WITH claim AS (
+      SELECT c.osm_type, c.osm_id, c.wikidata_id,
+             coalesce(b.tags->>'wikidata' = c.wikidata_id, false) AS on_boundary,
+             array_position(ARRAY['city', 'town', 'village', 'hamlet'], c.settlement_type::text) AS rank
+      FROM staging.city c
+      LEFT JOIN staging.boundary b
+        ON b.osm_type = c.boundary_osm_type AND b.osm_id = c.boundary_osm_id
+      WHERE c.wikidata_id IS NOT NULL
+    ),
+    placed AS (
+      SELECT *, rank() OVER (PARTITION BY wikidata_id ORDER BY on_boundary DESC, rank) AS place
+      FROM claim
+    ),
+    owner AS (
+      SELECT wikidata_id, min(osm_type::text) AS osm_type, min(osm_id) AS osm_id
+      FROM placed WHERE place = 1
+      GROUP BY wikidata_id HAVING count(*) = 1
+    )
+    UPDATE staging.city c SET wikidata_id = NULL
+    WHERE c.wikidata_id IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM owner o
+        WHERE o.wikidata_id = c.wikidata_id AND o.osm_type = c.osm_type::text AND o.osm_id = c.osm_id
+      );
   `);
 }
