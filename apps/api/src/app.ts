@@ -19,7 +19,7 @@ import {
   type UserResolver,
 } from './auth.ts';
 import { registerCitySearchRoutes } from './city-search-routes.ts';
-import type { CitySearch } from './city-search.ts';
+import type { CitySearch, Geography } from './city-search.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
 import type { UserEvent, WebhookReader } from './clerk.ts';
 import { defaultListPaths, registerDefaultListRoutes } from './default-list-routes.ts';
@@ -43,6 +43,7 @@ export interface AppDependencies {
   checkDatabase: () => Promise<boolean>;
   getCityTile: (params: TileParams) => Promise<Uint8Array | null>;
   searchCities: CitySearch;
+  geography: Geography;
   /** Origins of web clients that may call the API from the browser. */
   corsOrigins: string[];
   verifyToken: TokenVerifier;
@@ -105,6 +106,7 @@ export function createApp({
   checkDatabase,
   getCityTile,
   searchCities,
+  geography,
   corsOrigins,
   verifyToken,
   resolveUser,
@@ -183,7 +185,7 @@ export function createApp({
   registerRatingRoutes(app, ratings);
   registerCriteriaAdminRoutes(app, ratings);
   registerListRoutes(app, lists);
-  registerCitySearchRoutes(app, searchCities);
+  registerCitySearchRoutes(app, searchCities, geography);
   registerProfileRoutes(app, profiles);
   registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);
   registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });

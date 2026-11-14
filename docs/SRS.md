@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.10 |
+| Version | 0.11 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-11 |
@@ -24,6 +24,7 @@
 | 0.8 | 2026-11-12 | A. Malyshkin | Resolved OI-005 (a rating is deleted with the last visit, BR-005), OI-007 (suggested rating rounds halves up, BR-007), OI-010 (username rules, FR-PROF-001) and OI-019 (lived-in periods, BR-016) |
 | 0.9 | 2026-11-13 | A. Malyshkin | FR-LIST-001 brought in line with BR-004: the Visited list also has the lived-in cities |
 | 0.10 | 2026-11-13 | A. Malyshkin | Visibility of the two default lists stored as two user settings (FR-LIST-005, User entity); username and display name are managed in Flanr, the avatar comes from the Clerk account (FR-PROF-001, FR-PROF-002) |
+| 0.11 | 2026-11-13 | A. Malyshkin | Resolved OI-011: the user sets the minimum number of ratings when sorting or filtering by community rating, 10 by default (FR-SRCH-003) |
 
 ---
 
@@ -875,8 +876,12 @@ Each mode MUST have a legend.
 
 **Description.** The user MUST be able to filter cities by country, region, settlement type and population range, and sort them by community rating, number of ratings, population and name. Filtering by a minimum community rating MUST be supported.
 
+A community rating built from very few ratings says little, so the user MUST be able to set a minimum number of ratings a city needs to be listed. When the user sorts by community rating or filters by a minimum community rating, this minimum is 10 unless the user changes it; otherwise there is none unless the user sets one. The default of 10 is a product setting and will be raised when Flanr has enough ratings.
+
 **Acceptance criteria.**
 1. Given the filter country = Germany and sorting by community rating, then German cities are listed from the highest community rating.
+2. Given sorting by community rating and no minimum set by the user, then a city with 9 ratings is not listed and a city with 10 ratings is.
+3. Given sorting by community rating and a minimum of 1 set by the user, then a city with a single rating is listed.
 
 **Related.** OI-011.
 
@@ -1334,7 +1339,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-008 | Whether and how visits with month or year precision appear in the trip calendar or in a separate monthly view. | Statistics | Open |
 | OI-009 | Detailed role model and moderation process. | Moderation | Open, before R2 |
 | OI-010 | Username rules: allowed characters, how often it can be changed, whether old profile URLs redirect. | Profile | Resolved 2026-11-12: see FR-PROF-001 |
-| OI-011 | Whether sorting by community rating requires a minimum number of ratings. | Search | Open |
+| OI-011 | Whether sorting by community rating requires a minimum number of ratings. | Search | Resolved 2026-11-13: the user sets the minimum, 10 by default, see FR-SRCH-003 |
 | OI-012 | Whether friends can see a private profile. | Privacy | Open, before R2 |
 | OI-013 | Limits for photos: formats, size, number per user and city. | Photos | Open, before R2 |
 | OI-014 | Fields of a place and the list of place categories. | Places | Open |

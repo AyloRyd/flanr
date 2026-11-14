@@ -174,6 +174,14 @@ describe('GET /v1/cities: finding a city by its names (FR-SRCH-001)', () => {
     expect((await names('Stutgart'))[0]).toBe('Stuttgart');
   });
 
+  it('leaves close spellings out of a list that is not sorted by relevance', async () => {
+    const sorted = await guest.GET('/v1/cities', {
+      params: { query: { q: 'Wupertal', sort: 'population' } },
+    });
+
+    expect(sorted.data?.items).toEqual([]);
+  });
+
   it('finds cities whose name starts with the query, the largest first', async () => {
     expect(await names('St')).toEqual(['Stuttgart', 'Stade', 'Stockhausen', 'Stockhausen']);
   });
@@ -253,6 +261,8 @@ describe('GET /v1/cities: telling cities apart (FR-SRCH-002)', () => {
         country: { code: 'DE', name: 'Germany' },
         region: 'Hesse',
         municipality: null,
+        rating: null,
+        ratingCount: 0,
       },
       expect.objectContaining({
         name: 'Frankfurt (Oder)',

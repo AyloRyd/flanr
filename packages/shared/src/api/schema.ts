@@ -3175,15 +3175,24 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Find cities by name (FR-SRCH-001, FR-SRCH-002)
-         * @description Searches the local, English, alternative and former names in all languages, without letter case and diacritics, and tolerates small typos. Exact names come first, then names that start with the query, then close spellings; within each group the largest city first. Open to guests.
+         * Find, filter and sort cities (FR-SRCH-001…003)
+         * @description With `q`: searches the local, English, alternative and former names in all languages, without letter case and diacritics, and tolerates small typos. Exact names come first, then names that start with the query, then close spellings; within each group the largest city first. Without `q`: all cities. Either list can be filtered and sorted. When it is sorted or filtered by community rating, only cities with at least `minRatings` ratings are listed, 10 unless the request says otherwise. Open to guests.
          */
         get: {
             parameters: {
-                query: {
+                query?: {
                     limit?: number;
                     cursor?: string;
-                    q: string;
+                    q?: string;
+                    country?: string;
+                    regionId?: number;
+                    settlementType?: string;
+                    populationMin?: number | null;
+                    populationMax?: number | null;
+                    minRating?: number;
+                    minRatings?: number | null;
+                    sort?: "relevance" | "rating" | "ratings" | "population" | "name";
+                    order?: "asc" | "desc";
                 };
                 header?: never;
                 path?: never;
@@ -3191,7 +3200,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description One page of cities, best match first */
+                /** @description One page of cities */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -3212,8 +3221,115 @@ export interface paths {
                                 };
                                 region: string | null;
                                 municipality: string | null;
+                                rating: number | null;
+                                ratingCount: number;
                             }[];
                             nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The countries that have cities, for the country filter (FR-SRCH-003) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The countries by English name */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                code: string;
+                                name: string;
+                                nameLocal: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/countries/{code}/regions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The regions of a country, for the region filter (FR-SRCH-003) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description First-level regions, then second-level ones, by English name */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                nameLocal: string;
+                                level: number;
+                            }[];
                         };
                     };
                 };

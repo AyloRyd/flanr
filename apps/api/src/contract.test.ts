@@ -29,6 +29,7 @@ const dependencies: AppDependencies = {
   checkDatabase: async () => true,
   getCityTile: async () => null,
   searchCities: async () => [],
+  geography: { countries: async () => [], regions: async () => [] },
   corsOrigins: [],
   verifyToken: async (token) => (token === 'valid-token' ? 'clerk_1' : null),
   resolveUser: async () => user,

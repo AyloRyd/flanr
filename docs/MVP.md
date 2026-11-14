@@ -21,7 +21,7 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] OI-007 — rounding of the suggested rating. Decided: to the nearest 0.5, halves up (BR-007).
 - [ ] OI-008 — approximate dates in the calendar (recommended for MVP: not shown, only counted in the coverage note).
 - [x] OI-010 — username rules. Decided: 3–30 characters, changeable at any time, see FR-PROF-001.
-- [ ] OI-011 — minimum number of ratings for sorting by community rating (recommended: 3).
+- [x] OI-011 — minimum number of ratings for sorting by community rating. Decided: the user sets it in the sorting form; the default is 10 and will be raised to 100 or more once there are real users (FR-SRCH-003).
 - [ ] OI-017 — hosting (recommended: one VPS in Germany with about 8 GB RAM running web, API and database in Docker, plus a cheap domain; see the hosting discussion).
 - [x] OI-019 — whether lived-in cities have a period (from, to). Decided: an optional period that is not part of time-based statistics (BR-016).
 
@@ -96,7 +96,7 @@ Each business rule gets unit tests before or together with its implementation (N
 
 - [x] PostgreSQL search over all city names with `unaccent` and `pg_trgm` (FR-SRCH-001). `GET /v1/cities?q=`: exact names first, then main names that start with the query, then close spellings; the largest city first. Measured on the 47 imported countries (985,736 cities, 2.5 million names) with 1,382 typed-out queries: median 19 ms, 95th percentile 109 ms, slowest 368 ms, at the query, on the development machine (NFR-PERF-002).
 - [x] Results with country, region and settlement type (FR-SRCH-002), and the municipality for a city that is part of one.
-- [ ] Filters and sorting, including minimum rating and the minimum-ratings threshold (FR-SRCH-003).
+- [x] Filters and sorting, including minimum rating and the minimum-ratings threshold (FR-SRCH-003). `GET /v1/cities` takes the filters and the sorting with or without a search text; `GET /v1/countries` and `GET /v1/countries/{code}/regions` feed the filter form. The community rating is computed from the ratings on request; it will need a stored value once there are many ratings.
 - [ ] Search over public custom lists (FR-SRCH-004, FR-LIST-006).
 
 **Done when:** the acceptance criteria of FR-SRCH-001…004 pass, including "Cologne", "Koln", "Kiev" and "Frankfurt", and search stays under 300 ms (NFR-PERF-002).

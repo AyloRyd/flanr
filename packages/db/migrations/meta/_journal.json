@@ -134,6 +134,13 @@
       "when": 1794580612381,
       "tag": "0018_city_search_names",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794647764176,
+      "tag": "0019_city_list_indexes",
+      "breakpoints": true
     }
   ]
 }
