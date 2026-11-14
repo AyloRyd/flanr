@@ -119,12 +119,12 @@ describe('GET /v1/public-lists (FR-SRCH-004, FR-LIST-006)', () => {
     expect(await titlesFor('secret', ada)).toEqual([]);
   });
 
-  it('does not find the lists of a private profile (FR-PRIV-001, FR-PRIV-003)', async () => {
-    await createList(ada, { title: 'Ada towns' });
-    await createList(bob, { title: 'Bob towns' });
+  it('finds the public lists of a private profile (FR-LIST-006, FR-PRIV-001)', async () => {
+    await createList(ada, { title: 'Half-timbered towns' });
+    await createList(ada, { title: 'Secret towns', visibility: 'private' });
     await ada.PATCH('/v1/me', { body: { profileVisibility: 'private' } });
 
-    expect(await titlesFor('towns', bob)).toEqual(['Bob towns']);
+    expect(await titlesFor('towns', bob)).toEqual(['Half-timbered towns']);
   });
 
   it('finds a list again once it is made public', async () => {

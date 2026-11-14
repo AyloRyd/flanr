@@ -30,6 +30,12 @@ const contentErrors = {
 
 const privateList = problemResponse('The profile or this list is private (FR-LIST-005)');
 
+/** Responses of the routes for custom lists, which a private profile still shows (FR-PRIV-001). */
+const customListErrors = {
+  400: problemResponse('Invalid request'),
+  404: problemResponse('No user has this username'),
+};
+
 const visitedRoute = createRoute({
   method: 'get',
   path: '/v1/users/{username}/visited-cities',
@@ -69,10 +75,11 @@ const listsRoute = createRoute({
   method: 'get',
   path: '/v1/users/{username}/lists',
   summary: 'The public custom lists of a user, newest first (FR-LIST-006)',
+  description: 'Also of a private profile (FR-PRIV-001).',
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of lists', ...json(listPageSchema) },
-    ...contentErrors,
+    ...customListErrors,
   },
 });
 
@@ -83,7 +90,7 @@ const listRoute = createRoute({
   request: { params: userListParams },
   responses: {
     200: { description: 'The list', ...json(listSchema) },
-    ...contentErrors,
+    ...customListErrors,
     404: problemResponse('No such user, or the user has no such public list'),
   },
 });
@@ -95,7 +102,7 @@ const listEntriesRoute = createRoute({
   request: { params: userListParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of entries', ...json(listEntryPageSchema) },
-    ...contentErrors,
+    ...customListErrors,
     404: problemResponse('No such user, or the user has no such public list'),
   },
 });
@@ -108,9 +115,10 @@ export interface UserContentStores {
 }
 
 /**
- * What everyone, guests included, can see of a user's content. Nothing of a private profile
- * is shown (FR-PRIV-001, FR-PRIV-003), and of a public one only the lists that are public
- * (FR-LIST-005). The owner reads their own content through the routes for the signed-in user.
+ * What everyone, guests included, can see of a user's content. Of a private profile only the
+ * public custom lists are shown (FR-PRIV-001, FR-PRIV-003), and of a public one only the lists
+ * that are public (FR-LIST-005). The owner reads their own content through the routes for the
+ * signed-in user.
  */
 export function registerUserContentRoutes(
   app: OpenAPIHono<AuthEnv>,
@@ -127,6 +135,15 @@ export function registerUserContentRoutes(
       return { response: problem(c, 403, 'Profile is private') };
     }
     return { owner };
+  }
+
+  /** Finds the user of the path, whatever the visibility of the profile. */
+  async function listOwner(
+    c: Context,
+    username: string,
+  ): Promise<{ owner: ContentOwner } | { response: Response }> {
+    const owner = await profiles.findContentOwner(username);
+    return owner ? { owner } : { response: problem(c, 404, 'User not found') };
   }
 
   app.openapi(visitedRoute, async (c) => {
@@ -183,7 +200,7 @@ export function registerUserContentRoutes(
   });
 
   app.openapi(listsRoute, async (c) => {
-    const found = await publicOwner(c, c.req.valid('param').username);
+    const found = await listOwner(c, c.req.valid('param').username);
     if ('response' in found) return found.response as never;
     const { limit, cursor } = c.req.valid('query');
     const beforeId = idFromCursor(cursor);
@@ -202,7 +219,7 @@ export function registerUserContentRoutes(
 
   app.openapi(listRoute, async (c) => {
     const { username, listId } = c.req.valid('param');
-    const found = await publicOwner(c, username);
+    const found = await listOwner(c, username);
     if ('response' in found) return found.response as never;
 
     const list = await lists.find(found.owner.id, listId, 'others');
@@ -212,7 +229,7 @@ export function registerUserContentRoutes(
 
   app.openapi(listEntriesRoute, async (c) => {
     const { username, listId } = c.req.valid('param');
-    const found = await publicOwner(c, username);
+    const found = await listOwner(c, username);
     if ('response' in found) return found.response as never;
     const { limit, cursor } = c.req.valid('query');
     const afterPosition = idFromCursor(cursor);

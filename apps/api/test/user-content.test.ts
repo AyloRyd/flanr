@@ -217,17 +217,29 @@ describe('A private profile (FR-PRIV-001, FR-PRIV-003)', () => {
     await set({ profileVisibility: 'private' });
   });
 
-  it('shows none of its content to guests or other users', async () => {
-    const list = (await ada.GET('/v1/lists')).data?.items[0];
-
+  it('hides its visits, ratings and default lists from guests and other users', async () => {
     for (const client of [guest, bob]) {
       expect((await visitedOf(client)).response.status).toBe(403);
       expect((await plannedOf(client)).response.status).toBe(403);
       expect((await ratingsOf(client)).response.status).toBe(403);
-      expect((await listsOf(client)).response.status).toBe(403);
-      expect((await listOf(list?.id ?? 0, client)).response.status).toBe(403);
-      expect((await entriesOf(list?.id ?? 0, client)).response.status).toBe(403);
     }
+  });
+
+  it('still shows its public custom lists (FR-PRIV-001, FR-LIST-005)', async () => {
+    const list = (await ada.GET('/v1/lists')).data?.items[0];
+
+    for (const client of [guest, bob]) {
+      expect((await listsOf(client)).data?.items.map(({ title }) => title)).toEqual(['Trams']);
+      expect((await listOf(list?.id ?? 0, client)).data?.title).toBe('Trams');
+      expect((await entriesOf(list?.id ?? 0, client)).data?.items).toHaveLength(1);
+    }
+  });
+
+  it('keeps its private custom lists hidden', async () => {
+    const secret = await createList('Secret', 'private');
+
+    expect((await listsOf()).data?.items.map(({ title }) => title)).toEqual(['Trams']);
+    expect((await listOf(secret.id)).response.status).toBe(404);
   });
 
   it('says that the profile is private, in Problem Details format', async () => {

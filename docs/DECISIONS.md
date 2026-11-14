@@ -4,7 +4,8 @@ Decisions made while preparing the project, with the reasons behind them. The co
 
 ## 2026-11-14
 
-- **List search looks for words, not close spellings (FR-SRCH-004).** A list is found when its title or description contains every word of the query, a word possibly being part of a longer one ("timber" finds "Half-timbered towns"). Hyphens and other punctuation separate words, so "half-timbered" also finds "half timbered". Close spellings, as in city search, are left out for now: list titles are free text, and a typo-tolerant match on a few words finds too much. Lists of private profiles are not found, because a private profile shows nothing but its name (FR-PRIV-001).
+- **List search looks for words, not close spellings (FR-SRCH-004).** A list is found when its title or description contains every word of the query, a word possibly being part of a longer one ("timber" finds "Half-timbered towns"). Hyphens and other punctuation separate words, so "half-timbered" also finds "half timbered". Close spellings, as in city search, are left out for now: list titles are free text, and a typo-tolerant match on a few words finds too much.
+- **A private profile still shows its public custom lists (SRS 0.12, FR-PRIV-001, FR-LIST-005, FR-LIST-006).** A custom list is made to be shared, and its owner sets its visibility one by one, so making the profile private does not hide it, on the profile or in search. The username and display name stay visible anyway. The default lists, visits, ratings, lived-in cities, bio and avatar stay hidden: they are the travel record a private profile is there to hide, and since the Visited list is public by default, letting it through would make a private profile hide almost nothing. The API answers 403 for those parts, as for a private default list of a public profile; the profile itself (`/v1/users/{username}`) is answered normally with `isPrivate: true`.
 
 ## 2026-11-13
 

@@ -59,8 +59,9 @@ export interface ListStore {
   removeEntry(userId: number, listId: number, cityId: number): Promise<boolean>;
 
   /**
-   * Public custom lists of public profiles whose title or description contains every word
-   * (FR-SRCH-004, FR-LIST-006). The only method that reads the lists of all users.
+   * Public custom lists whose title or description contains every word, also of private
+   * profiles (FR-SRCH-004, FR-LIST-006, FR-PRIV-001). The only method that reads the lists of
+   * all users.
    */
   search(words: string[], options: { limit: number; offset: number }): Promise<ListSearchResult[]>;
 }
@@ -269,7 +270,7 @@ export function createListStore(sql: Sql): ListStore {
         SELECT ${listColumns}, users.username, users.display_name,
           ${contains(title)} AS in_title
         FROM lists JOIN users ON users.id = lists.user_id
-        WHERE lists.visibility = 'public' AND users.profile_visibility = 'public'
+        WHERE lists.visibility = 'public'
           AND ${contains(titleAndDescription)}
         -- Lists that have all words in the title first, then the longer lists.
         ORDER BY in_title DESC, entry_count DESC, lists.id DESC

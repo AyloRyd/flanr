@@ -3176,7 +3176,7 @@ export interface paths {
         };
         /**
          * Find public custom lists by their title and description (FR-SRCH-004, FR-LIST-006)
-         * @description Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists of public profiles are found. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.
+         * @description Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists are found, also those of private profiles. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.
          */
         get: {
             parameters: {
@@ -3977,7 +3977,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The public custom lists of a user, newest first (FR-LIST-006) */
+        /**
+         * The public custom lists of a user, newest first (FR-LIST-006)
+         * @description Also of a private profile (FR-PRIV-001).
+         */
         get: {
             parameters: {
                 query?: {
@@ -4014,24 +4017,6 @@ export interface paths {
                 };
                 /** @description Invalid request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": {
-                            type: string;
-                            title: string;
-                            status: number;
-                            detail?: string;
-                            errors?: {
-                                path: string;
-                                message: string;
-                            }[];
-                        };
-                    };
-                };
-                /** @description The profile is private (FR-PRIV-001) */
-                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4131,24 +4116,6 @@ export interface paths {
                         };
                     };
                 };
-                /** @description The profile is private (FR-PRIV-001) */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": {
-                            type: string;
-                            title: string;
-                            status: number;
-                            detail?: string;
-                            errors?: {
-                                path: string;
-                                message: string;
-                            }[];
-                        };
-                    };
-                };
                 /** @description No such user, or the user has no such public list */
                 404: {
                     headers: {
@@ -4218,24 +4185,6 @@ export interface paths {
                 };
                 /** @description Invalid request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": {
-                            type: string;
-                            title: string;
-                            status: number;
-                            detail?: string;
-                            errors?: {
-                                path: string;
-                                message: string;
-                            }[];
-                        };
-                    };
-                };
-                /** @description The profile is private (FR-PRIV-001) */
-                403: {
                     headers: {
                         [name: string]: unknown;
                     };

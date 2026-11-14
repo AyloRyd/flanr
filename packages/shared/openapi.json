@@ -7059,7 +7059,7 @@
     "/v1/public-lists": {
       "get": {
         "summary": "Find public custom lists by their title and description (FR-SRCH-004, FR-LIST-006)",
-        "description": "Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists of public profiles are found. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.",
+        "description": "Lists whose title or description contains every word of `q`, without letter case and diacritics; a word may be part of a longer word. Lists with all words in the title come first, then lists with more cities, then newer lists. Only public lists are found, also those of private profiles. Open to guests; a found list is opened through `/v1/users/{username}/lists/{listId}`.",
         "parameters": [
           {
             "schema": {
@@ -8975,6 +8975,7 @@
     "/v1/users/{username}/lists": {
       "get": {
         "summary": "The public custom lists of a user, newest first (FR-LIST-006)",
+        "description": "Also of a private profile (FR-PRIV-001).",
         "parameters": [
           {
             "schema": {
@@ -9074,53 +9075,6 @@
           },
           "400": {
             "description": "Invalid request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "path": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "path",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title",
-                    "status"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The profile is private (FR-PRIV-001)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -9334,53 +9288,6 @@
               }
             }
           },
-          "403": {
-            "description": "The profile is private (FR-PRIV-001)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "path": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "path",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title",
-                    "status"
-                  ]
-                }
-              }
-            }
-          },
           "404": {
             "description": "No such user, or the user has no such public list",
             "content": {
@@ -9526,53 +9433,6 @@
           },
           "400": {
             "description": "Invalid request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "path": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "path",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title",
-                    "status"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The profile is private (FR-PRIV-001)",
             "content": {
               "application/problem+json": {
                 "schema": {
