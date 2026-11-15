@@ -12,3 +12,5 @@ export * from './rating.ts';
 export * from './list.ts';
 export * from './data-export.ts';
 export * from './city-search.ts';
+export * from './city.ts';
+export * from './rating-colors.ts';
