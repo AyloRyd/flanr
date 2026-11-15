@@ -48,6 +48,6 @@ describe('updateProfileSchema (FR-PROF-001…003)', () => {
   });
 
   it('knows only public and private', () => {
-    expect(updateProfileSchema.safeParse({ visitedVisibility: 'friends' }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ profileVisibility: 'friends' }).success).toBe(false);
   });
 });

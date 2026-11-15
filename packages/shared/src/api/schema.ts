@@ -92,10 +92,6 @@ export interface paths {
                             homeCityVisible: boolean;
                             /** @enum {string} */
                             profileVisibility: "public" | "private";
-                            /** @enum {string} */
-                            visitedVisibility: "public" | "private";
-                            /** @enum {string} */
-                            plannedVisibility: "public" | "private";
                             roles: ("user" | "moderator" | "administrator")[];
                             registeredAt: string;
                         };
@@ -223,10 +219,6 @@ export interface paths {
                         homeCityVisible?: boolean;
                         /** @enum {string} */
                         profileVisibility?: "public" | "private";
-                        /** @enum {string} */
-                        visitedVisibility?: "public" | "private";
-                        /** @enum {string} */
-                        plannedVisibility?: "public" | "private";
                     };
                 };
             };
@@ -247,10 +239,6 @@ export interface paths {
                             homeCityVisible: boolean;
                             /** @enum {string} */
                             profileVisibility: "public" | "private";
-                            /** @enum {string} */
-                            visitedVisibility: "public" | "private";
-                            /** @enum {string} */
-                            plannedVisibility: "public" | "private";
                             roles: ("user" | "moderator" | "administrator")[];
                             registeredAt: string;
                         };
@@ -3556,10 +3544,6 @@ export interface paths {
                                 homeCityVisible: boolean;
                                 /** @enum {string} */
                                 profileVisibility: "public" | "private";
-                                /** @enum {string} */
-                                visitedVisibility: "public" | "private";
-                                /** @enum {string} */
-                                plannedVisibility: "public" | "private";
                                 roles: ("user" | "moderator" | "administrator")[];
                                 registeredAt: string;
                             };
@@ -3669,7 +3653,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The Visited list of a user, if it is public (FR-PROF-004, FR-LIST-005) */
+        /** The Visited list of a user with a public profile (FR-PROF-004, FR-LIST-005) */
         get: {
             parameters: {
                 query?: {
@@ -3716,7 +3700,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description The profile or this list is private (FR-LIST-005) */
+                /** @description The profile is private (FR-PRIV-001) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -3769,7 +3753,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The Planned list of a user, if it is public (FR-PROF-004, FR-LIST-005) */
+        /** The Planned list of a user with a public profile (FR-PROF-004, FR-LIST-005) */
         get: {
             parameters: {
                 query?: {
@@ -3817,7 +3801,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description The profile or this list is private (FR-LIST-005) */
+                /** @description The profile is private (FR-PRIV-001) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -3870,7 +3854,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The city ratings of a user with a public profile (FR-PROF-004) */
+        /** The city ratings of a user with a public profile, part of the Visited list (FR-PROF-004) */
         get: {
             parameters: {
                 query?: {

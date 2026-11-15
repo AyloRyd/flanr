@@ -19,8 +19,6 @@ const user = {
   homeCityId: null,
   homeCityVisible: false,
   profileVisibility: 'public' as const,
-  visitedVisibility: 'public' as const,
-  plannedVisibility: 'public' as const,
   roles: ['user' as const],
   registeredAt: '2026-03-01T12:00:00.000Z',
 };
