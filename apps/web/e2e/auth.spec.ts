@@ -16,6 +16,8 @@ test('a guest sees the sign-in button and reaches the sign-in form (FR-AUTH-001)
 }) => {
   await setupClerkTestingToken({ page });
   await page.goto('/');
+  // The button only works once Clerk has loaded in the browser.
+  await clerk.loaded({ page });
 
   await signInButton(page).click();
 

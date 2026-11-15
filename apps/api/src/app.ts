@@ -18,6 +18,8 @@ import {
   type TokenVerifier,
   type UserResolver,
 } from './auth.ts';
+import type { CityStore } from './cities.ts';
+import { registerCityRoutes } from './city-routes.ts';
 import { registerCitySearchRoutes } from './city-search-routes.ts';
 import type { CitySearch, Geography } from './city-search.ts';
 import { tileParamsSchema, type TileParams } from './city-tiles.ts';
@@ -44,6 +46,7 @@ export interface AppDependencies {
   checkDatabase: () => Promise<boolean>;
   getCityTile: (params: TileParams) => Promise<Uint8Array | null>;
   searchCities: CitySearch;
+  cities: CityStore;
   geography: Geography;
   /** Origins of web clients that may call the API from the browser. */
   corsOrigins: string[];
@@ -107,6 +110,7 @@ export function createApp({
   checkDatabase,
   getCityTile,
   searchCities,
+  cities,
   geography,
   corsOrigins,
   verifyToken,
@@ -188,6 +192,7 @@ export function createApp({
   registerListRoutes(app, lists);
   registerListSearchRoutes(app, lists);
   registerCitySearchRoutes(app, searchCities, geography);
+  registerCityRoutes(app, cities);
   registerProfileRoutes(app, profiles);
   registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);
   registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });

@@ -3425,6 +3425,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/cities/{cityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A city with the data of its city page (FR-CITY-001, FR-CITY-002)
+         * @description Fields that are not known are null. The boundary is simplified to about 10 m and is null for a city mapped as a point only. Open to guests.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The city */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                            nameEn: string;
+                            /** @enum {string} */
+                            settlementType: "city" | "town" | "village" | "hamlet";
+                            /** @enum {string} */
+                            capitalStatus: "national" | "regional" | "none";
+                            country: {
+                                code: string;
+                                name: string;
+                            };
+                            region: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            municipality: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            centre: {
+                                latitude: number;
+                                longitude: number;
+                            };
+                            boundary: {
+                                /** @enum {string} */
+                                type: "MultiPolygon";
+                                coordinates: number[][][][];
+                            } | null;
+                            osm: {
+                                /** @enum {string} */
+                                type: "node" | "way" | "relation";
+                                id: number;
+                            };
+                            population: number | null;
+                            populationYear: number | null;
+                            areaKm2: number | null;
+                            elevationM: number | null;
+                            founded: number | null;
+                            wikipediaUrl: string | null;
+                            website: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description City not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users/{username}": {
         parameters: {
             query?: never;
