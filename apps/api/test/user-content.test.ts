@@ -131,30 +131,6 @@ describe('Content of a public profile (FR-PROF-004, BR-013)', () => {
   });
 });
 
-describe('Visibility of the default lists (FR-LIST-005)', () => {
-  it('hides a private Visited list and keeps the Planned list', async () => {
-    await set({ visitedVisibility: 'private' });
-
-    expect((await visitedOf()).response.status).toBe(403);
-    expect((await visitedOf(bob)).response.status).toBe(403);
-    expect((await plannedOf()).response.status).toBe(200);
-  });
-
-  it('hides a private Planned list and keeps the Visited list', async () => {
-    await set({ plannedVisibility: 'private' });
-
-    expect((await plannedOf()).response.status).toBe(403);
-    expect((await visitedOf()).response.status).toBe(200);
-  });
-
-  it('still shows the owner their own lists', async () => {
-    await set({ visitedVisibility: 'private', plannedVisibility: 'private' });
-
-    expect((await ada.GET('/v1/visited-cities')).data?.items).toHaveLength(2);
-    expect((await ada.GET('/v1/planned-cities')).data?.items).toHaveLength(1);
-  });
-});
-
 describe('Custom lists of another user (FR-LIST-005, FR-LIST-006)', () => {
   it('shows a public list with its entries', async () => {
     const list = await createList('Trams');
@@ -217,7 +193,7 @@ describe('A private profile (FR-PRIV-001, FR-PRIV-003)', () => {
     await set({ profileVisibility: 'private' });
   });
 
-  it('hides its visits, ratings and default lists from guests and other users', async () => {
+  it('hides its default lists and ratings from guests and other users (FR-LIST-005)', async () => {
     for (const client of [guest, bob]) {
       expect((await visitedOf(client)).response.status).toBe(403);
       expect((await plannedOf(client)).response.status).toBe(403);
@@ -265,6 +241,7 @@ describe('A private profile (FR-PRIV-001, FR-PRIV-003)', () => {
 
   it('still shows the owner everything', async () => {
     expect((await ada.GET('/v1/visited-cities')).data?.items).toHaveLength(2);
+    expect((await ada.GET('/v1/planned-cities')).data?.items).toHaveLength(1);
     expect((await ada.GET('/v1/ratings')).data?.items).toHaveLength(1);
     expect((await ada.GET('/v1/lists')).data?.items).toHaveLength(1);
   });

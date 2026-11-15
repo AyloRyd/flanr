@@ -18,8 +18,6 @@ interface UserRow {
   home_city_id: number | null;
   home_city_visible: boolean;
   profile_visibility: Visibility;
-  visited_visibility: Visibility;
-  planned_visibility: Visibility;
   roles: UserRole[];
   registered_at: Date;
 }
@@ -33,8 +31,6 @@ const toCurrentUser = (row: UserRow): CurrentUser => ({
   homeCityId: row.home_city_id,
   homeCityVisible: row.home_city_visible,
   profileVisibility: row.profile_visibility,
-  visitedVisibility: row.visited_visibility,
-  plannedVisibility: row.planned_visibility,
   roles: row.roles,
   registeredAt: row.registered_at.toISOString(),
 });
@@ -43,8 +39,8 @@ const toCurrentUser = (row: UserRow): CurrentUser => ({
 const userColumns = (sql: Sql) => sql`
   users.id, users.username, users.display_name, users.avatar_url, users.bio,
   (SELECT city_id FROM lived_cities WHERE user_id = users.id AND is_current) AS home_city_id,
-  users.home_city_visible, users.profile_visibility, users.visited_visibility,
-  users.planned_visibility, users.roles::text[] AS roles, users.registered_at`;
+  users.home_city_visible, users.profile_visibility, users.roles::text[] AS roles,
+  users.registered_at`;
 
 /** A username for an account that has not chosen one yet. The user can change it later. */
 const placeholderUsername = () => `user_${randomBytes(5).toString('hex')}`;
@@ -116,8 +112,6 @@ export async function deleteUserByAuthProviderId(sql: Sql, authProviderId: strin
 export interface ContentOwner {
   id: number;
   profileVisibility: Visibility;
-  visitedVisibility: Visibility;
-  plannedVisibility: Visibility;
 }
 
 /** Profiles: the user's own settings and what everyone sees of a user. */
@@ -143,12 +137,6 @@ export function createProfileStore(sql: Sql): ProfileStore {
         ...(changes.profileVisibility === undefined
           ? {}
           : { profile_visibility: changes.profileVisibility }),
-        ...(changes.visitedVisibility === undefined
-          ? {}
-          : { visited_visibility: changes.visitedVisibility }),
-        ...(changes.plannedVisibility === undefined
-          ? {}
-          : { planned_visibility: changes.plannedVisibility }),
       };
       try {
         const [row] =
@@ -168,8 +156,7 @@ export function createProfileStore(sql: Sql): ProfileStore {
 
     async findContentOwner(username) {
       const [owner] = await sql<ContentOwner[]>`
-        SELECT id, profile_visibility AS "profileVisibility",
-          visited_visibility AS "visitedVisibility", planned_visibility AS "plannedVisibility"
+        SELECT id, profile_visibility AS "profileVisibility"
         FROM users WHERE lower(username) = lower(${username})`;
       return owner ?? null;
     },
@@ -183,9 +170,9 @@ export function createProfileStore(sql: Sql): ProfileStore {
         username: row.username,
         displayName: row.display_name,
         isPrivate,
-        // FR-PRIV-001: a private profile shows the username and the display name only.
-        avatarUrl: isPrivate ? null : row.avatar_url,
-        bio: isPrivate ? null : row.bio,
+        // FR-PRIV-001: a private profile shows who it is, but not where the user has been.
+        avatarUrl: row.avatar_url,
+        bio: row.bio,
         homeCityId: isPrivate || !row.home_city_visible ? null : row.home_city_id,
       };
     },
