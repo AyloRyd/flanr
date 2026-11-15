@@ -2,6 +2,13 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-16
+
+- **Visual style: light and airy, like a travel-booking site, with a dark theme.** White surfaces, near-black text, thin borders, large radii, generous spacing and one warm rose accent for the main action of a page; the rating colours (SRS appendix C) are the only other colours. The dark theme follows the system until the user picks light or dark in the header. The font is Figtree, a free geometric sans served by `next/font` from the app itself.
+- **Components: shadcn/ui on Tailwind CSS (CON-002).** The components are copied into `apps/web/components/ui` and owned by the project, so they can be restyled without fighting a library.
+- **Page URLs use the bare city ID**, as map services do: `/cities/{id}`. No name in the URL, so it never changes when a city is renamed. Profiles are `/u/{username}` and lists `/u/{username}/lists/{id}`.
+- **Localisation is in the MVP, but only English (NFR-L10N-001…002).** `next-intl` reads every text from `messages/en.json`; the locale is fixed and not part of the URL. Setting this up at the start costs little, while moving hard-coded text into files later touches every page. Message keys are type-checked.
+
 ## 2026-11-14
 
 - **List search looks for words, not close spellings (FR-SRCH-004).** A list is found when its title or description contains every word of the query, a word possibly being part of a longer one ("timber" finds "Half-timbered towns"). Hyphens and other punctuation separate words, so "half-timbered" also finds "half timbered". Close spellings, as in city search, are left out for now: list titles are free text, and a typo-tolerant match on a few words finds too much.

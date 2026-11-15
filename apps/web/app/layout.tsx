@@ -1,17 +1,53 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import { Figtree } from 'next/font/google';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
-import { messages } from '@/i18n';
+import { SiteFooter } from '@/components/site-footer';
+import { SiteHeader } from '@/components/site-header';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
-export const metadata: Metadata = {
-  title: messages.app.name,
-  description: messages.app.tagline,
+const figtree = Figtree({ subsets: ['latin', 'latin-ext'], variable: '--font-figtree' });
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app');
+  return {
+    title: { default: t('name'), template: `%s · ${t('name')}` },
+    description: t('tagline'),
+  };
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#1c1c1c' },
+  ],
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const [locale, t] = await Promise.all([getLocale(), getTranslations('nav')]);
+
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-neutral-900 antialiased">{children}</body>
+    // next-themes sets the theme class before React runs, so the server markup differs.
+    <html lang={locale} className={figtree.variable} suppressHydrationWarning>
+      <body className="flex min-h-svh flex-col">
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <a
+              href="#main"
+              className="sr-only rounded-lg bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+            >
+              {t('skipToContent')}
+            </a>
+            <SiteHeader />
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+            <SiteFooter />
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
