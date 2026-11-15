@@ -105,11 +105,11 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ## Phase 6 — Web foundation
 
-- [ ] Next.js App Router with SSR, Tailwind CSS and a component library (for example shadcn/ui) (CON-002).
+- [x] Next.js App Router with SSR, Tailwind CSS and shadcn/ui (CON-002). Light and dark theme, see DECISIONS.md.
 - [ ] Clerk integration: sign-up and sign-in with email and password, email code and Google; sign-out; change email (FR-AUTH-003…008).
 - [ ] Registration prompt on write actions with return to the same page (FR-AUTH-002).
-- [ ] i18n setup with all text in English translation files (NFR-L10N-001…003).
-- [ ] Layout, navigation, responsive design from 360 px (NFR-UX-001).
+- [x] i18n setup with all text in English translation files (NFR-L10N-001…003). `next-intl` with `messages/en.json` and type-checked keys; dates and numbers are formatted with it as pages need them.
+- [x] Layout, navigation, responsive design from 360 px (NFR-UX-001). Header, footer, skip link and a not-found page; navigation links are added with their pages.
 
 **Done when:** a guest can browse, and a user can sign up, sign in and sign out in desktop and mobile browsers.
 

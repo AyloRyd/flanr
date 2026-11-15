@@ -1,10 +1,15 @@
-import { messages } from '@/i18n';
+import { useTranslations } from 'next-intl';
 
 export default function HomePage() {
+  const t = useTranslations('home');
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4">
-      <h1 className="text-4xl font-semibold">{messages.app.name}</h1>
-      <p className="text-neutral-600">{messages.app.tagline}</p>
-    </main>
+    <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-16 sm:px-6 sm:py-24">
+      <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+        {t('title')}
+      </h1>
+      <p className="max-w-xl text-lg text-muted-foreground">{t('lead')}</p>
+      <p className="text-sm text-muted-foreground">{t('comingSoon')}</p>
+    </section>
   );
 }
