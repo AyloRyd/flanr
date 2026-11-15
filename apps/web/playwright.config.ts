@@ -4,6 +4,9 @@ const port = 3000;
 
 export default defineConfig({
   testDir: './e2e',
+  // A Clerk testing token and a test user in the Clerk development instance.
+  globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
