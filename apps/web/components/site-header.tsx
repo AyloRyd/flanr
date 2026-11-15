@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { AccountMenu } from '@/components/account-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-/**
- * The bar at the top of every page. Navigation links and the account menu join it as their
- * pages are built (phases 6 and 7).
- */
+/** The bar at the top of every page. Navigation links join it as their pages are built. */
 export function SiteHeader() {
   const t = useTranslations('app');
 
@@ -15,7 +13,10 @@ export function SiteHeader() {
         <Link href="/" className="text-xl font-bold tracking-tight text-primary">
           {t('name')}
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <AccountMenu />
+        </div>
       </div>
     </header>
   );

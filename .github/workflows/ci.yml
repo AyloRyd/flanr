@@ -45,6 +45,10 @@ jobs:
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
+    # Keys of the Clerk development instance. The tests create a test user there and delete it.
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

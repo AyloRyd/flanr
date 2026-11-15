@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
@@ -6,6 +7,7 @@ import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { ThemeProvider } from '@/components/theme-provider';
+import { clerkAppearance } from '@/lib/clerk-appearance';
 import './globals.css';
 
 const figtree = Figtree({ subsets: ['latin', 'latin-ext'], variable: '--font-figtree' });
@@ -32,21 +34,23 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     // next-themes sets the theme class before React runs, so the server markup differs.
     <html lang={locale} className={figtree.variable} suppressHydrationWarning>
       <body className="flex min-h-svh flex-col">
-        <NextIntlClientProvider>
-          <ThemeProvider>
-            <a
-              href="#main"
-              className="sr-only rounded-lg bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
-            >
-              {t('skipToContent')}
-            </a>
-            <SiteHeader />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" appearance={clerkAppearance}>
+          <NextIntlClientProvider>
+            <ThemeProvider>
+              <a
+                href="#main"
+                className="sr-only rounded-lg bg-background px-4 py-2 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+              >
+                {t('skipToContent')}
+              </a>
+              <SiteHeader />
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <SiteFooter />
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
