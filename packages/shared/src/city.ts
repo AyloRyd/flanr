@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { settlementTypeSchema } from './city-search.ts';
+import { livedCitySchema } from './lived-city.ts';
+import { cityRatingSchema } from './rating.ts';
 
 export const capitalStatuses = ['national', 'regional', 'none'] as const;
 export const capitalStatusSchema = z.enum(capitalStatuses);
@@ -44,3 +46,24 @@ export const cityDetailsSchema = z.object({
 });
 
 export type CityDetails = z.infer<typeof cityDetailsSchema>;
+
+/**
+ * The signed-in user's own data for one city, for the city page (FR-CITY-004). The dated visits
+ * themselves come from `GET /v1/visits?cityId=`.
+ */
+export const ownCityDataSchema = z.object({
+  cityId: z.number().int(),
+  /** All visits, undated ones included. */
+  visitCount: z.number().int().min(0),
+  undatedVisitCount: z.number().int().min(0),
+  /** Null if the user has not lived in the city (BR-016). */
+  lived: livedCitySchema.omit({ cityId: true }).nullable(),
+  /** A visited or lived-in city is in the Visited list and cannot be planned (BR-004). */
+  visited: z.boolean(),
+  planned: z.boolean(),
+  rating: cityRatingSchema.nullable(),
+  /** The user's custom lists that contain the city, by title. */
+  lists: z.array(z.object({ id: z.number().int(), title: z.string() })),
+});
+
+export type OwnCityData = z.infer<typeof ownCityDataSchema>;
