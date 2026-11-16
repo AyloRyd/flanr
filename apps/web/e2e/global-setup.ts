@@ -2,13 +2,16 @@ import { randomUUID } from 'node:crypto';
 import { createClerkClient } from '@clerk/backend';
 import { clerkSetup } from '@clerk/testing/playwright';
 import { clerkKeys } from './clerk-env';
+import { seedE2eDatabase } from './database';
 
 /**
- * Gets a Clerk testing token, so that Clerk's bot protection lets the tests through, and creates
+ * Seeds the database of the test API with the test cities. Gets a Clerk testing token, so that Clerk's bot protection lets the tests through, and creates
  * a user for the sign-in tests. Its address uses Clerk's `+clerk_test` form, which never receives
  * mail. The user is deleted again in global-teardown.ts.
  */
 export default async function globalSetup(): Promise<void> {
+  await seedE2eDatabase();
+
   const { publishableKey, secretKey } = clerkKeys();
   await clerkSetup({ publishableKey, secretKey });
 

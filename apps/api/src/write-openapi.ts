@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { noAccountStore } from './accounts.ts';
+import { noCityStore } from './cities.ts';
 import { createApp } from './app.ts';
 import { noDefaultListStore } from './default-lists.ts';
 import { noListStore } from './lists.ts';
@@ -21,6 +22,7 @@ const app = createApp({
   checkDatabase: async () => false,
   getCityTile: async () => null,
   searchCities: async () => [],
+  cities: noCityStore,
   geography: { countries: async () => [], regions: async () => [] },
   corsOrigins: [],
   verifyToken: async () => null,

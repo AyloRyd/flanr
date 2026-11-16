@@ -117,8 +117,8 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ## Phase 7 — Web pages
 
-- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004).
-- [ ] Links to external maps on the city page (FR-CITY-009).
+- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004). Done: `/cities/{id}` with the data, the community rating and its criteria (FR-CITY-001…003) from `GET /v1/cities/{cityId}`. Open: the boundary map (with Mapbox in Phase 8), personal data and the actions.
+- [x] Links to external maps on the city page (FR-CITY-009).
 - [ ] Visit form with date precision and the "before registration" option, help hint with the recommended visit model (FR-VIS-002, FR-VIS-003, FR-VIS-008).
 - [ ] Rating form with criteria and the suggested subjective rating (FR-RATE-001…003).
 - [ ] Search page for cities and lists (Phase 5).

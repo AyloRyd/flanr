@@ -7672,6 +7672,338 @@
         }
       }
     },
+    "/v1/cities/{cityId}": {
+      "get": {
+        "summary": "A city with the data of its city page (FR-CITY-001, FR-CITY-002)",
+        "description": "Fields that are not known are null. The boundary is simplified to about 10 m and is null for a city mapped as a point only. Open to guests.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "required": true,
+            "name": "cityId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The city",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "nameEn": {
+                      "type": "string"
+                    },
+                    "settlementType": {
+                      "type": "string",
+                      "enum": [
+                        "city",
+                        "town",
+                        "village",
+                        "hamlet"
+                      ]
+                    },
+                    "capitalStatus": {
+                      "type": "string",
+                      "enum": [
+                        "national",
+                        "regional",
+                        "none"
+                      ]
+                    },
+                    "country": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "name"
+                      ]
+                    },
+                    "region": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    },
+                    "municipality": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    },
+                    "centre": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": {
+                          "type": "number"
+                        },
+                        "longitude": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "latitude",
+                        "longitude"
+                      ]
+                    },
+                    "boundary": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "MultiPolygon"
+                          ]
+                        },
+                        "coordinates": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "array",
+                                "items": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "coordinates"
+                      ]
+                    },
+                    "osm": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "node",
+                            "way",
+                            "relation"
+                          ]
+                        },
+                        "id": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ]
+                    },
+                    "population": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "populationYear": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "areaKm2": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "elevationM": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "founded": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "wikipediaUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "website": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "nameEn",
+                    "settlementType",
+                    "capitalStatus",
+                    "country",
+                    "region",
+                    "municipality",
+                    "centre",
+                    "boundary",
+                    "osm",
+                    "population",
+                    "populationYear",
+                    "areaKm2",
+                    "elevationM",
+                    "founded",
+                    "wikipediaUrl",
+                    "website"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "City not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/{username}": {
       "get": {
         "summary": "The profile of a user as everyone sees it (FR-PROF-004)",
