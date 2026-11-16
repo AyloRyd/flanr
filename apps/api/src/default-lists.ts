@@ -22,6 +22,15 @@ export interface DefaultListStore {
   /** Returns null, and plans nothing, if the user has already visited the city (BR-004). */
   plan(userId: number, cityId: number): Promise<PlannedCity | null>;
   unplan(userId: number, cityId: number): Promise<boolean>;
+  /** Where the city stands in the user's default lists, and how often the user was there. */
+  cityStatus(userId: number, cityId: number): Promise<DefaultListStatus>;
+}
+
+export interface DefaultListStatus {
+  visitCount: number;
+  undatedVisitCount: number;
+  visited: boolean;
+  planned: boolean;
 }
 
 /**
@@ -127,6 +136,20 @@ export function createDefaultListStore(sql: Sql): DefaultListStore {
         if (!row) throw new Error('City could not be planned');
         return toPlannedCity(row);
       });
+    },
+
+    async cityStatus(userId, cityId) {
+      const [row] = await sql<DefaultListStatus[]>`
+        SELECT
+          (SELECT count(*)::int FROM visits
+            WHERE user_id = ${userId} AND city_id = ${cityId}) AS "visitCount",
+          (SELECT count(*)::int FROM visits
+            WHERE user_id = ${userId} AND city_id = ${cityId} AND date IS NULL)
+            AS "undatedVisitCount",
+          EXISTS (SELECT 1 FROM planned_cities
+            WHERE user_id = ${userId} AND city_id = ${cityId}) AS planned`;
+      if (!row) throw new Error('City status could not be read');
+      return { ...row, visited: await isVisited(sql, userId, cityId) };
     },
 
     async unplan(userId, cityId) {

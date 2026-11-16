@@ -1,12 +1,7 @@
 import { clerk, setupClerkTestingToken } from '@clerk/testing/playwright';
 import { expect, test } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
-
-const emailAddress = () => {
-  const email = process.env.E2E_USER_EMAIL;
-  if (!email) throw new Error('The global setup has not created the test user');
-  return email;
-};
+import { signInTestUser } from './users';
 
 const signInButton = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: en.auth.signIn });
@@ -21,7 +16,8 @@ test('a guest sees the sign-in button and reaches the sign-in form (FR-AUTH-001)
 
   await signInButton(page).click();
 
-  await expect(page).toHaveURL(/\/sign-in/);
+  // The first visit of the sign-in page compiles it on the development server.
+  await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
   await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible();
   await expect(page.getByLabel(/email address/i)).toBeVisible();
 });
@@ -34,9 +30,11 @@ test('the sign-up page shows the sign-up form', async ({ page }) => {
   await expect(page.getByLabel(/email address/i)).toBeVisible();
 });
 
-test('a user signs in, sees the account menu and signs out (FR-AUTH-007)', async ({ page }) => {
+test('a user signs in, sees the account menu and signs out (FR-AUTH-007)', async ({
+  page,
+}, testInfo) => {
   await page.goto('/');
-  await clerk.signIn({ page, emailAddress: emailAddress() });
+  await signInTestUser(page, testInfo);
   await page.reload();
 
   // The server renders the signed-in header, so the session reached the proxy too.

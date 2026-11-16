@@ -7958,6 +7958,302 @@
         }
       }
     },
+    "/v1/me/cities/{cityId}": {
+      "get": {
+        "summary": "The signed-in user's own data for a city (FR-CITY-004)",
+        "description": "Visit counts, the lived-in mark, whether the city is visited or planned, the rating and the custom lists that contain it. The dated visits are listed by `GET /v1/visits?cityId=`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "required": true,
+            "name": "cityId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user's data for the city",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cityId": {
+                      "type": "integer"
+                    },
+                    "visitCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "undatedVisitCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "lived": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "isCurrent": {
+                          "type": "boolean"
+                        },
+                        "from": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+                        },
+                        "to": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+                        }
+                      },
+                      "required": [
+                        "isCurrent",
+                        "from",
+                        "to"
+                      ]
+                    },
+                    "visited": {
+                      "type": "boolean"
+                    },
+                    "planned": {
+                      "type": "boolean"
+                    },
+                    "rating": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "cityId": {
+                          "type": "integer"
+                        },
+                        "subjective": {
+                          "type": "number",
+                          "minimum": 1,
+                          "maximum": 10
+                        },
+                        "criteria": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 10
+                          }
+                        },
+                        "criteriaAverage": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "cityId",
+                        "subjective",
+                        "criteria",
+                        "criteriaAverage",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    "lists": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "cityId",
+                    "visitCount",
+                    "undatedVisitCount",
+                    "lived",
+                    "visited",
+                    "planned",
+                    "rating",
+                    "lists"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "City not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users/{username}": {
       "get": {
         "summary": "The profile of a user as everyone sees it (FR-PROF-004)",

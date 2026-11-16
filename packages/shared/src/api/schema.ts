@@ -3543,6 +3543,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/cities/{cityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The signed-in user's own data for a city (FR-CITY-004)
+         * @description Visit counts, the lived-in mark, whether the city is visited or planned, the rating and the custom lists that contain it. The dated visits are listed by `GET /v1/visits?cityId=`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The user's data for the city */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cityId: number;
+                            visitCount: number;
+                            undatedVisitCount: number;
+                            lived: {
+                                isCurrent: boolean;
+                                from: string | null;
+                                to: string | null;
+                            } | null;
+                            visited: boolean;
+                            planned: boolean;
+                            rating: {
+                                cityId: number;
+                                subjective: number;
+                                criteria: {
+                                    [key: string]: number;
+                                };
+                                criteriaAverage: number | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            } | null;
+                            lists: {
+                                id: number;
+                                title: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description City not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users/{username}": {
         parameters: {
             query?: never;

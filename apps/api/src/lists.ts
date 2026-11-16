@@ -57,6 +57,8 @@ export interface ListStore {
     changes: UpdateListEntry,
   ): Promise<UpdateEntryResult>;
   removeEntry(userId: number, listId: number, cityId: number): Promise<boolean>;
+  /** The user's lists that contain the city, by title. */
+  containing(userId: number, cityId: number): Promise<{ id: number; title: string }[]>;
 
   /**
    * Public custom lists whose title or description contains every word, also of private
@@ -279,6 +281,14 @@ export function createListStore(sql: Sql): ListStore {
         ...toList(row),
         owner: { username: row.username, displayName: row.display_name },
       }));
+    },
+
+    async containing(userId, cityId) {
+      return sql<{ id: number; title: string }[]>`
+        SELECT lists.id, lists.title FROM lists
+        JOIN list_entries ON list_entries.list_id = lists.id
+        WHERE lists.user_id = ${userId} AND list_entries.city_id = ${cityId}
+        ORDER BY lists.title, lists.id`;
     },
 
     async removeEntry(userId, listId, cityId) {
