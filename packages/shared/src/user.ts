@@ -115,10 +115,6 @@ export const currentUserSchema = z.object({
   /** Whether others see the home location. Hidden unless the user shows it (FR-PROF-003). */
   homeCityVisible: z.boolean(),
   profileVisibility: visibilitySchema,
-  /** Visibility of the Visited list (FR-LIST-005). */
-  visitedVisibility: visibilitySchema,
-  /** Visibility of the Planned list (FR-LIST-005). */
-  plannedVisibility: visibilitySchema,
   roles: z.array(userRoleSchema),
   /** When the account was created, as an ISO 8601 timestamp. Visits after it need a date (BR-002). */
   registeredAt: z.string(),
@@ -133,8 +129,6 @@ export const updateProfileSchema = z.object({
   bio: bioSchema.optional(),
   homeCityVisible: z.boolean().optional(),
   profileVisibility: visibilitySchema.optional(),
-  visitedVisibility: visibilitySchema.optional(),
-  plannedVisibility: visibilitySchema.optional(),
 });
 
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;

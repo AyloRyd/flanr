@@ -148,6 +148,13 @@
       "when": 1794663197235,
       "tag": "0020_list_search",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794828610646,
+      "tag": "0021_single_privacy_setting",
+      "breakpoints": true
     }
   ]
 }

@@ -28,8 +28,6 @@ const contentErrors = {
   404: problemResponse('No user has this username'),
 };
 
-const privateList = problemResponse('The profile or this list is private (FR-LIST-005)');
-
 /** Responses of the routes for custom lists, which a private profile still shows (FR-PRIV-001). */
 const customListErrors = {
   400: problemResponse('Invalid request'),
@@ -39,31 +37,30 @@ const customListErrors = {
 const visitedRoute = createRoute({
   method: 'get',
   path: '/v1/users/{username}/visited-cities',
-  summary: 'The Visited list of a user, if it is public (FR-PROF-004, FR-LIST-005)',
+  summary: 'The Visited list of a user with a public profile (FR-PROF-004, FR-LIST-005)',
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of visited cities', ...json(publicVisitedCityPageSchema) },
     ...contentErrors,
-    403: privateList,
   },
 });
 
 const plannedRoute = createRoute({
   method: 'get',
   path: '/v1/users/{username}/planned-cities',
-  summary: 'The Planned list of a user, if it is public (FR-PROF-004, FR-LIST-005)',
+  summary: 'The Planned list of a user with a public profile (FR-PROF-004, FR-LIST-005)',
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of planned cities', ...json(plannedCityPageSchema) },
     ...contentErrors,
-    403: privateList,
   },
 });
 
 const ratingsRoute = createRoute({
   method: 'get',
   path: '/v1/users/{username}/ratings',
-  summary: 'The city ratings of a user with a public profile (FR-PROF-004)',
+  summary:
+    'The city ratings of a user with a public profile, part of the Visited list (FR-PROF-004)',
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of ratings', ...json(cityRatingPageSchema) },
@@ -116,9 +113,9 @@ export interface UserContentStores {
 
 /**
  * What everyone, guests included, can see of a user's content. Of a private profile only the
- * public custom lists are shown (FR-PRIV-001, FR-PRIV-003), and of a public one only the lists
- * that are public (FR-LIST-005). The owner reads their own content through the routes for the
- * signed-in user.
+ * public custom lists are shown (FR-PRIV-001, FR-PRIV-003), and of a public one everything but
+ * the private custom lists (FR-LIST-005). The owner reads their own content through the routes
+ * for the signed-in user.
  */
 export function registerUserContentRoutes(
   app: OpenAPIHono<AuthEnv>,
@@ -149,9 +146,6 @@ export function registerUserContentRoutes(
   app.openapi(visitedRoute, async (c) => {
     const found = await publicOwner(c, c.req.valid('param').username);
     if ('response' in found) return found.response as never;
-    if (found.owner.visitedVisibility === 'private') {
-      return problem(c, 403, 'List is private') as never;
-    }
     const { limit, cursor } = c.req.valid('query');
     const afterCityId = idFromCursor(cursor);
     if (afterCityId === null) return invalidCursor(c) as never;
@@ -171,9 +165,6 @@ export function registerUserContentRoutes(
   app.openapi(plannedRoute, async (c) => {
     const found = await publicOwner(c, c.req.valid('param').username);
     if ('response' in found) return found.response as never;
-    if (found.owner.plannedVisibility === 'private') {
-      return problem(c, 403, 'List is private') as never;
-    }
     const { limit, cursor } = c.req.valid('query');
     const afterCityId = idFromCursor(cursor);
     if (afterCityId === null) return invalidCursor(c) as never;

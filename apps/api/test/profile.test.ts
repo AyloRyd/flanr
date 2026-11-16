@@ -48,8 +48,6 @@ describe('GET /v1/me', () => {
       homeCityId: null,
       homeCityVisible: false,
       profileVisibility: 'public',
-      visitedVisibility: 'public',
-      plannedVisibility: 'public',
     });
   });
 });
@@ -206,22 +204,27 @@ describe('Home location (FR-PROF-003, BR-016)', () => {
   });
 });
 
-describe('Visibility settings (FR-LIST-005, FR-PRIV-001)', () => {
-  it('stores the visibility of the Visited and the Planned list separately', async () => {
-    const { data } = await change({ plannedVisibility: 'private' });
+describe('Profile visibility (FR-PRIV-001)', () => {
+  it('is the only privacy setting; separate list settings are not stored', async () => {
+    const { data } = await ada.PATCH('/v1/me', {
+      // A client of the old contract may still send them; they are ignored.
+      body: { profileVisibility: 'private', visitedVisibility: 'public' } as never,
+    });
 
-    expect(data).toMatchObject({ visitedVisibility: 'public', plannedVisibility: 'private' });
+    expect(data?.profileVisibility).toBe('private');
+    expect(data).not.toHaveProperty('visitedVisibility');
+    expect(data).not.toHaveProperty('plannedVisibility');
   });
 
-  it('shows only the username and the display name of a private profile', async () => {
+  it('shows who the user is but not where they live on a private profile', async () => {
     await change({ bio: 'Trams.', homeCityVisible: true, profileVisibility: 'private' });
 
     expect((await profileOf('Ada_1')).data).toEqual({
       username: 'Ada_1',
       displayName: 'Ada Lovelace',
       isPrivate: true,
-      avatarUrl: null,
-      bio: null,
+      avatarUrl: 'https://example.com/ada.png',
+      bio: 'Trams.',
       homeCityId: null,
     });
   });

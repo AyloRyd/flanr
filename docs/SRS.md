@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.12 |
+| Version | 0.13 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-14 |
+| Date | 2026-11-16 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -26,6 +26,7 @@
 | 0.10 | 2026-11-13 | A. Malyshkin | Visibility of the two default lists stored as two user settings (FR-LIST-005, User entity); username and display name are managed in Flanr, the avatar comes from the Clerk account (FR-PROF-001, FR-PROF-002) |
 | 0.11 | 2026-11-13 | A. Malyshkin | Resolved OI-011: the user sets the minimum number of ratings when sorting or filtering by community rating, 10 by default (FR-SRCH-003) |
 | 0.12 | 2026-11-14 | A. Malyshkin | Public custom lists stay visible and findable when the profile is private (FR-PRIV-001, FR-PRIV-003, FR-LIST-005, FR-LIST-006) |
+| 0.13 | 2026-11-16 | A. Malyshkin | One privacy setting: the profile's visibility also decides the visibility of the default lists and of everything that follows from visits; the two list settings of 0.10 are removed (FR-PRIV-001, FR-LIST-005, FR-PROF-004, FR-MAP-007, User entity). A private profile shows its avatar and bio. Following instead of friendship for R2, with requests for private profiles (FR-SOC, OI-001, OI-012). Text reviews show their author (FR-RATE-008) |
 
 ---
 
@@ -125,7 +126,8 @@ This version covers the web application and the backend API. The mobile applicat
 | Default list | One of the two lists every user has: Visited and Planned. |
 | Custom list | A list of cities created by a user. |
 | Place | A point of interest inside a city, for example a landmark or a venue. |
-| Feed | The stream of activity of a user's friends and of news from Flanr. |
+| Feed | The stream of activity of the users one follows and of news from Flanr. |
+| Travel record | Everything that follows from a user's visits and lived-in cities: the Visited list, the ratings, the map of visited and lived-in cities, the home city and the statistics of visits. |
 | Map mode | A way of visualising cities on the map, for example by number of visits. |
 | Moderator | A user with permission to approve or reject user-contributed content. |
 | MVP | Minimum viable product, the first usable release. |
@@ -177,7 +179,7 @@ The web client does not access the database directly. All data access goes throu
 - A world map with several visualisation modes and clickable city boundaries.
 - Personal statistics and a trip calendar.
 - City search with filters and sorting.
-- Friends, feed, likes, comments and notifications (R2).
+- Following, feed, likes, comments and notifications (R2).
 - User photos of cities with moderation (R2).
 - Places within cities (Later).
 - Affiliate travel offers (Later).
@@ -409,7 +411,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-004 — Public profile page
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** A public profile MUST show the user's profile information, their Visited and Planned lists, their public custom lists, their ratings, their map and their basic statistics.
+**Description.** A public profile MUST show the user's profile information, their travel record (the Visited list with the user's ratings, the map of visited and lived-in cities and the basic statistics), their Planned list and their public custom lists. A private profile shows less, see FR-PRIV-001.
 
 **Acceptance criteria.**
 1. Given a public profile, when any visitor opens it, then the listed content is shown.
@@ -667,7 +669,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-RATE-008 — Text reviews
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Rating cities
 
-**Description.** Users SHOULD be able to write text reviews of cities.
+**Description.** Users SHOULD be able to write text reviews of cities. A text review is public and shows its author and the author's rating of the city, also when the author's profile is private: writing a review is a public act.
 
 **Related.** OI-006.
 
@@ -713,19 +715,22 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-LIST-005 — List visibility
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Every list, default or custom, MUST be either public or private, and MUST be public by default. Private lists MUST be visible only to their owner. The visibility of the two default lists is a setting of the user, one for the Visited list and one for the Planned list, because these lists are not stored as lists (section 5.1). A public custom list stays public when the profile is private; the default lists of a private profile are hidden (FR-PRIV-001).
+**Description.** Every custom list MUST be either public or private, and MUST be public by default. Private custom lists MUST be visible only to their owner. A public custom list stays public when the profile is private.
+
+The two default lists have no visibility of their own: they are public when the profile is public and private when it is private (FR-PRIV-001). The Visited list carries the user's travel record with it, so its ratings, map and statistics are shown and hidden together with it.
 
 **Acceptance criteria.**
 1. Given a new custom list, then it is public.
-2. Given a private list, when another user opens the owner's profile, then the list is not shown.
+2. Given a private custom list, when another user opens the owner's profile, then the list is not shown.
 3. Given a public custom list of a private profile, when a guest opens the list, then it is shown.
+4. Given a private profile, when a guest opens it, then neither the Visited nor the Planned list is shown, and neither are the user's ratings.
 
 **Related.** BR-013, FR-PRIV-001.
 
 #### FR-LIST-006 — List discovery
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
 
-**Description.** Public default lists MUST be visible on the owner's profile, unless the profile is private. Public custom lists MUST be visible on the owner's profile and MUST be findable through search, also when the profile is private (FR-PRIV-001).
+**Description.** The default lists of a public profile MUST be visible on the profile. Public custom lists MUST be visible on the owner's profile and MUST be findable through search, also when the profile is private (FR-PRIV-001).
 
 **Acceptance criteria.**
 1. Given a public custom list titled "Half-timbered towns", when a guest searches lists for "half-timbered", then the list is found.
@@ -798,7 +803,7 @@ Each mode MUST have a legend.
 #### FR-MAP-007 — Map on other users' profiles
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** A public profile MUST show the user's map with the same modes as the personal map.
+**Description.** A public profile MUST show the user's map with the same modes as the personal map. A private profile does not show it (FR-PRIV-001).
 
 **Acceptance criteria.**
 1. Given a public profile, when a guest opens its map, then the owner's visited cities are shown.
@@ -901,26 +906,28 @@ A community rating built from very few ratings says little, so the user MUST be 
 
 **Description.** The system SHOULD let users find other users by username and display name.
 
-### 4.10 Social: friends, feed, notifications (`FR-SOC`)
+### 4.10 Social: following, feed, notifications (`FR-SOC`)
 
 The social part is the least worked-out area. The requirements below describe the agreed direction and will be detailed before R2.
 
-#### FR-SOC-001 — Friends
+#### FR-SOC-001 — Following
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** Registered users SHOULD be able to send friend requests. A friendship SHOULD be created only after the other user accepts the request. Either side SHOULD be able to end the friendship.
+**Description.** Registered users SHOULD be able to follow other users, one way. Following a public profile SHOULD take effect at once. Following a private profile SHOULD send a request that its owner accepts or declines. Either side SHOULD be able to end the following.
 
 **Related.** OI-001.
 
-#### FR-SOC-002 — Friend profiles
+#### FR-SOC-002 — Followed profiles
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** Users SHOULD be able to see all completed and planned trips of their friends on their profiles.
+**Description.** A follower whose request a private profile accepted SHOULD see that profile as if it were public.
+
+**Related.** OI-012.
 
 #### FR-SOC-003 — Feed
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** The system SHOULD show a feed with friends' activity, such as new visits, ratings and lists, in reverse chronological order.
+**Description.** The system SHOULD show a feed with the activity of the users one follows, such as new visits, ratings and lists, in reverse chronological order.
 
 #### FR-SOC-004 — News from Flanr
 **Priority:** Could · **Release:** R2 · **Status:** Draft · **Source:** Concept §Social features
@@ -935,22 +942,22 @@ The social part is the least worked-out area. The requirements below describe th
 #### FR-SOC-006 — Notifications
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** Notifications, such as replies to comments and new friend requests, SHOULD be shown in the feed. The feed SHOULD be filterable by type of entry.
+**Description.** Notifications, such as replies to comments and new follow requests, SHOULD be shown in the feed. The feed SHOULD be filterable by type of entry.
 
 ### 4.11 Privacy (`FR-PRIV`)
 
 #### FR-PRIV-001 — Profile visibility
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Privacy
 
-**Description.** The user MUST be able to set their profile to public or private. A profile MUST be public by default. There MUST NOT be separate visibility settings for individual visits or ratings.
+**Description.** The user MUST be able to set their profile to public or private. A profile MUST be public by default. This is the only privacy setting of a profile: there MUST NOT be separate visibility settings for the default lists, for individual visits or for ratings. Custom lists have their own visibility (FR-LIST-005).
 
-A private profile MUST show only the username, the display name, a note that the profile is private, and the user's public custom lists. Everything else MUST be hidden: visits, ratings, lived-in cities, the home city, the bio, the avatar and the two default lists, whatever their own visibility settings are. Opening a private profile is not an error; it simply shows less.
+A private profile MUST show only the username, the display name, the avatar, the bio, a note that the profile is private, and the user's public custom lists. It MUST hide the travel record (the Visited list, ratings, lived-in cities, the home city, the map and the statistics) and the Planned list. Opening a private profile is not an error; it simply shows less.
 
-**Rationale.** A custom list is made to be shared, and the user decides about each one (FR-LIST-005). The default lists are the user's travel record, which the private profile is there to hide.
+**Rationale.** One setting is easy to understand and leaves no combination in which hidden visits can be read from something else, such as ratings. The avatar and the bio stay visible so that people can tell whom they found, which following with requests in R2 needs (OI-001). A custom list is made to be shared, and the user decides about each one.
 
 **Acceptance criteria.**
-1. Given a private profile, when a guest or another user opens it, then only the username, the display name and the public custom lists are shown, with a note that the profile is private.
-2. Given a private profile with a public Visited list, when a guest opens it, then the Visited list is not shown.
+1. Given a private profile, when a guest or another user opens it, then only the username, the display name, the avatar, the bio and the public custom lists are shown, with a note that the profile is private.
+2. Given a private profile, when a guest asks for the user's ratings, then none are shown.
 
 **Related.** OI-012.
 
@@ -1062,7 +1069,7 @@ City *───0..1 Region (second level)
 City *───0..1 Municipality
 City 1───* CityName
 User 1───* LivedCity *───1 City
-User *───* User                      (Friendship, R2)
+User *───* User                      (Follow, R2)
 User 1───* Photo *───1 City          (R2)
 City 1───* Place *───1 PlaceCategory (Later)
 User 1───* PlaceRating *───1 Place   (Later)
@@ -1085,8 +1092,6 @@ The two default lists are not stored as list entries. Visited is derived from vi
 | home_city_id | no | Derived from the current lived-in city, see BR-016 |
 | home_city_visible | yes | Default false |
 | profile_visibility | yes | public / private, default public |
-| visited_visibility | yes | Visibility of the Visited list: public / private, default public, see FR-LIST-005 |
-| planned_visibility | yes | Visibility of the Planned list: public / private, default public, see FR-LIST-005 |
 | roles | yes | user, moderator, administrator |
 | registered_at | yes | Basis for BR-002 |
 
@@ -1337,7 +1342,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 
 | ID | Issue | Area | Status |
 |---|---|---|---|
-| OI-001 | Friendship model: mutual friendship with requests, one-way following, or both. | Social | Open, before R2 |
+| OI-001 | Friendship model: mutual friendship with requests, one-way following, or both. | Social | Direction agreed 2026-11-16: one-way following, with requests for private profiles, see FR-SOC-001; details before R2 |
 | OI-002 | Which OSM extract to use for the initial import: Geoapify, Overture Maps Divisions or a custom extract. | Data | Resolved 2026-11-10: Geofabrik regional extracts, see §5.3 |
 | OI-003 | How to treat settlements without a mapped boundary: import them as points only, or skip them. | Data | Resolved 2026-11-10: import as points only, see §5.3 |
 | OI-004 | How the community rating should take into account that cities change over time. | Ratings | Open |
@@ -1348,7 +1353,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-009 | Detailed role model and moderation process. | Moderation | Open, before R2 |
 | OI-010 | Username rules: allowed characters, how often it can be changed, whether old profile URLs redirect. | Profile | Resolved 2026-11-12: see FR-PROF-001 |
 | OI-011 | Whether sorting by community rating requires a minimum number of ratings. | Search | Resolved 2026-11-13: the user sets the minimum, 10 by default, see FR-SRCH-003 |
-| OI-012 | Whether friends can see a private profile. | Privacy | Open, before R2 |
+| OI-012 | Whether friends can see a private profile. | Privacy | Resolved 2026-11-16: accepted followers see it, see FR-SOC-002 |
 | OI-013 | Limits for photos: formats, size, number per user and city. | Photos | Open, before R2 |
 | OI-014 | Fields of a place and the list of place categories. | Places | Open |
 | OI-015 | Whether a Timeline.json file is processed on the client or on the server, and whether it is stored. | Import | Open |
