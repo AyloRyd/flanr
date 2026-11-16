@@ -4,7 +4,7 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.13 |
+| Version | 0.14 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
 | Date | 2026-11-16 |
@@ -27,6 +27,7 @@
 | 0.11 | 2026-11-13 | A. Malyshkin | Resolved OI-011: the user sets the minimum number of ratings when sorting or filtering by community rating, 10 by default (FR-SRCH-003) |
 | 0.12 | 2026-11-14 | A. Malyshkin | Public custom lists stay visible and findable when the profile is private (FR-PRIV-001, FR-PRIV-003, FR-LIST-005, FR-LIST-006) |
 | 0.13 | 2026-11-16 | A. Malyshkin | One privacy setting: the profile's visibility also decides the visibility of the default lists and of everything that follows from visits; the two list settings of 0.10 are removed (FR-PRIV-001, FR-LIST-005, FR-PROF-004, FR-MAP-007, User entity). A private profile shows its avatar and bio. Following instead of friendship for R2, with requests for private profiles (FR-SOC, OI-001, OI-012). Text reviews show their author (FR-RATE-008) |
+| 0.14 | 2026-11-16 | A. Malyshkin | Search engine optimisation (NFR-SEO), OI-022 for the population threshold of indexed cities |
 
 ---
 
@@ -1324,6 +1325,19 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | NFR-LIC-002 | The use of OSM data MUST comply with the ODbL. |
 | NFR-LIC-003 | Images from Wikimedia Commons MUST be shown with author and licence. |
 
+### 7.11 Search engine optimisation (`NFR-SEO`)
+
+City pages are the main way new people find Flanr, so public pages must be readable by search engines and look good when shared.
+
+| ID | Requirement |
+|---|---|
+| NFR-SEO-001 | Every public page MUST have its own title, description and canonical URL. |
+| NFR-SEO-002 | Public pages SHOULD have Open Graph and Twitter preview data, so that a shared link to a city, profile or list shows a title, a description and an image. |
+| NFR-SEO-003 | Pages that are not public content, such as sign-in, sign-up, settings and private profiles, MUST NOT be indexed. |
+| NFR-SEO-004 | The system MUST serve a `robots.txt` and sitemaps of the indexable pages, split into files within the limits of the sitemap protocol. |
+| NFR-SEO-005 | City pages SHOULD carry structured data (JSON-LD) with the name, the coordinates and links to Wikipedia and Wikidata. |
+| NFR-SEO-006 | Only cities above a population threshold MUST be indexed and listed in the sitemaps; the pages of smaller places stay reachable but are marked not to be indexed. The threshold is decided before launch, see OI-022. |
+
 ---
 
 ## 8. Out of scope
@@ -1363,6 +1377,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. The 
 | OI-018 | Whether planned trips can have dates, or the Planned list stays a simple set of cities. | Lists | Open |
 | OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
 | OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Open |
+| OI-022 | The population threshold above which city pages are indexed by search engines (NFR-SEO-006). | SEO | Open, before launch |
 
 ---
 
