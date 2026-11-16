@@ -2,5 +2,27 @@
   "app": {
     "name": "Flanr",
     "tagline": "Track and rate the cities you visit."
+  },
+  "nav": {
+    "skipToContent": "Skip to content"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "home": {
+    "title": "Every city you have been to, in one place",
+    "lead": "Log your visits, rate cities on what matters to you and see your travels on a map.",
+    "comingSoon": "Search, the map and your profile are on their way."
+  },
+  "footer": {
+    "dataAttribution": "City data © OpenStreetMap contributors, Wikidata"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "There is nothing at this address.",
+    "backHome": "Back to the home page"
   }
 }
