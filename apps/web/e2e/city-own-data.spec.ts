@@ -38,10 +38,14 @@ test.describe('signed in', () => {
     await signInTestUser(page, testInfo);
   });
 
-  test('a user plans a city and removes it again (FR-LIST-002)', async ({ page }) => {
+  test('a user plans a city and removes it again (FR-LIST-002)', async ({ page }, testInfo) => {
+    // With --repeat-each, two runs of this test can toggle the same user's Planned list at the
+    // same time; each run gets a city of its own. Neither city is ever visited.
+    const plannable = [e2eCities.worringen, e2eCities.point];
+    const city = plannable[testInfo.repeatEachIndex % plannable.length];
     // Start from a known state: the city is not planned.
-    await callApiAsUser(page, 'DELETE', `/v1/planned-cities/${e2eCities.worringen}`);
-    await page.goto(`/cities/${e2eCities.worringen}`);
+    await callApiAsUser(page, 'DELETE', `/v1/planned-cities/${city}`);
+    await page.goto(`/cities/${city}`);
 
     await planButton(page).click();
     await expect(plannedButton(page)).toHaveAttribute('aria-pressed', 'true');

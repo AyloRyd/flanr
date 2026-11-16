@@ -1,6 +1,6 @@
 'use server';
 
-import { visitDateProblemMessages, type VisitDateProblem } from '@flanr/shared';
+import { visitDateProblemMessages, type SetCityRating, type VisitDateProblem } from '@flanr/shared';
 import { revalidatePath } from 'next/cache';
 import { serverApi } from '@/lib/api';
 
@@ -55,4 +55,24 @@ function dateProblemOf(
   const message = errors?.find((entry) => entry.path === 'date')?.message;
   const problems = Object.entries(visitDateProblemMessages) as [VisitDateProblem, string][];
   return problems.find(([, text]) => text === message)?.[0] ?? null;
+}
+
+export type RatingProblem = 'not_visited' | 'failed';
+
+export type SetRatingResult = { ok: true } | { ok: false; problem: RatingProblem };
+
+/**
+ * Rates the city for the signed-in user or replaces their rating (FR-RATE-001, FR-RATE-002,
+ * BR-008). The API refuses a city the user has not visited (BR-005).
+ */
+export async function setRating(cityId: number, rating: SetCityRating): Promise<SetRatingResult> {
+  const { response } = await serverApi().PUT('/v1/cities/{cityId}/rating', {
+    params: { path: { cityId } },
+    body: rating,
+  });
+  if (response.ok) {
+    revalidatePath(`/cities/${cityId}`);
+    return { ok: true };
+  }
+  return { ok: false, problem: response.status === 409 ? 'not_visited' : 'failed' };
 }
