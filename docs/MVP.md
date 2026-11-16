@@ -183,11 +183,25 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ---
 
+## Phase 12 — Search engine optimisation
+
+- [ ] Title, description and canonical URL for every public page (NFR-SEO-001). Pages built before this phase get them here; new pages can get them as they are built.
+- [ ] Open Graph and Twitter previews for city, profile and list pages (NFR-SEO-002).
+- [ ] `noindex` for sign-in, sign-up, settings and private profiles (NFR-SEO-003).
+- [ ] `robots.txt` and sitemaps split into files of at most 50,000 URLs (NFR-SEO-004).
+- [ ] JSON-LD on city pages (NFR-SEO-005).
+- [ ] Indexing only cities above the population threshold (NFR-SEO-006, OI-022).
+- [ ] Register the site in Google Search Console and submit the sitemaps.
+
+**Done when:** the sitemaps list the indexable cities, and a shared link to a city, profile or list shows a preview.
+
+---
+
 ## Order and dependencies
 
 ```
 Phase 0 → Phase 1 → Phase 2 ─┬→ Phase 3 → Phase 4 → Phase 5 ─┐
-                             │                                ├→ Phase 7 → Phase 9 → Phase 10 → Phase 11
+                             │                                ├→ Phase 7 → Phase 9 → Phase 10 → Phase 11 → Phase 12
                              └→ Phase 6 ──────────────────────┤
                                                 Phase 8 ──────┘ (needs Phase 2 tiles and Phase 6)
 ```
