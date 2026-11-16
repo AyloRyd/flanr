@@ -6,6 +6,11 @@
   "nav": {
     "skipToContent": "Skip to content"
   },
+  "auth": {
+    "signIn": "Sign in",
+    "signInTitle": "Sign in",
+    "signUpTitle": "Create an account"
+  },
   "theme": {
     "label": "Theme",
     "light": "Light",
