@@ -43,7 +43,7 @@ export function PlanButton({ cityId, signedIn, planned }: PlanButtonProps) {
   return (
     <div className="flex flex-col items-start gap-2">
       <Button
-        variant={shownPlanned ? 'secondary' : 'default'}
+        variant={shownPlanned ? 'secondary' : 'outline'}
         size="lg"
         className="rounded-full"
         onClick={toggle}
@@ -59,7 +59,11 @@ export function PlanButton({ cityId, signedIn, planned }: PlanButtonProps) {
           {problem === 'visited' ? t('planVisited') : t('planFailed')}
         </p>
       )}
-      <SignInPrompt open={promptOpen} onOpenChange={setPromptOpen} />
+      <SignInPrompt
+        title={t('signInPrompt.planTitle')}
+        open={promptOpen}
+        onOpenChange={setPromptOpen}
+      />
     </div>
   );
 }

@@ -71,8 +71,38 @@
     "unplan": "Remove from Planned",
     "planFailed": "The city could not be saved. Please try again.",
     "planVisited": "You have already been to this city, so it is in your Visited list.",
+    "logVisit": "Log a visit",
+    "visitSaved": "Visit saved.",
+    "visitForm": {
+      "title": "Log a visit to {city}",
+      "description": "Enter the date as precisely as you remember it.",
+      "precision": "How well do you know the date?",
+      "precisionOption": {
+        "day": "Exact day",
+        "month": "Month",
+        "year": "Year",
+        "none": "No date"
+      },
+      "date": "Date",
+      "month": "Month",
+      "chooseMonth": "Choose a month",
+      "year": "Year",
+      "beforeRegistration": "This visit was before I joined Flanr on {date}",
+      "undatedNote": "Visits after you joined need a date, so that they count in your trip statistics.",
+      "helpTitle": "What counts as a visit?",
+      "helpText": "You decide. We recommend counting about 24 hours in a city as a visit, or a shorter stay in which you saw something of the city, depending on its size. A stay of several days counts each day as a separate visit.",
+      "problem": {
+        "incomplete": "Enter a complete date.",
+        "date_in_future": "A visit cannot be in the future.",
+        "date_required": "Enter a date, or confirm that the visit was before you joined Flanr.",
+        "failed": "The visit could not be saved. Please try again."
+      },
+      "save": "Save visit",
+      "cancel": "Cancel"
+    },
     "signInPrompt": {
-      "title": "Sign in to save cities",
+      "planTitle": "Sign in to save cities",
+      "visitTitle": "Sign in to log visits",
       "text": "With an account you can plan cities, log your visits and rate the places you have been to. You will come back to this page.",
       "signIn": "Sign in",
       "signUp": "Create an account"
