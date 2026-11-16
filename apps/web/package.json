@@ -11,6 +11,8 @@
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@clerk/backend": "^3.29.0",
+    "@clerk/testing": "^2.3.0",
     "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/react": "^19.3.0",
@@ -19,6 +21,7 @@
     "tailwindcss": "^4.3.5"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.10.0",
     "@flanr/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
