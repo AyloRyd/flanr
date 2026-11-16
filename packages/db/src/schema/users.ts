@@ -8,7 +8,6 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { listVisibilityEnum } from './visibility.ts';
 
 export const userRoleEnum = pgEnum('user_role', ['user', 'moderator', 'administrator']);
 
@@ -28,9 +27,6 @@ export const users = pgTable(
     bio: text('bio'),
     homeCityVisible: boolean('home_city_visible').notNull().default(false),
     profileVisibility: profileVisibilityEnum('profile_visibility').notNull().default('public'),
-    /** The default lists are not stored as lists, so their visibility is kept here (FR-LIST-005). */
-    visitedVisibility: listVisibilityEnum('visited_visibility').notNull().default('public'),
-    plannedVisibility: listVisibilityEnum('planned_visibility').notNull().default('public'),
     /** Every account is a registered user; moderator and administrator are added by an administrator (FR-AUTH-010). */
     roles: userRoleEnum('roles')
       .array()
