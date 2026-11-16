@@ -107,7 +107,7 @@ Each business rule gets unit tests before or together with its implementation (N
 
 - [x] Next.js App Router with SSR, Tailwind CSS and shadcn/ui (CON-002). Light and dark theme, see DECISIONS.md.
 - [x] Clerk integration: sign-up and sign-in with email and password, email code and Google; sign-out; change email (FR-AUTH-003…008). Clerk's own components on `/sign-in` and `/sign-up` and its account menu in the header; which methods are offered is set in the Clerk dashboard. The web app reads the root `.env`. End-to-end tests sign a test user of the development instance in and out; CI needs the repository secrets `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` of the development instance.
-- [ ] Registration prompt on write actions with return to the same page (FR-AUTH-002).
+- [x] Registration prompt on write actions with return to the same page (FR-AUTH-002). A dialog with sign-in and sign-up; first used by the Planned button on the city page (Phase 7).
 - [x] i18n setup with all text in English translation files (NFR-L10N-001…003). `next-intl` with `messages/en.json` and type-checked keys; dates and numbers are formatted with it as pages need them.
 - [x] Layout, navigation, responsive design from 360 px (NFR-UX-001). Header, footer, skip link and a not-found page; navigation links are added with their pages.
 
@@ -117,7 +117,7 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ## Phase 7 — Web pages
 
-- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004). Done: `/cities/{id}` with the data, the community rating and its criteria (FR-CITY-001…003) from `GET /v1/cities/{cityId}`. Open: the boundary map (with Mapbox in Phase 8), personal data and the actions.
+- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004). Done: `/cities/{id}` with the data, the community rating and its criteria (FR-CITY-001…003) from `GET /v1/cities/{cityId}`; the user's own data (FR-CITY-004) from `GET /v1/me/cities/{cityId}`; saving to the Planned list. Open: the boundary map (with Mapbox in Phase 8), logging visits, rating and adding to custom lists.
 - [x] Links to external maps on the city page (FR-CITY-009).
 - [ ] Visit form with date precision and the "before registration" option, help hint with the recommended visit model (FR-VIS-002, FR-VIS-003, FR-VIS-008).
 - [ ] Rating form with criteria and the suggested subjective rating (FR-RATE-001…003).
