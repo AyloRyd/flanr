@@ -32,6 +32,7 @@ import { listPaths, registerListRoutes } from './list-routes.ts';
 import { registerListSearchRoutes } from './list-search-routes.ts';
 import type { ListStore } from './lists.ts';
 import { problem } from './problem.ts';
+import { registerOwnCityRoutes } from './own-city-routes.ts';
 import { registerProfileRoutes } from './profile-routes.ts';
 import { registerUserContentRoutes } from './user-content-routes.ts';
 import { criteriaAdminPaths, registerCriteriaAdminRoutes } from './criteria-admin-routes.ts';
@@ -193,6 +194,7 @@ export function createApp({
   registerListSearchRoutes(app, lists);
   registerCitySearchRoutes(app, searchCities, geography);
   registerCityRoutes(app, cities);
+  registerOwnCityRoutes(app, { defaultLists, livedCities, ratings, lists });
   registerProfileRoutes(app, profiles);
   registerAccountRoutes(app, { accounts, visits, livedCities, defaultLists, ratings, lists }, now);
   registerUserContentRoutes(app, { profiles, defaultLists, ratings, lists });

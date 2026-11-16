@@ -30,6 +30,8 @@ export interface LivedCityStore {
     userId: number,
     options: { afterCityId?: number | undefined; limit: number },
   ): Promise<LivedCity[]>;
+  /** Null if the user has not lived in the city. */
+  find(userId: number, cityId: number): Promise<LivedCity | null>;
   /**
    * Marks the city as lived-in or changes its mark. A new current city replaces the previous
    * one, which becomes a past city (FR-VIS-010).
@@ -67,6 +69,12 @@ export function createLivedCityStore(sql: Sql): LivedCityStore {
 
   return {
     cityExists: (cityId) => cityExists(sql, cityId),
+
+    async find(userId, cityId) {
+      const [row] = await sql<LivedCityRow[]>`
+        SELECT ${columns} FROM lived_cities WHERE user_id = ${userId} AND city_id = ${cityId}`;
+      return row ? toLivedCity(row) : null;
+    },
 
     async list(userId, { afterCityId, limit }) {
       const rows = await sql<LivedCityRow[]>`

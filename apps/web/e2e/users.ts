@@ -1,0 +1,46 @@
+import { clerk } from '@clerk/testing/playwright';
+import type { Page, TestInfo } from '@playwright/test';
+
+/** The Playwright projects; each gets its own test user. */
+export const projectNames = ['desktop', 'mobile'] as const;
+
+export type TestUsers = Partial<Record<string, { id: string; emailAddress: string }>>;
+
+export const testUsersVariable = 'E2E_USERS';
+
+/** The users that the global setup created, by project. */
+export function testUsers(): TestUsers {
+  const value = process.env[testUsersVariable];
+  return value ? (JSON.parse(value) as TestUsers) : {};
+}
+
+/** Signs in the test user of the running project on the current page. */
+export async function signInTestUser(page: Page, testInfo: TestInfo): Promise<void> {
+  const user = testUsers()[testInfo.project.name];
+  if (!user)
+    throw new Error(`The global setup has not created a user for ${testInfo.project.name}`);
+  await clerk.signIn({ page, emailAddress: user.emailAddress });
+}
+
+/** The API of the end-to-end tests, as the browser reaches it. */
+export const e2eApiUrl = 'http://localhost:8788';
+
+/**
+ * Calls the test API as the signed-in user of the page, with the session token of Clerk in the
+ * browser. Used to put the user's data into a known state.
+ */
+export async function callApiAsUser(
+  page: Page,
+  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  path: string,
+  body?: unknown,
+): Promise<number> {
+  const token = await page.evaluate(() => window.Clerk.session?.getToken());
+  if (!token) throw new Error('No signed-in user on the page');
+  const response = await fetch(`${e2eApiUrl}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  return response.status;
+}

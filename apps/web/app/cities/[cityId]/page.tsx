@@ -1,4 +1,5 @@
-import type { CityDetails, CommunityRating } from '@flanr/shared';
+import { auth } from '@clerk/nextjs/server';
+import type { CityDetails, CommunityRating, OwnCityData, Visit } from '@flanr/shared';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -6,6 +7,8 @@ import { cache } from 'react';
 import { CityFacts } from '@/components/city/city-facts';
 import { CityLinks } from '@/components/city/city-links';
 import { CommunityRatingCard } from '@/components/city/community-rating-card';
+import { OwnCityCard } from '@/components/city/own-city-card';
+import { PlanButton } from '@/components/city/plan-button';
 import { serverApi } from '@/lib/api';
 
 interface CityPageProps {
@@ -32,17 +35,38 @@ const loadCity = cache(
   },
 );
 
+/** How many dated visits the city page lists; the rest are counted. */
+const shownVisits = 10;
+
+/** The signed-in user's own data for the city and their newest visits; null for a guest. */
+async function loadOwnData(cityId: number): Promise<{ data: OwnCityData; visits: Visit[] } | null> {
+  const { userId } = await auth();
+  if (!userId) return null;
+  const api = serverApi();
+  const [own, visits] = await Promise.all([
+    api.GET('/v1/me/cities/{cityId}', { params: { path: { cityId } } }),
+    api.GET('/v1/visits', { params: { query: { cityId, limit: shownVisits } } }),
+  ]);
+  if (!own.data || !visits.data) {
+    throw new Error(`Own data for city ${cityId} could not be loaded: ${own.response.status}`);
+  }
+  return { data: own.data, visits: visits.data.items };
+}
+
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const loaded = await loadCity((await params).cityId);
   return loaded ? { title: loaded.city.name } : {};
 }
 
-/** The city page (FR-CITY-001…003, FR-CITY-009). Open to guests (FR-AUTH-001). */
+/**
+ * The city page (FR-CITY-001…004, FR-CITY-009). Open to guests (FR-AUTH-001); a signed-in user
+ * also sees their own data.
+ */
 export default async function CityPage({ params }: CityPageProps) {
   const loaded = await loadCity((await params).cityId);
   if (!loaded) notFound();
   const { city, rating } = loaded;
-  const t = await getTranslations('city');
+  const [t, own] = await Promise.all([getTranslations('city'), loadOwnData(city.id)]);
 
   const place = [city.region?.name, city.country.name].filter(Boolean).join(', ');
   const capital =
@@ -55,15 +79,27 @@ export default async function CityPage({ params }: CityPageProps) {
   return (
     <article className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-muted-foreground">
-          {t(`settlementType.${city.settlementType}`)} · {place}
-        </p>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{city.name}</h1>
-        {city.nameEn !== city.name && (
-          <p className="text-xl text-muted-foreground" lang="en">
-            {city.nameEn}
-          </p>
-        )}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-muted-foreground">
+              {t(`settlementType.${city.settlementType}`)} · {place}
+            </p>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{city.name}</h1>
+            {city.nameEn !== city.name && (
+              <p className="text-xl text-muted-foreground" lang="en">
+                {city.nameEn}
+              </p>
+            )}
+          </div>
+          {/* A visited city is in the Visited list and cannot be planned (FR-LIST-002, BR-004). */}
+          {!own?.data.visited && (
+            <PlanButton
+              cityId={city.id}
+              signedIn={own !== null}
+              planned={own?.data.planned ?? false}
+            />
+          )}
+        </div>
         {(city.municipality || capital) && (
           <ul className="mt-1 flex flex-wrap gap-2 text-sm">
             {city.municipality && (
@@ -82,6 +118,7 @@ export default async function CityPage({ params }: CityPageProps) {
           <CommunityRatingCard rating={rating} />
         </div>
         <div className="flex flex-col gap-6">
+          {own && <OwnCityCard data={own.data} visits={own.visits} />}
           <CityLinks city={city} />
         </div>
       </div>
