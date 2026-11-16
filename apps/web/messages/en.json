@@ -22,6 +22,43 @@
     "lead": "Log your visits, rate cities on what matters to you and see your travels on a map.",
     "comingSoon": "Search, the map and your profile are on their way."
   },
+  "city": {
+    "settlementType": {
+      "city": "City",
+      "town": "Town",
+      "village": "Village",
+      "hamlet": "Hamlet"
+    },
+    "capital": {
+      "national": "Capital of {country}",
+      "regional": "Capital of {region}"
+    },
+    "partOf": "Part of {municipality}",
+    "facts": "Facts",
+    "population": "Population",
+    "populationYear": "{population} ({year})",
+    "area": "Area",
+    "areaValue": "{area} km²",
+    "density": "Population density",
+    "densityValue": "{density} per km²",
+    "elevation": "Elevation",
+    "elevationValue": "{elevation} m",
+    "founded": "Founded or first mentioned",
+    "communityRating": "Community rating",
+    "ratingCount": "{count, plural, one {# rating} other {# ratings}}",
+    "noRatings": "No one has rated this city yet.",
+    "criteria": "By criterion",
+    "notRated": "Not rated",
+    "links": "Links",
+    "wikipedia": "Wikipedia",
+    "website": "Official website",
+    "openIn": "Open in {service}",
+    "mapService": {
+      "openstreetmap": "OpenStreetMap",
+      "google-maps": "Google Maps",
+      "apple-maps": "Apple Maps"
+    }
+  },
   "footer": {
     "dataAttribution": "City data © OpenStreetMap contributors, Wikidata"
   },

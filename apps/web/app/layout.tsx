@@ -34,7 +34,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     // next-themes sets the theme class before React runs, so the server markup differs.
     <html lang={locale} className={figtree.variable} suppressHydrationWarning>
       <body className="flex min-h-svh flex-col">
-        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" appearance={clerkAppearance}>
+        <ClerkProvider
+          // Hands the session of the request to client components while they render on the
+          // server, so the header shows the right account state without a jump.
+          dynamic
+          signInUrl="/sign-in"
+          signUpUrl="/sign-up"
+          appearance={clerkAppearance}
+        >
           <NextIntlClientProvider>
             <ThemeProvider>
               <a
