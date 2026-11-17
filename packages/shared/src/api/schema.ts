@@ -1314,6 +1314,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/map-cities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The cities of the personal map of the signed-in user (FR-MAP-005, FR-MAP-006)
+         * @description The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The cities of the map */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            visited: {
+                                cityId: number;
+                                longitude: number;
+                                latitude: number;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                                visitCount: number;
+                                livedIn: boolean;
+                                rating: number | null;
+                            }[];
+                            planned: {
+                                cityId: number;
+                                longitude: number;
+                                latitude: number;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/planned-cities/{cityId}": {
         parameters: {
             query?: never;
@@ -4096,6 +4173,121 @@ export interface paths {
                                 addedAt: string;
                             }[];
                             nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description The profile is private (FR-PRIV-001) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description No user has this username */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/users/{username}/map-cities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The cities of the map of a user with a public profile (FR-MAP-007)
+         * @description The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    username: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The cities of the map */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            visited: {
+                                cityId: number;
+                                longitude: number;
+                                latitude: number;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                                visitCount: number;
+                                livedIn: boolean;
+                                rating: number | null;
+                            }[];
+                            planned: {
+                                cityId: number;
+                                longitude: number;
+                                latitude: number;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                            }[];
                         };
                     };
                 };

@@ -8,6 +8,7 @@ import {
   plannedCityPageSchema,
   visitedCityPageSchema,
   toPage,
+  userMapSchema,
 } from '@flanr/shared';
 import type { Context } from 'hono';
 import type { AuthEnv } from './auth.ts';
@@ -52,6 +53,19 @@ const plannedRoute = createRoute({
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
     200: { description: 'One page of planned cities', ...json(plannedCityPageSchema) },
+    ...contentErrors,
+  },
+});
+
+const mapRoute = createRoute({
+  method: 'get',
+  path: '/v1/users/{username}/map-cities',
+  summary: 'The cities of the map of a user with a public profile (FR-MAP-007)',
+  description:
+    'The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.',
+  request: { params: userParams },
+  responses: {
+    200: { description: 'The cities of the map', ...json(userMapSchema) },
     ...contentErrors,
   },
 });
@@ -170,6 +184,13 @@ export function registerUserContentRoutes(
       toPage(rows, limit, (city) => String(city.cityId)),
       200,
     );
+  });
+
+  // The map shows the Visited and the Planned list, so it is as visible as they are.
+  app.openapi(mapRoute, async (c) => {
+    const found = await publicOwner(c, c.req.valid('param').username);
+    if ('response' in found) return found.response as never;
+    return c.json(await defaultLists.map(found.owner.id), 200);
   });
 
   app.openapi(ratingsRoute, async (c) => {

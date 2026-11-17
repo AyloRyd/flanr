@@ -9,7 +9,7 @@ export default clerkMiddleware();
 
 export const config = {
   matcher: [
-    // Everything except Next.js internals and static files.
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|webmanifest)).*)',
+    // Everything except Next.js internals, static files and the city tiles of the API.
+    '/((?!_next|tiles/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|webmanifest)).*)',
   ],
 };

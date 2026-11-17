@@ -4,6 +4,7 @@ import {
   plannedCityPageSchema,
   plannedCitySchema,
   toPage,
+  userMapSchema,
   visitedCityPageSchema,
 } from '@flanr/shared';
 import type { AuthEnv } from './auth.ts';
@@ -71,8 +72,22 @@ const unplanCityRoute = createRoute({
   },
 });
 
+const mapRoute = createRoute({
+  method: 'get',
+  path: '/v1/map-cities',
+  summary: 'The cities of the personal map of the signed-in user (FR-MAP-005, FR-MAP-006)',
+  description:
+    'The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.',
+  security: bearerSecurity,
+  responses: {
+    200: { description: 'The cities of the map', ...json(userMapSchema) },
+    401: problemResponse('No valid session token'),
+  },
+});
+
 /** Paths that need a signed-in user; the app puts requireAuth in front of them. */
 export const defaultListPaths = [
+  '/v1/map-cities',
   '/v1/visited-cities',
   '/v1/planned-cities',
   '/v1/planned-cities/*',
@@ -106,6 +121,8 @@ export function registerDefaultListRoutes(
       200,
     );
   });
+
+  app.openapi(mapRoute, async (c) => c.json(await lists.map(c.get('user').id), 200));
 
   app.openapi(planCityRoute, async (c) => {
     const { cityId } = c.req.valid('param');

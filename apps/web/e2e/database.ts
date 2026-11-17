@@ -40,6 +40,13 @@ export const e2eCities = {
   /** A city the profile tests keep visited once and rated 7, and one they keep planned. */
   profileVisited: 14,
   profilePlanned: 15,
+  /**
+   * Cities of the map tests. Each test has a fresh user of its own, so the users' data never
+   * meet. Only towns and cities, so that Worringen stays the only village of the search tests.
+   * Every run of the mode test rates Leverkusen 5: below Cologne's 7.83 and fewer than ten
+   * ratings, so the search tests of the community rating still find Cologne first.
+   */
+  map: { visited: 16, lived: 17, planned: 18 },
 } as const;
 
 const square = 'SRID=4326;MULTIPOLYGON(((6.8 50.8, 7.1 50.8, 7.1 51.1, 6.8 51.1, 6.8 50.8)))';
@@ -94,7 +101,13 @@ export async function seedE2eDatabase(): Promise<void> {
           (${e2eCities.profileVisited}, 'node', 12, 'Bergheim', 'Bergheim', 'DE', 1, NULL, false,
             'town', 'SRID=4326;POINT(6.65 50.95)', NULL, NULL, NULL, NULL, NULL, NULL),
           (${e2eCities.profilePlanned}, 'node', 13, 'Erftstadt', 'Erftstadt', 'DE', 1, NULL, false,
-            'town', 'SRID=4326;POINT(6.8 50.8)', NULL, NULL, NULL, NULL, NULL, NULL)`;
+            'town', 'SRID=4326;POINT(6.8 50.8)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.map.visited}, 'node', 14, 'Leverkusen', 'Leverkusen', 'DE', 1, NULL, false,
+            'city', 'SRID=4326;POINT(7 51.03)', NULL, 160000, NULL, NULL, NULL, NULL),
+          (${e2eCities.map.lived}, 'node', 15, 'Monheim', 'Monheim', 'DE', 1, NULL, false,
+            'town', 'SRID=4326;POINT(6.88 51.09)', NULL, 40000, NULL, NULL, NULL, NULL),
+          (${e2eCities.map.planned}, 'node', 16, 'Zons', 'Zons', 'DE', 1, NULL, false,
+            'town', 'SRID=4326;POINT(6.85 51.12)', NULL, NULL, NULL, NULL, NULL, NULL)`;
       // The search looks up cities by these names (FR-SRCH-001).
       await tx`
         INSERT INTO city_names (city_id, name, kind)

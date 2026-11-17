@@ -2926,6 +2926,176 @@
         }
       }
     },
+    "/v1/map-cities": {
+      "get": {
+        "summary": "The cities of the personal map of the signed-in user (FR-MAP-005, FR-MAP-006)",
+        "description": "The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cities of the map",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "visited": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "longitude": {
+                            "type": "number"
+                          },
+                          "latitude": {
+                            "type": "number"
+                          },
+                          "settlementType": {
+                            "type": "string",
+                            "enum": [
+                              "city",
+                              "town",
+                              "village",
+                              "hamlet"
+                            ]
+                          },
+                          "population": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "visitCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "livedIn": {
+                            "type": "boolean"
+                          },
+                          "rating": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "longitude",
+                          "latitude",
+                          "settlementType",
+                          "population",
+                          "visitCount",
+                          "livedIn",
+                          "rating"
+                        ]
+                      }
+                    },
+                    "planned": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "longitude": {
+                            "type": "number"
+                          },
+                          "latitude": {
+                            "type": "number"
+                          },
+                          "settlementType": {
+                            "type": "string",
+                            "enum": [
+                              "city",
+                              "town",
+                              "village",
+                              "hamlet"
+                            ]
+                          },
+                          "population": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "longitude",
+                          "latitude",
+                          "settlementType",
+                          "population"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "visited",
+                    "planned"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/planned-cities/{cityId}": {
       "put": {
         "summary": "Add a city to the Planned list (FR-LIST-002)",
@@ -9313,6 +9483,277 @@
                   "required": [
                     "items",
                     "nextCursor"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The profile is private (FR-PRIV-001)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No user has this username",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{username}/map-cities": {
+      "get": {
+        "summary": "The cities of the map of a user with a public profile (FR-MAP-007)",
+        "description": "The Visited and the Planned list at once, with what the map modes need of every city. Not paginated.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": true,
+            "name": "username",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cities of the map",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "visited": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "longitude": {
+                            "type": "number"
+                          },
+                          "latitude": {
+                            "type": "number"
+                          },
+                          "settlementType": {
+                            "type": "string",
+                            "enum": [
+                              "city",
+                              "town",
+                              "village",
+                              "hamlet"
+                            ]
+                          },
+                          "population": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "visitCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "livedIn": {
+                            "type": "boolean"
+                          },
+                          "rating": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "longitude",
+                          "latitude",
+                          "settlementType",
+                          "population",
+                          "visitCount",
+                          "livedIn",
+                          "rating"
+                        ]
+                      }
+                    },
+                    "planned": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cityId": {
+                            "type": "integer"
+                          },
+                          "longitude": {
+                            "type": "number"
+                          },
+                          "latitude": {
+                            "type": "number"
+                          },
+                          "settlementType": {
+                            "type": "string",
+                            "enum": [
+                              "city",
+                              "town",
+                              "village",
+                              "hamlet"
+                            ]
+                          },
+                          "population": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "cityId",
+                          "longitude",
+                          "latitude",
+                          "settlementType",
+                          "population"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "visited",
+                    "planned"
                   ]
                 }
               }

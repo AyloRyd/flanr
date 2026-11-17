@@ -2,6 +2,7 @@ import * as cityActions from '@/app/cities/[cityId]/actions';
 import * as onboardingActions from '@/app/onboarding/actions';
 import * as settingsActions from '@/app/settings/actions';
 import * as listActions from '@/lib/list-actions';
+import * as mapActions from '@/lib/map-actions';
 
 /**
  * Makes sure the session cookie holds a valid token before a server action reads it. Clerk
@@ -43,3 +44,4 @@ export const updateProfile = freshly(settingsActions.updateProfile);
 export const deleteAccount = freshly(settingsActions.deleteAccount);
 export const findCities = freshly(onboardingActions.findCities);
 export const savePastVisits = freshly(onboardingActions.savePastVisits);
+export const loadCityPreview = freshly(mapActions.loadCityPreview);
