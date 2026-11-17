@@ -10,9 +10,10 @@ export const testUsersVariable = 'E2E_USERS';
 
 /**
  * What a test user is for. Signing out happens in a browser of its own user, so that it can
- * never end a session that other tests of the project are using at the same time.
+ * never end a session that other tests of the project are using at the same time. The private
+ * user's profile is made private and stays so.
  */
-export type TestUserPurpose = 'main' | 'signOut';
+export type TestUserPurpose = 'main' | 'signOut' | 'private';
 
 /** The key of a test user in the environment: the project, and the purpose unless it is main. */
 export const testUserKey = (project: string, purpose: TestUserPurpose = 'main') =>
@@ -45,7 +46,7 @@ export const e2eApiUrl = 'http://localhost:8788';
  */
 export async function fetchApiAsUser(
   page: Page,
-  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE' | 'POST',
   path: string,
   body?: unknown,
 ): Promise<Response> {
@@ -67,7 +68,7 @@ export async function fetchApiAsUser(
 /** Like fetchApiAsUser, for calls where only the status matters. */
 export async function callApiAsUser(
   page: Page,
-  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE' | 'POST',
   path: string,
   body?: unknown,
 ): Promise<number> {

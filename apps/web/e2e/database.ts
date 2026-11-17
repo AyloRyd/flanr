@@ -37,6 +37,9 @@ export const e2eCities = {
     [10, 11],
     [12, 13],
   ],
+  /** A city the profile tests keep visited once and rated 7, and one they keep planned. */
+  profileVisited: 14,
+  profilePlanned: 15,
 } as const;
 
 const square = 'SRID=4326;MULTIPOLYGON(((6.8 50.8, 7.1 50.8, 7.1 51.1, 6.8 51.1, 6.8 50.8)))';
@@ -87,7 +90,11 @@ export async function seedE2eDatabase(): Promise<void> {
           (${e2eCities.lived[1][0]}, 'node', 10, 'Wesseling', 'Wesseling', 'DE', 1, NULL, false, 'town',
             'SRID=4326;POINT(6.8 50.9)', NULL, NULL, NULL, NULL, NULL, NULL),
           (${e2eCities.lived[1][1]}, 'node', 11, 'Dormagen', 'Dormagen', 'DE', 1, NULL, false, 'town',
-            'SRID=4326;POINT(6.8 50.9)', NULL, NULL, NULL, NULL, NULL, NULL)`;
+            'SRID=4326;POINT(6.8 50.9)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.profileVisited}, 'node', 12, 'Bergheim', 'Bergheim', 'DE', 1, NULL, false,
+            'town', 'SRID=4326;POINT(6.65 50.95)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.profilePlanned}, 'node', 13, 'Erftstadt', 'Erftstadt', 'DE', 1, NULL, false,
+            'town', 'SRID=4326;POINT(6.8 50.8)', NULL, NULL, NULL, NULL, NULL, NULL)`;
       // The search looks up cities by these names (FR-SRCH-001).
       await tx`
         INSERT INTO city_names (city_id, name, kind)

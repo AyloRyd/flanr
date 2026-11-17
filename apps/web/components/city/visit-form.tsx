@@ -9,7 +9,8 @@ import {
 } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import { logVisit, updateVisit, type VisitProblem } from '@/app/cities/[cityId]/actions';
+import type { VisitProblem } from '@/app/cities/[cityId]/actions';
+import { logVisit, updateVisit } from '@/lib/fresh-actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

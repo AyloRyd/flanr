@@ -9,7 +9,8 @@ import {
 import { Home } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import { removeLived, setLived, type LivedProblem } from '@/app/cities/[cityId]/actions';
+import type { LivedProblem } from '@/app/cities/[cityId]/actions';
+import { removeLived, setLived } from '@/lib/fresh-actions';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {

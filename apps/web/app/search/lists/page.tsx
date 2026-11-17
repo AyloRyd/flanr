@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { SearchField } from '@/components/search/search-field';
 import { SearchTabs } from '@/components/search/search-tabs';
 import { serverApi } from '@/lib/api';
+import { profilePath } from '@/lib/profile';
 import { toListSearchQuery, withCursor, type SearchParams } from '@/lib/search-params';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * Search the public custom lists by title and description, also those of private profiles
- * (FR-SRCH-004, FR-LIST-006). The lists open once their pages exist.
+ * (FR-SRCH-004, FR-LIST-006).
  */
 export default async function ListSearchPage({
   searchParams,
@@ -49,7 +50,12 @@ export default async function ListSearchPage({
             <ul aria-label={t('results')} className="divide-y">
               {data.items.map((list) => (
                 <li key={list.id} className="py-3">
-                  <p className="font-medium">{list.title}</p>
+                  <Link
+                    href={profilePath(list.owner.username, `/lists/${list.id}`)}
+                    className="font-medium underline-offset-4 hover:underline"
+                  >
+                    {list.title}
+                  </Link>
                   {list.description && (
                     <p className="line-clamp-2 text-sm text-muted-foreground">{list.description}</p>
                   )}

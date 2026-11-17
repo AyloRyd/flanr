@@ -44,6 +44,8 @@ interface OwnData {
   visits: Visit[];
   /** The day the user registered, as YYYY-MM-DD. Visits after it need a date (BR-002). */
   registeredOn: string;
+  /** For the links to the user's own lists. */
+  username: string;
 }
 
 /** The signed-in user's own data for the city and their newest visits; null for a guest. */
@@ -61,7 +63,7 @@ async function loadOwnData(cityId: number): Promise<OwnData | null> {
   }
   // The API takes the date of the registration in UTC as well.
   const registeredOn = me.data.registeredAt.slice(0, 10);
-  return { data: own.data, visits: visits.data.items, registeredOn };
+  return { data: own.data, visits: visits.data.items, registeredOn, username: me.data.username };
 }
 
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
@@ -143,6 +145,7 @@ export default async function CityPage({ params }: CityPageProps) {
               criteria={rating.criteria.map(({ key, name }) => ({ key, name }))}
               visits={own.visits}
               registeredOn={own.registeredOn}
+              username={own.username}
             />
           )}
           <CityLinks city={city} />

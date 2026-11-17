@@ -3,7 +3,7 @@
 import { maxUndatedVisits } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import { setUndatedVisits } from '@/app/cities/[cityId]/actions';
+import { setUndatedVisits } from '@/lib/fresh-actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

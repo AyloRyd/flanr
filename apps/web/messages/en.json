@@ -10,7 +10,8 @@
   "auth": {
     "signIn": "Sign in",
     "signInTitle": "Sign in",
-    "signUpTitle": "Create an account"
+    "signUpTitle": "Create an account",
+    "profile": "Your profile"
   },
   "theme": {
     "label": "Theme",
@@ -21,7 +22,7 @@
   "home": {
     "title": "Every city you have been to, in one place",
     "lead": "Log your visits, rate cities on what matters to you and see your travels on a map.",
-    "comingSoon": "The map and your profile are on their way.",
+    "comingSoon": "The map and your statistics are on their way.",
     "searchLabel": "Find a city"
   },
   "city": {
@@ -263,6 +264,83 @@
       "minRatingsHint": "A rating from very few people says little. When you sort or filter by community rating, cities need at least 10 ratings unless you set another number.",
       "apply": "Apply",
       "clear": "Clear filters"
+    }
+  },
+  "profile": {
+    "parts": "Parts of the profile",
+    "visited": "Visited",
+    "planned": "Planned",
+    "lists": "Lists",
+    "livesIn": "Lives in",
+    "privateNote": "This profile is private. Only its public lists are shown.",
+    "privateOwnerNote": "Your profile is private: others see only your name, picture, bio and public lists.",
+    "noVisited": "No visited cities yet.",
+    "noVisitedOwn": "No visited cities yet. <search>Find a city</search> and log a visit.",
+    "noPlanned": "No planned cities yet.",
+    "noPlannedOwn": "No planned cities yet. Save a city to Planned on its page.",
+    "livedIn": "Lived here",
+    "visitCount": "{count, plural, one {# visit} other {# visits}}",
+    "ratingOf": "Rating of {name}",
+    "more": "More"
+  },
+  "lists": {
+    "heading": "Lists",
+    "new": "New list",
+    "newTitle": "A new list",
+    "create": "Create list",
+    "none": "No public lists.",
+    "noneOwn": "No lists yet. Create one, or add a city to a new list from its page.",
+    "privateBadge": "Private",
+    "publicBadge": "Public",
+    "cityCount": "{count, plural, one {# city} other {# cities}}",
+    "backTo": "Lists of {name}",
+    "by": "by {name} (@{username})",
+    "entries": "Cities of the list",
+    "empty": "This list has no cities yet.",
+    "emptyOwn": "This list has no cities yet. Add cities from their pages.",
+    "edit": "Edit list",
+    "editTitle": "Edit the list",
+    "save": "Save",
+    "delete": "Delete list",
+    "deleteTitle": "Delete this list?",
+    "deleteText": "The list \"{title}\" and its notes will be deleted. The cities stay as they are.",
+    "deleteFailed": "The list could not be deleted. Please try again.",
+    "form": {
+      "title": "Title",
+      "description": "Description (optional)",
+      "visibility": "Who can see the list",
+      "public": "Public",
+      "publicNote": "Everyone can see and find it, also when your profile is private.",
+      "private": "Private",
+      "privateNote": "Only you can see it.",
+      "problem": {
+        "title_required": "Give the list a title.",
+        "failed": "The list could not be saved. Please try again."
+      },
+      "cancel": "Cancel"
+    },
+    "entry": {
+      "moveUp": "Move {city} up",
+      "moveDown": "Move {city} down",
+      "editNote": "Note for {city}",
+      "remove": "Remove {city} from the list",
+      "noteTitle": "Note for {city}",
+      "note": "Note (optional)",
+      "saveNote": "Save note",
+      "cancel": "Cancel",
+      "failed": "This could not be changed. Please try again."
+    },
+    "add": {
+      "button": "Add to a list",
+      "title": "Lists with {city}",
+      "description": "Tick a list to add the city, untick it to take the city out.",
+      "loading": "Loading your lists…",
+      "noLists": "You have no lists yet.",
+      "yourLists": "Your lists",
+      "newList": "New list with this city",
+      "newListPlaceholder": "Title of the list",
+      "create": "Create",
+      "failed": "This could not be changed. Please try again."
     }
   },
   "footer": {

@@ -26,7 +26,7 @@ export default async function globalSetup(): Promise<void> {
 
   const clerk = createClerkClient({ secretKey });
   const users: TestUsers = {};
-  const purposes: TestUserPurpose[] = ['main', 'signOut'];
+  const purposes: TestUserPurpose[] = ['main', 'signOut', 'private'];
   for (const project of projectNames) {
     for (const purpose of purposes) {
       const id = randomUUID().replaceAll('-', '').slice(0, 12);

@@ -4,7 +4,7 @@ import type { OwnCityData, Visit } from '@flanr/shared';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
-import { deleteVisit } from '@/app/cities/[cityId]/actions';
+import { deleteVisit } from '@/lib/fresh-actions';
 import { UndatedVisitsForm } from '@/components/city/undated-visits-form';
 import { VisitForm } from '@/components/city/visit-form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
