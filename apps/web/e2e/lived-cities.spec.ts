@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
 import { expect, test } from './test';
-import { callApiAsUser, fetchApiAsUser, signInTestUser } from './users';
+import { callApiAsUser, fetchApiAsUser } from './users';
 
 const lived = en.city.lived;
 const names = [
@@ -26,18 +26,17 @@ async function openLivedDialog(page: Page, cityName: string) {
   return page.getByRole('dialog', { name: lived.title.replace('{city}', cityName) });
 }
 
-test.beforeEach(async ({ page }, testInfo) => {
+/**
+ * Every test has a user of its own: a user has one current home, so tests that mark homes for
+ * the same user at the same time, as the repetitions do, would take it from each other.
+ */
+test.beforeEach(async ({ page, freshUser }, testInfo) => {
   const index = testInfo.repeatEachIndex % e2eCities.lived.length;
   cities = e2eCities.lived[index] ?? e2eCities.lived[0];
   cityNames = names[index] ?? [];
   await page.goto('/');
-  await signInTestUser(page, testInfo);
+  await clerk.signIn({ page, emailAddress: freshUser.emailAddress });
   await clerk.loaded({ page });
-  // Start from nothing: no mark and no rating.
-  for (const city of cities) {
-    await callApiAsUser(page, 'DELETE', `/v1/lived-cities/${city}?confirmRatingDeletion=true`);
-    await callApiAsUser(page, 'DELETE', `/v1/cities/${city}/rating`);
-  }
 });
 
 test('a city without visits marked as home is visited and can be rated (FR-VIS-010)', async ({
