@@ -271,6 +271,7 @@
   "profile": {
     "parts": "Parts of the profile",
     "visited": "Visited",
+    "map": "Map",
     "planned": "Planned",
     "lists": "Lists",
     "livesIn": "Lives in",
@@ -284,6 +285,55 @@
     "visitCount": "{count, plural, one {# visit} other {# visits}}",
     "ratingOf": "Rating of {name}",
     "more": "More"
+  },
+  "map": {
+    "label": "Map of visited cities",
+    "cityLabel": "Map of {name}",
+    "unavailable": "The map cannot be shown in this browser.",
+    "attribution": "Flanr city data © OpenStreetMap contributors, Wikidata",
+    "style": {
+      "label": "Map style",
+      "standard": "Standard",
+      "satellite": "Satellite"
+    },
+    "mode": {
+      "label": "Show cities by",
+      "visits": "Number of visits",
+      "rating": "Rating",
+      "population": "Population"
+    },
+    "showPlanned": "Show planned cities",
+    "legend": {
+      "title": "Legend",
+      "lived": "Lived here",
+      "visits10": "10 visits or more",
+      "visits5": "5 to 9 visits",
+      "visits2": "2 to 4 visits",
+      "visits1": "1 visit",
+      "rated": "Rated, from 1 to 10",
+      "unrated": "Not rated",
+      "population1m": "1 million people or more",
+      "population100k": "100,000 to 999,999 people",
+      "population10k": "10,000 to 99,999 people",
+      "population0": "Fewer than 10,000 people",
+      "populationUnknown": "Population unknown",
+      "planned": "Planned"
+    },
+    "preview": {
+      "label": "Selected city",
+      "close": "Close the preview",
+      "loading": "Loading…",
+      "notFound": "This city could not be found.",
+      "noRatings": "No ratings yet",
+      "yours": "You",
+      "theirs": "{name}",
+      "livedIn": "Lived here",
+      "visits": "{count, plural, one {# visit} other {# visits}}",
+      "rating": "Rating",
+      "planned": "Planned",
+      "notVisited": "Not visited",
+      "open": "Open the city page"
+    }
   },
   "lists": {
     "heading": "Lists",

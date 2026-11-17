@@ -7,6 +7,7 @@ import { cache } from 'react';
 import { CityFacts } from '@/components/city/city-facts';
 import { CityLinks } from '@/components/city/city-links';
 import { CommunityRatingCard } from '@/components/city/community-rating-card';
+import { CityMap } from '@/components/map/city-map';
 import { LogVisitButton } from '@/components/city/log-visit-button';
 import { OwnCityCard } from '@/components/city/own-city-card';
 import { PlanButton } from '@/components/city/plan-button';
@@ -134,6 +135,7 @@ export default async function CityPage({ params }: CityPageProps) {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-6">
+          <CityMap city={city} />
           <CityFacts city={city} />
           <CommunityRatingCard rating={rating} />
         </div>

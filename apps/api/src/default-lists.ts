@@ -1,4 +1,4 @@
-import type { PlannedCity, VisitedCity } from '@flanr/shared';
+import type { MapCity, PlannedCity, UserMap, VisitedCity, VisitedMapCity } from '@flanr/shared';
 import type { TransactionSql } from 'postgres';
 import { cityExists } from './cities.ts';
 import type { Sql } from './db.ts';
@@ -24,6 +24,8 @@ export interface DefaultListStore {
   unplan(userId: number, cityId: number): Promise<boolean>;
   /** Where the city stands in the user's default lists, and how often the user was there. */
   cityStatus(userId: number, cityId: number): Promise<DefaultListStatus>;
+  /** Both lists with what the map shows of each city, ordered by city ID (FR-MAP-005, FR-MAP-006). */
+  map(userId: number): Promise<UserMap>;
 }
 
 export interface DefaultListStatus {
@@ -89,21 +91,40 @@ interface VisitedRow {
   lived_in: boolean;
 }
 
+/**
+ * One row per city of the user's Visited list, with the number of visits and whether the user
+ * has lived there (BR-004, BR-016).
+ */
+const visitedMarks = (sql: Sql, userId: number) => sql`
+  SELECT city_id, sum(visits)::int AS visit_count, bool_or(lived) AS lived_in
+  FROM (
+    SELECT city_id, count(*) AS visits, false AS lived
+    FROM visits WHERE user_id = ${userId} GROUP BY city_id
+    UNION ALL
+    SELECT city_id, 0, true FROM lived_cities WHERE user_id = ${userId}
+  ) AS each_mark
+  GROUP BY city_id`;
+
+/**
+ * The columns of a city on the map. Coordinates are rounded to about a metre, which is far
+ * finer than a marker and keeps the response of a user with a thousand cities small.
+ */
+const mapCityColumns = (sql: Sql) => sql`
+  c.id AS "cityId",
+  round(ST_X(c.centre)::numeric, 5)::float8 AS longitude,
+  round(ST_Y(c.centre)::numeric, 5)::float8 AS latitude,
+  c.settlement_type AS "settlementType",
+  c.population`;
+
 export function createDefaultListStore(sql: Sql): DefaultListStore {
   return {
     cityExists: (cityId) => cityExists(sql, cityId),
 
     async listVisited(userId, { afterCityId, limit }) {
       const rows = await sql<VisitedRow[]>`
-        SELECT city_id, sum(visits)::int AS visit_count, bool_or(lived) AS lived_in
-        FROM (
-          SELECT city_id, count(*) AS visits, false AS lived
-          FROM visits WHERE user_id = ${userId} GROUP BY city_id
-          UNION ALL
-          SELECT city_id, 0, true FROM lived_cities WHERE user_id = ${userId}
-        ) AS marks
+        SELECT city_id, visit_count, lived_in
+        FROM (${visitedMarks(sql, userId)}) AS marks
         ${afterCityId === undefined ? sql`` : sql`WHERE city_id > ${afterCityId}`}
-        GROUP BY city_id
         ORDER BY city_id
         LIMIT ${limit}`;
       return rows.map((row) => ({
@@ -150,6 +171,26 @@ export function createDefaultListStore(sql: Sql): DefaultListStore {
             WHERE user_id = ${userId} AND city_id = ${cityId}) AS planned`;
       if (!row) throw new Error('City status could not be read');
       return { ...row, visited: await isVisited(sql, userId, cityId) };
+    },
+
+    async map(userId) {
+      const [visited, planned] = await Promise.all([
+        sql<VisitedMapCity[]>`
+          SELECT ${mapCityColumns(sql)}, marks.visit_count AS "visitCount",
+            marks.lived_in AS "livedIn", rating.subjective::float8 AS rating
+          FROM (${visitedMarks(sql, userId)}) AS marks
+          JOIN cities c ON c.id = marks.city_id
+          LEFT JOIN city_ratings rating
+            ON rating.user_id = ${userId} AND rating.city_id = marks.city_id
+          ORDER BY c.id`,
+        sql<MapCity[]>`
+          SELECT ${mapCityColumns(sql)}
+          FROM planned_cities planned
+          JOIN cities c ON c.id = planned.city_id
+          WHERE planned.user_id = ${userId}
+          ORDER BY c.id`,
+      ]);
+      return { visited, planned };
     },
 
     async unplan(userId, cityId) {

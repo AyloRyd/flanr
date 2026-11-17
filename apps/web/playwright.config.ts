@@ -36,7 +36,9 @@ export default defineConfig({
         ? `pnpm build && pnpm exec next start --port ${webPort}`
         : `pnpm exec next dev --port ${webPort}`,
       port: webPort,
-      env: { API_URL: `http://localhost:${apiPort}` },
+      // Without a Mapbox token: the tests check the data, legends and behaviour of the map, not
+      // what Mapbox draws, which needs WebGL and loads from Mapbox (FR-MAP-001).
+      env: { API_URL: `http://localhost:${apiPort}`, NEXT_PUBLIC_MAPBOX_TOKEN: '' },
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

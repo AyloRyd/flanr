@@ -5,6 +5,8 @@
     "jsx": "react-jsx",
     "allowJs": false,
     "incremental": true,
+    // The types of mapbox-gl use the global GeoJSON namespace of @types/geojson.
+    "types": ["geojson"],
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./*"] }
   },
