@@ -27,7 +27,7 @@ interface RateButtonProps {
 export function RateButton({ cityId, cityName, criteria, rating }: RateButtonProps) {
   const t = useTranslations('city');
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [status, setStatus] = useState<'ratingSaved' | 'ratingDeleted' | null>(null);
 
   return (
     <div className="flex flex-col items-start gap-2">
@@ -35,14 +35,14 @@ export function RateButton({ cityId, cityName, criteria, rating }: RateButtonPro
         variant="outline"
         size="sm"
         onClick={() => {
-          setSaved(false);
+          setStatus(null);
           setOpen(true);
         }}
       >
         {rating ? t('changeRating') : t('rate')}
       </Button>
       <p role="status" className="text-sm text-muted-foreground empty:hidden">
-        {saved && t('ratingSaved')}
+        {status && t(status)}
       </p>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -57,7 +57,11 @@ export function RateButton({ cityId, cityName, criteria, rating }: RateButtonPro
             rating={rating}
             onSaved={() => {
               setOpen(false);
-              setSaved(true);
+              setStatus('ratingSaved');
+            }}
+            onDeleted={() => {
+              setOpen(false);
+              setStatus('ratingDeleted');
             }}
             onCancel={() => setOpen(false)}
           />

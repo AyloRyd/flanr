@@ -1,5 +1,6 @@
 import type { Criterion, OwnCityData, Visit } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
+import { OwnVisits } from '@/components/city/own-visits';
 import { RateButton } from '@/components/city/rate-button';
 import { RatingValue } from '@/components/city/rating-value';
 import { formatVisitDateForDisplay } from '@/lib/visit-date';
@@ -9,18 +10,17 @@ interface OwnCityCardProps {
   data: OwnCityData;
   /** The criteria the city can be rated by, in display order (FR-RATE-002). */
   criteria: Criterion[];
-  /** The newest dated visits. */
+  /** The newest visits. */
   visits: Visit[];
+  /** The day the user registered, as YYYY-MM-DD. */
+  registeredOn: string;
 }
 
 /** The signed-in user's own data for the city (FR-CITY-004). Only the user sees it. */
-export function OwnCityCard({ cityName, data, criteria, visits }: OwnCityCardProps) {
+export function OwnCityCard({ cityName, data, criteria, visits, registeredOn }: OwnCityCardProps) {
   const t = useTranslations('city');
   const format = useFormatter();
   const date = (value: string) => formatVisitDateForDisplay(format, value);
-
-  const datedVisits = visits.filter((visit) => visit.date !== null);
-  const moreDated = data.visitCount - data.undatedVisitCount - datedVisits.length;
 
   return (
     <section aria-labelledby="yours" className="rounded-2xl border p-6">
@@ -35,22 +35,7 @@ export function OwnCityCard({ cityName, data, criteria, visits }: OwnCityCardPro
         </p>
       )}
 
-      <div className="mt-4">
-        <p className="font-medium">{t('visits', { count: data.visitCount })}</p>
-        {datedVisits.length > 0 && (
-          <ul className="mt-2 space-y-1 text-muted-foreground">
-            {datedVisits.map((visit) => (
-              <li key={visit.id}>{visit.date && date(visit.date)}</li>
-            ))}
-            {moreDated > 0 && <li>{t('moreVisits', { count: moreDated })}</li>}
-          </ul>
-        )}
-        {data.undatedVisitCount > 0 && (
-          <p className="mt-1 text-muted-foreground">
-            {t('undatedVisits', { count: data.undatedVisitCount })}
-          </p>
-        )}
-      </div>
+      <OwnVisits cityId={data.cityId} data={data} visits={visits} registeredOn={registeredOn} />
 
       <div className="mt-4">
         <h3 className="text-sm text-muted-foreground">{t('yourRating')}</h3>

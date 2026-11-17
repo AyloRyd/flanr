@@ -8,7 +8,8 @@ import {
 } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import { setRating, type RatingProblem } from '@/app/cities/[cityId]/actions';
+import { deleteRating, setRating, type RatingProblem } from '@/app/cities/[cityId]/actions';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
@@ -22,6 +23,8 @@ interface RatingFormProps {
   /** The user's rating of the city, if they have one: the form changes it (BR-008). */
   rating: CityRating | null;
   onSaved: () => void;
+  /** Called after the user deleted their rating (FR-RATE-004). */
+  onDeleted: () => void;
   onCancel: () => void;
 }
 
@@ -30,7 +33,14 @@ interface RatingFormProps {
  * the user picks a subjective rating themselves, it follows the criteria average rounded to the
  * nearest 0.5 (FR-RATE-003, BR-007).
  */
-export function RatingForm({ cityId, criteria, rating, onSaved, onCancel }: RatingFormProps) {
+export function RatingForm({
+  cityId,
+  criteria,
+  rating,
+  onSaved,
+  onDeleted,
+  onCancel,
+}: RatingFormProps) {
   const t = useTranslations('city.ratingForm');
   const format = useFormatter();
   const id = useId();
@@ -45,6 +55,8 @@ export function RatingForm({ cityId, criteria, rating, onSaved, onCancel }: Rati
   );
   const [problem, setProblem] = useState<FormProblem | null>(null);
   const [pending, startTransition] = useTransition();
+  const [confirmingDeletion, setConfirmingDeletion] = useState(false);
+  const [deletionFailed, setDeletionFailed] = useState(false);
 
   const ratedCriteria = Object.fromEntries(
     criteria.flatMap(({ key }) =>
@@ -69,6 +81,14 @@ export function RatingForm({ cityId, criteria, rating, onSaved, onCancel }: Rati
       });
       if (result.ok) onSaved();
       else setProblem(result.problem);
+    });
+  }
+
+  function confirmDeletion() {
+    startTransition(async () => {
+      const result = await deleteRating(cityId);
+      if (result.ok) onDeleted();
+      else setDeletionFailed(true);
     });
   }
 
@@ -147,7 +167,20 @@ export function RatingForm({ cityId, criteria, rating, onSaved, onCancel }: Rati
         {problem && t(`problem.${problem}`)}
       </p>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+        {rating && (
+          <Button
+            type="button"
+            variant="destructive"
+            className="sm:mr-auto"
+            onClick={() => {
+              setDeletionFailed(false);
+              setConfirmingDeletion(true);
+            }}
+          >
+            {t('delete')}
+          </Button>
+        )}
         <Button type="button" variant="outline" onClick={onCancel}>
           {t('cancel')}
         </Button>
@@ -155,6 +188,17 @@ export function RatingForm({ cityId, criteria, rating, onSaved, onCancel }: Rati
           {t('save')}
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDeletion}
+        onOpenChange={setConfirmingDeletion}
+        title={t('deleteTitle')}
+        description={t('deleteText')}
+        confirmLabel={t('delete')}
+        onConfirm={confirmDeletion}
+        pending={pending}
+        problem={deletionFailed ? t('problem.deleteFailed') : null}
+      />
     </form>
   );
 }
