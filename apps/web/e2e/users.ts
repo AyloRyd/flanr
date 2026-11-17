@@ -49,8 +49,14 @@ export async function fetchApiAsUser(
   path: string,
   body?: unknown,
 ): Promise<Response> {
+  // After a navigation or a refresh Clerk needs a moment until the session is back.
+  await page
+    .waitForFunction(() => Boolean(window.Clerk?.session), undefined, { timeout: 10_000 })
+    .catch(() => {
+      throw new Error('No signed-in user on the page');
+    });
   const token = await page.evaluate(() => window.Clerk.session?.getToken());
-  if (!token) throw new Error('No signed-in user on the page');
+  if (!token) throw new Error('No session token on the page');
   return fetch(`${e2eApiUrl}${path}`, {
     method,
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
