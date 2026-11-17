@@ -117,9 +117,9 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ## Phase 7 — Web pages
 
-- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004). Done: `/cities/{id}` with the data, the community rating and its criteria (FR-CITY-001…003) from `GET /v1/cities/{cityId}`; the user's own data (FR-CITY-004) from `GET /v1/me/cities/{cityId}`; saving to the Planned list. Open: the boundary map (with Mapbox in Phase 8), logging visits, rating and adding to custom lists.
+- [ ] City page: required and optional data, community rating, personal data, log visit, rate, add to lists (FR-CITY-001…004). Done: `/cities/{id}` with the data, the community rating and its criteria (FR-CITY-001…003) from `GET /v1/cities/{cityId}`; the user's own data (FR-CITY-004) from `GET /v1/me/cities/{cityId}`; saving to the Planned list; logging a visit. Open: the boundary map (with Mapbox in Phase 8), editing and deleting visits (FR-VIS-006), setting the number of undated visits (FR-VIS-005), rating and adding to custom lists.
 - [x] Links to external maps on the city page (FR-CITY-009).
-- [ ] Visit form with date precision and the "before registration" option, help hint with the recommended visit model (FR-VIS-002, FR-VIS-003, FR-VIS-008).
+- [x] Visit form with date precision and the "before registration" option, help hint with the recommended visit model (FR-VIS-002, FR-VIS-003, FR-VIS-008). A dialog on the city page with day, month, year or no date; an undated visit needs the confirmation that it was before the registration date, which the form shows. The form checks the date with the same rules as the API (`checkVisitDate` in `packages/shared`), against today in the user's own time zone. Guests get the sign-in dialog.
 - [ ] Rating form with criteria and the suggested subjective rating (FR-RATE-001…003).
 - [ ] Search page for cities and lists (Phase 5).
 - [ ] Profile page with lists, ratings, map and statistics (FR-PROF-004).

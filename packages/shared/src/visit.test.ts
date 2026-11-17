@@ -5,6 +5,7 @@ import {
   latestToday,
   parseVisitDate,
   visitDateSchema,
+  visitDateFromFields,
   type ParsedVisitDate,
 } from './visit.ts';
 
@@ -121,5 +122,32 @@ describe('checkVisitDate', () => {
       // The year had begun before the registration, so the visit can be from before it.
       expect(checkVisitDate(input, { ...context, previousDate: date('2026') })).toBe(null);
     });
+  });
+});
+
+describe('visitDateFromFields (FR-VIS-002)', () => {
+  it('uses only the fields of the chosen precision', () => {
+    const fields = { day: '2026-05-10', month: '5', year: '2026' };
+    expect(visitDateFromFields('day', fields)).toBe('2026-05-10');
+    expect(visitDateFromFields('month', fields)).toBe('2026-05');
+    expect(visitDateFromFields('year', fields)).toBe('2026');
+  });
+
+  it('pads a one-digit month', () => {
+    expect(visitDateFromFields('month', { month: '1', year: '2020' })).toBe('2020-01');
+  });
+
+  it.each([
+    ['day', {}],
+    ['day', { day: '2026-02-30' }],
+    ['month', { year: '2026' }],
+    ['month', { month: '13', year: '2026' }],
+    ['month', { month: '5' }],
+    ['year', {}],
+    ['year', { year: '12026' }],
+    ['year', { year: '2026.5' }],
+    ['year', { year: '-2026' }],
+  ] as const)('gives no date for %s precision with %j', (precision, fields) => {
+    expect(visitDateFromFields(precision, fields)).toBeNull();
   });
 });

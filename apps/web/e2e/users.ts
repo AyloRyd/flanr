@@ -27,20 +27,29 @@ export const e2eApiUrl = 'http://localhost:8788';
 
 /**
  * Calls the test API as the signed-in user of the page, with the session token of Clerk in the
- * browser. Used to put the user's data into a known state.
+ * browser. Used to put the user's data into a known state and to read it back.
  */
+export async function fetchApiAsUser(
+  page: Page,
+  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  path: string,
+  body?: unknown,
+): Promise<Response> {
+  const token = await page.evaluate(() => window.Clerk.session?.getToken());
+  if (!token) throw new Error('No signed-in user on the page');
+  return fetch(`${e2eApiUrl}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+}
+
+/** Like fetchApiAsUser, for calls where only the status matters. */
 export async function callApiAsUser(
   page: Page,
   method: 'GET' | 'PUT' | 'DELETE' | 'POST',
   path: string,
   body?: unknown,
 ): Promise<number> {
-  const token = await page.evaluate(() => window.Clerk.session?.getToken());
-  if (!token) throw new Error('No signed-in user on the page');
-  const response = await fetch(`${e2eApiUrl}${path}`, {
-    method,
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  return response.status;
+  return (await fetchApiAsUser(page, method, path, body)).status;
 }

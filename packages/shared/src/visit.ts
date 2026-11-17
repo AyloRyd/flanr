@@ -47,6 +47,34 @@ export function latestToday(now: Date): string {
   return new Date(now.getTime() + 14 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
+/** What a visit form holds, as its fields give it: a full date for day precision, otherwise a month and a year. */
+export interface VisitDateFields {
+  /** YYYY-MM-DD, as a date input gives it. Used for day precision. */
+  day?: string;
+  /** 1 to 12. Used for month precision. */
+  month?: string;
+  /** Used for month and year precision. */
+  year?: string;
+}
+
+/**
+ * The visit date in the form the API takes (FR-VIS-002): `2026-05-10`, `2026-05` or `2026`, built
+ * from the fields of the given precision. Null if those fields do not make a date.
+ */
+export function visitDateFromFields(
+  precision: VisitDatePrecision,
+  fields: VisitDateFields,
+): string | null {
+  const year = fields.year?.trim() ?? '';
+  const value =
+    precision === 'day'
+      ? (fields.day ?? '')
+      : precision === 'month'
+        ? `${year}-${(fields.month ?? '').padStart(2, '0')}`
+        : year;
+  return parseVisitDate(value) ? value : null;
+}
+
 export type VisitDateProblem = 'date_in_future' | 'date_required';
 
 export const visitDateProblemMessages: Record<VisitDateProblem, string> = {

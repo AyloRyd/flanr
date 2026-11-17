@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 
 interface SignInPromptProps {
+  /** Names what the guest tried to do, such as "Sign in to log visits". */
+  title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -21,14 +23,14 @@ interface SignInPromptProps {
  * Offered to a guest who tries to change something (FR-AUTH-002). Clerk brings the user back to
  * the page they were on after signing in or up.
  */
-export function SignInPrompt({ open, onOpenChange }: SignInPromptProps) {
+export function SignInPrompt({ title, open, onOpenChange }: SignInPromptProps) {
   const t = useTranslations('city.signInPrompt');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{t('text')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>

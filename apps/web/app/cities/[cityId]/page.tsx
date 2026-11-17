@@ -7,6 +7,7 @@ import { cache } from 'react';
 import { CityFacts } from '@/components/city/city-facts';
 import { CityLinks } from '@/components/city/city-links';
 import { CommunityRatingCard } from '@/components/city/community-rating-card';
+import { LogVisitButton } from '@/components/city/log-visit-button';
 import { OwnCityCard } from '@/components/city/own-city-card';
 import { PlanButton } from '@/components/city/plan-button';
 import { serverApi } from '@/lib/api';
@@ -38,19 +39,29 @@ const loadCity = cache(
 /** How many dated visits the city page lists; the rest are counted. */
 const shownVisits = 10;
 
+interface OwnData {
+  data: OwnCityData;
+  visits: Visit[];
+  /** The day the user registered, as YYYY-MM-DD. Visits after it need a date (BR-002). */
+  registeredOn: string;
+}
+
 /** The signed-in user's own data for the city and their newest visits; null for a guest. */
-async function loadOwnData(cityId: number): Promise<{ data: OwnCityData; visits: Visit[] } | null> {
+async function loadOwnData(cityId: number): Promise<OwnData | null> {
   const { userId } = await auth();
   if (!userId) return null;
   const api = serverApi();
-  const [own, visits] = await Promise.all([
+  const [own, visits, me] = await Promise.all([
     api.GET('/v1/me/cities/{cityId}', { params: { path: { cityId } } }),
     api.GET('/v1/visits', { params: { query: { cityId, limit: shownVisits } } }),
+    api.GET('/v1/me'),
   ]);
-  if (!own.data || !visits.data) {
+  if (!own.data || !visits.data || !me.data) {
     throw new Error(`Own data for city ${cityId} could not be loaded: ${own.response.status}`);
   }
-  return { data: own.data, visits: visits.data.items };
+  // The API takes the date of the registration in UTC as well.
+  const registeredOn = me.data.registeredAt.slice(0, 10);
+  return { data: own.data, visits: visits.data.items, registeredOn };
 }
 
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
@@ -91,14 +102,21 @@ export default async function CityPage({ params }: CityPageProps) {
               </p>
             )}
           </div>
-          {/* A visited city is in the Visited list and cannot be planned (FR-LIST-002, BR-004). */}
-          {!own?.data.visited && (
-            <PlanButton
+          <div className="flex flex-wrap items-start gap-2">
+            <LogVisitButton
               cityId={city.id}
-              signedIn={own !== null}
-              planned={own?.data.planned ?? false}
+              cityName={city.name}
+              registeredOn={own?.registeredOn ?? null}
             />
-          )}
+            {/* A visited city is in the Visited list and cannot be planned (FR-LIST-002, BR-004). */}
+            {!own?.data.visited && (
+              <PlanButton
+                cityId={city.id}
+                signedIn={own !== null}
+                planned={own?.data.planned ?? false}
+              />
+            )}
+          </div>
         </div>
         {(city.municipality || capital) && (
           <ul className="mt-1 flex flex-wrap gap-2 text-sm">

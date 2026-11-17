@@ -15,17 +15,21 @@ test('a guest who saves a city is asked to sign in and comes back (FR-AUTH-002)'
 
   await planButton(page).click();
 
-  const dialog = page.getByRole('dialog', { name: en.city.signInPrompt.title });
+  const dialog = page.getByRole('dialog', { name: en.city.signInPrompt.planTitle });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('button', { name: en.city.signInPrompt.signUp })).toBeVisible();
   await dialog.getByRole('button', { name: en.city.signInPrompt.signIn }).click();
 
   // Clerk sends the user back to the city page after signing in. It keeps the address in the
   // fragment of the sign-in URL: /sign-in#/?redirect_url=…
+  // Clerk can write the fragment a moment after the page has loaded, so the test waits for it.
   await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
-  const fragment = new URL(page.url()).hash.replace(/^#\/?\??/, '');
-  const returnUrl = new URLSearchParams(fragment).get('redirect_url');
-  expect(returnUrl).toMatch(new RegExp(`/cities/${e2eCities.worringen}$`));
+  await expect
+    .poll(() => {
+      const fragment = new URL(page.url()).hash.replace(/^#\/?\??/, '');
+      return new URLSearchParams(fragment).get('redirect_url') ?? '';
+    })
+    .toMatch(new RegExp(`/cities/${e2eCities.worringen}$`));
 });
 
 test.describe('signed in', () => {

@@ -18,6 +18,8 @@ export const e2eCities = {
   point: 3,
   /** A city that the tests of the user's own data visit and rate, so other tests never see it. */
   ownData: 4,
+  /** A city that only the tests of the visit form log visits to. */
+  visits: 5,
 } as const;
 
 const square = 'SRID=4326;MULTIPOLYGON(((6.8 50.8, 7.1 50.8, 7.1 51.1, 6.8 51.1, 6.8 50.8)))';
@@ -50,7 +52,9 @@ export async function seedE2eDatabase(): Promise<void> {
           (${e2eCities.point}, 'node', 1, 'Punkt', 'Punkt', 'DE', 1, NULL, false, 'hamlet',
             'SRID=4326;POINT(7 51)', NULL, NULL, NULL, NULL, NULL, NULL),
           (${e2eCities.ownData}, 'node', 2, 'Aachen', 'Aachen', 'DE', 1, NULL, false, 'city',
-            'SRID=4326;POINT(6.08 50.78)', NULL, NULL, NULL, NULL, NULL, NULL)`;
+            'SRID=4326;POINT(6.08 50.78)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.visits}, 'node', 3, 'Bonn', 'Bonn', 'DE', 1, NULL, false, 'city',
+            'SRID=4326;POINT(7.1 50.73)', NULL, NULL, NULL, NULL, NULL, NULL)`;
       for (const [index, subjective] of [7, 8, 8.5].entries()) {
         const [user] = await tx<{ id: number }[]>`
           INSERT INTO users (auth_provider_id, username, display_name)
