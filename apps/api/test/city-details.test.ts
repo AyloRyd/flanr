@@ -101,3 +101,46 @@ describe('GET /v1/cities/{cityId} (FR-CITY-001, FR-CITY-002)', () => {
     expect(response.status).toBe(400);
   });
 });
+
+describe('GET /v1/city-summaries', () => {
+  const summariesOf = (ids: string) =>
+    guest.GET('/v1/city-summaries', { params: { query: { ids } } });
+
+  it('gives a guest the cities in the order asked for, with places and community rating', async () => {
+    const [rater] = await sql<{ id: number }[]>`
+      INSERT INTO users (auth_provider_id, username, display_name)
+      VALUES ('summary_rater', 'summary_rater', 'Rater') RETURNING id`;
+    await sql`INSERT INTO city_ratings (user_id, city_id, subjective) VALUES (${rater?.id ?? 0}, ${cologne}, 7.5)`;
+
+    const { data, response } = await summariesOf(`${worringen},${cologne}`);
+
+    expect(response.status).toBe(200);
+    expect(data?.items).toEqual([
+      {
+        id: worringen,
+        name: 'Worringen',
+        nameEn: 'Worringen',
+        settlementType: 'village',
+        population: null,
+        country: { code: 'DE', name: 'Germany' },
+        region: 'North Rhine-Westphalia',
+        municipality: 'Köln',
+        rating: null,
+        ratingCount: 0,
+      },
+      expect.objectContaining({ id: cologne, municipality: null, rating: 7.5, ratingCount: 1 }),
+    ]);
+  });
+
+  it('leaves out unknown IDs and gives a repeated one once', async () => {
+    const { data } = await summariesOf(`${pointOnly},999,${pointOnly}`);
+    expect(data?.items.map((city) => city.id)).toEqual([pointOnly]);
+  });
+
+  it.each(['', 'a', '0', '1,,2', Array.from({ length: 101 }, (_, i) => i + 1).join(',')])(
+    'answers 400 for ids=%j',
+    async (ids) => {
+      expect((await summariesOf(ids)).response.status).toBe(400);
+    },
+  );
+});

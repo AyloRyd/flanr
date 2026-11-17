@@ -1,4 +1,4 @@
-import type { CityDetails } from '@flanr/shared';
+import type { CityDetails, CitySummary } from '@flanr/shared';
 import type { TransactionSql } from 'postgres';
 import type { Sql } from './db.ts';
 
@@ -11,6 +11,8 @@ export async function cityExists(sql: Sql | TransactionSql, cityId: number): Pro
 export interface CityStore {
   /** Null if there is no such city. */
   find(cityId: number): Promise<CityDetails | null>;
+  /** The cities with these IDs in the same order; IDs of no city are left out. */
+  summaries(cityIds: number[]): Promise<CitySummary[]>;
 }
 
 /**
@@ -45,12 +47,36 @@ export function createCityStore(sql: Sql): CityStore {
         WHERE c.id = ${cityId}`;
       return city ?? null;
     },
+
+    async summaries(cityIds) {
+      return sql<CitySummary[]>`
+        SELECT c.id, c.name_local AS name, c.name_en AS "nameEn",
+          c.settlement_type AS "settlementType", c.population,
+          json_build_object('code', country.code, 'name', country.name_en) AS country,
+          region.name_en AS region,
+          CASE WHEN c.represents_municipality THEN NULL ELSE municipality.name_local END
+            AS municipality,
+          community.rating, community.rating_count AS "ratingCount"
+        FROM unnest(${cityIds}::int[]) WITH ORDINALITY AS wanted(id, position)
+        JOIN cities c ON c.id = wanted.id
+        JOIN countries country ON country.code = c.country_code
+        LEFT JOIN regions region ON region.id = c.region_1_id
+        LEFT JOIN municipalities municipality ON municipality.id = c.municipality_id
+        CROSS JOIN LATERAL (
+          SELECT round(avg(subjective), 2)::float8 AS rating, count(*)::int AS rating_count
+          FROM city_ratings WHERE city_id = c.id
+        ) AS community
+        ORDER BY wanted.position`;
+    },
   };
 }
 
 /** For places that never read cities, such as writing the OpenAPI document. */
 export const noCityStore: CityStore = {
   find: () => {
+    throw new Error('Cities are not available here');
+  },
+  summaries: () => {
     throw new Error('Cities are not available here');
   },
 };

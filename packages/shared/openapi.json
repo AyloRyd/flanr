@@ -7958,6 +7958,167 @@
         }
       }
     },
+    "/v1/city-summaries": {
+      "get": {
+        "summary": "Short data of several cities at once, for lists of cities",
+        "description": "The lists of a user and the entries of custom lists carry only city IDs; this gives one page of them their names, places and community ratings in one request. The cities come in the order of `ids`; IDs of no city are left out, a repeated ID comes once. Open to guests.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "ids",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "nameEn": {
+                            "type": "string"
+                          },
+                          "settlementType": {
+                            "type": "string",
+                            "enum": [
+                              "city",
+                              "town",
+                              "village",
+                              "hamlet"
+                            ]
+                          },
+                          "population": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "country": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "code",
+                              "name"
+                            ]
+                          },
+                          "region": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "municipality": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "rating": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "ratingCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "nameEn",
+                          "settlementType",
+                          "population",
+                          "country",
+                          "region",
+                          "municipality",
+                          "rating",
+                          "ratingCount"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/me/cities/{cityId}": {
       "get": {
         "summary": "The signed-in user's own data for a city (FR-CITY-004)",
