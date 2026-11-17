@@ -3991,6 +3991,8 @@ export interface paths {
                         "application/json": {
                             items: {
                                 cityId: number;
+                                visitCount: number;
+                                livedIn: boolean;
                             }[];
                             nextCursor: string | null;
                         };

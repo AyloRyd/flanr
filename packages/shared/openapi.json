@@ -9067,10 +9067,19 @@
                         "properties": {
                           "cityId": {
                             "type": "integer"
+                          },
+                          "visitCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "livedIn": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
-                          "cityId"
+                          "cityId",
+                          "visitCount",
+                          "livedIn"
                         ]
                       }
                     },

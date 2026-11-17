@@ -13,7 +13,9 @@ export const plannedCityPageSchema = paginated(plannedCitySchema);
 
 /**
  * A city in the Visited list (FR-LIST-001). The list is derived: a city is in it when the user
- * has a visit to it or has marked it as a lived-in city (BR-004).
+ * has a visit to it or has marked it as a lived-in city (BR-004). Others see the same on a
+ * public profile (FR-PROF-004); which lived-in city is the current one, the home location, is
+ * not part of it (FR-PROF-003).
  */
 export const visitedCitySchema = z.object({
   cityId: z.number().int(),
@@ -25,14 +27,3 @@ export const visitedCitySchema = z.object({
 export type VisitedCity = z.infer<typeof visitedCitySchema>;
 
 export const visitedCityPageSchema = paginated(visitedCitySchema);
-
-/**
- * A city in the Visited list of another user. Only the city: the number of visits and the
- * lived-in mark stay with the owner, because a city without visits would give away where
- * the user lives or lived, also when the home location is hidden (FR-PROF-003).
- */
-export const publicVisitedCitySchema = visitedCitySchema.pick({ cityId: true });
-
-export type PublicVisitedCity = z.infer<typeof publicVisitedCitySchema>;
-
-export const publicVisitedCityPageSchema = paginated(publicVisitedCitySchema);

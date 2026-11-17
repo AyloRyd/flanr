@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.14 |
+| Version | 0.16 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-16 |
+| Date | 2026-11-17 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -29,6 +29,7 @@
 | 0.13 | 2026-11-16 | A. Malyshkin | One privacy setting: the profile's visibility also decides the visibility of the default lists and of everything that follows from visits; the two list settings of 0.10 are removed (FR-PRIV-001, FR-LIST-005, FR-PROF-004, FR-MAP-007, User entity). A private profile shows its avatar and bio. Following instead of friendship for R2, with requests for private profiles (FR-SOC, OI-001, OI-012). Text reviews show their author (FR-RATE-008) |
 | 0.14 | 2026-11-16 | A. Malyshkin | Search engine optimisation (NFR-SEO), OI-022 for the population threshold of indexed cities |
 | 0.15 | 2026-11-17 | A. Malyshkin | Tentative decision on OI-008: the trip calendar covers only the period in which every visit has a day (FR-STAT-003). Resolved OI-022: cities from 50,000 people are indexed, plus a hand-picked list (NFR-SEO-006). OI-017 leans towards a Hetzner VPS. Resolved OI-021: OpenStreetMap settlement points are kept as they are |
+| 0.16 | 2026-11-17 | A. Malyshkin | Lived-in cities and the number of visits are part of the travel record that a public profile shows; which lived-in city is the current one is shown only as the home location, when the user shows it (BR-016, FR-PROF-003, FR-PROF-004) |
 
 ---
 
@@ -285,6 +286,8 @@ Core functionality, including logging visits, rating cities, lists, the map and 
 #### BR-016 — Lived-in cities
 A user can mark any number of cities as lived-in cities: at most one as the current city and any number as past cities. The user decides what counts as having lived somewhere. A lived-in city counts as a visited city but does not require visits. The user can still log visits to it. The current lived-in city is the user's home location (FR-PROF-003). A lived-in city can have an optional period (from, to) with the same precision rules as visit dates (BR-003). The period is shown with the city but is not part of time-based statistics, which count dated visits only.
 
+Having lived in a city stands above any number of visits to it. Lived-in cities are part of the travel record, so a public profile shows them like visits (FR-PROF-004); it does not tell which of them is the current one. That is the home location, which the user decides to show or not (FR-PROF-003).
+
 #### BR-017 — Cities and municipalities
 A city MAY belong to one municipality. The municipality is reference data, like a region: it cannot be visited or rated.
 
@@ -405,7 +408,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-003 — Home location
 **Priority:** Should · **Release:** MVP · **Status:** Draft · **Source:** Concept §Accounts and guests
 
-**Description.** A user MAY specify where they live. This field MUST be optional and MUST be hideable from other users.
+**Description.** A user MAY specify where they live. This field MUST be optional and MUST be hideable from other users. The lived-in cities shown on a public profile do not give away which one is the home location (BR-016).
 
 **Acceptance criteria.**
 1. Given a user who set a home location and hid it, when another user views the profile, then the home location is not shown.
@@ -413,7 +416,7 @@ Whether a city and its municipality are the same thing is taken from the source 
 #### FR-PROF-004 — Public profile page
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Social features
 
-**Description.** A public profile MUST show the user's profile information, their travel record (the Visited list with the user's ratings, the map of visited and lived-in cities and the basic statistics), their Planned list and their public custom lists. A private profile shows less, see FR-PRIV-001.
+**Description.** A public profile MUST show the user's profile information, their travel record (the Visited list with the number of visits, the lived-in cities and the user's ratings, the map of visited and lived-in cities and the basic statistics), their Planned list and their public custom lists. A private profile shows less, see FR-PRIV-001.
 
 **Acceptance criteria.**
 1. Given a public profile, when any visitor opens it, then the listed content is shown.

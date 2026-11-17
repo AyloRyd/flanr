@@ -79,14 +79,17 @@ describe('Content of a public profile (FR-PROF-004, BR-013)', () => {
     const forBob = await visitedOf(bob);
 
     expect(forGuest.response.status).toBe(200);
-    expect(forGuest.data?.items).toEqual([{ cityId: wuppertal }, { cityId: bonn }]);
+    expect(forGuest.data?.items).toEqual([
+      { cityId: wuppertal, visitCount: 1, livedIn: false },
+      { cityId: bonn, visitCount: 0, livedIn: true },
+    ]);
     expect(forBob.data).toEqual(forGuest.data);
   });
 
-  it('does not say which visited city the user lives in (FR-PROF-003)', async () => {
+  it('shows lived-in cities but not which one the user lives in now (BR-016, FR-PROF-003)', async () => {
     const { data } = await visitedOf();
 
-    expect(JSON.stringify(data)).not.toMatch(/livedIn|visitCount/);
+    expect(JSON.stringify(data)).not.toMatch(/isCurrent/);
   });
 
   it('shows the Planned list', async () => {
@@ -126,8 +129,11 @@ describe('Content of a public profile (FR-PROF-004, BR-013)', () => {
     const first = await page();
     const second = await page(first.data?.nextCursor ?? undefined);
 
-    expect(first.data?.items).toEqual([{ cityId: wuppertal }]);
-    expect(second.data).toEqual({ items: [{ cityId: bonn }], nextCursor: null });
+    expect(first.data?.items.map((city) => city.cityId)).toEqual([wuppertal]);
+    expect(second.data).toEqual({
+      items: [expect.objectContaining({ cityId: bonn })],
+      nextCursor: null,
+    });
   });
 });
 
