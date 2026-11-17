@@ -1,16 +1,20 @@
-import type { OwnCityData, Visit } from '@flanr/shared';
+import type { Criterion, OwnCityData, Visit } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
+import { RateButton } from '@/components/city/rate-button';
 import { RatingValue } from '@/components/city/rating-value';
 import { formatVisitDateForDisplay } from '@/lib/visit-date';
 
 interface OwnCityCardProps {
+  cityName: string;
   data: OwnCityData;
+  /** The criteria the city can be rated by, in display order (FR-RATE-002). */
+  criteria: Criterion[];
   /** The newest dated visits. */
   visits: Visit[];
 }
 
 /** The signed-in user's own data for the city (FR-CITY-004). Only the user sees it. */
-export function OwnCityCard({ data, visits }: OwnCityCardProps) {
+export function OwnCityCard({ cityName, data, criteria, visits }: OwnCityCardProps) {
   const t = useTranslations('city');
   const format = useFormatter();
   const date = (value: string) => formatVisitDateForDisplay(format, value);
@@ -54,6 +58,17 @@ export function OwnCityCard({ data, visits }: OwnCityCardProps) {
           <RatingValue value={data.rating.subjective} className="mt-1 text-lg" />
         ) : (
           <p className="mt-1">{t('notRatedByYou')}</p>
+        )}
+        {/* Only a visited or lived-in city can be rated (FR-RATE-001, BR-005). */}
+        {data.visited && (
+          <div className="mt-3">
+            <RateButton
+              cityId={data.cityId}
+              cityName={cityName}
+              criteria={criteria}
+              rating={data.rating}
+            />
+          </div>
         )}
       </div>
 

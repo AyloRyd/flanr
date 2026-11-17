@@ -64,6 +64,27 @@
     "livedUntil": "until {to}",
     "yourRating": "Your rating",
     "notRatedByYou": "You have not rated this city.",
+    "rate": "Rate this city",
+    "changeRating": "Change your rating",
+    "ratingSaved": "Rating saved.",
+    "ratingForm": {
+      "title": "Rate {city}",
+      "description": "Rate the criteria you have an opinion on, then give the city your own rating from 1 to 10.",
+      "criteria": "Criteria",
+      "criteriaNote": "Optional. Leave out what you cannot judge.",
+      "notRated": "Not rated",
+      "subjective": "Your rating",
+      "choose": "Choose",
+      "suggested": "Your criteria suggest {value}",
+      "useSuggested": "Use it",
+      "problem": {
+        "subjective_required": "Choose your rating of the city.",
+        "not_visited": "You can rate a city once you have visited or lived in it.",
+        "failed": "The rating could not be saved. Please try again."
+      },
+      "save": "Save rating",
+      "cancel": "Cancel"
+    },
     "inYourLists": "In your lists",
     "noLists": "Not in any of your lists.",
     "plan": "Save to Planned",

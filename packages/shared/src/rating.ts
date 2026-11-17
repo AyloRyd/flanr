@@ -5,6 +5,12 @@ export const minRating = 1;
 export const maxRating = 10;
 export const ratingStep = 0.5;
 
+/** Every value of the city rating scale, from 1 to 10 in steps of 0.5 (BR-006). */
+export const ratingScaleValues: readonly number[] = Array.from(
+  { length: (maxRating - minRating) / ratingStep + 1 },
+  (_, index) => minRating + index * ratingStep,
+);
+
 /** A value on the city rating scale: 1 to 10 in steps of 0.5 (BR-006). */
 export const ratingValueSchema = z.number().min(minRating).max(maxRating).multipleOf(ratingStep);
 

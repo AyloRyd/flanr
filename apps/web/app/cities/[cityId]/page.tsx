@@ -136,7 +136,14 @@ export default async function CityPage({ params }: CityPageProps) {
           <CommunityRatingCard rating={rating} />
         </div>
         <div className="flex flex-col gap-6">
-          {own && <OwnCityCard data={own.data} visits={own.visits} />}
+          {own && (
+            <OwnCityCard
+              cityName={city.name}
+              data={own.data}
+              criteria={rating.criteria.map(({ key, name }) => ({ key, name }))}
+              visits={own.visits}
+            />
+          )}
           <CityLinks city={city} />
         </div>
       </div>

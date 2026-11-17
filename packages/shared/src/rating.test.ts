@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   criteriaAverage,
+  ratingScaleValues,
   ratingValueSchema,
   setCityRatingSchema,
   suggestedSubjectiveRating,
@@ -69,5 +70,20 @@ describe('suggestedSubjectiveRating (BR-007, FR-RATE-003)', () => {
 
   it('suggests nothing without rated criteria', () => {
     expect(suggestedSubjectiveRating([])).toBeNull();
+  });
+});
+
+describe('ratingScaleValues (BR-006)', () => {
+  it('has the 19 steps from 1 to 10', () => {
+    expect(ratingScaleValues).toHaveLength(19);
+    expect(ratingScaleValues[0]).toBe(1);
+    expect(ratingScaleValues[1]).toBe(1.5);
+    expect(ratingScaleValues.at(-1)).toBe(10);
+  });
+
+  it('has only values the API accepts', () => {
+    for (const value of ratingScaleValues) {
+      expect(ratingValueSchema.safeParse(value).success).toBe(true);
+    }
   });
 });
