@@ -142,6 +142,7 @@ export default async function CityPage({ params }: CityPageProps) {
               data={own.data}
               criteria={rating.criteria.map(({ key, name }) => ({ key, name }))}
               visits={own.visits}
+              registeredOn={own.registeredOn}
             />
           )}
           <CityLinks city={city} />

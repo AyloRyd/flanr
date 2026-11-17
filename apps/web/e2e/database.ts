@@ -24,6 +24,11 @@ export const e2eCities = {
   rating: 6,
   /** A visited city that is never rated, so the rating form always opens empty. */
   unrated: 7,
+  /**
+   * Cities whose visits and rating the tests of managing visits reset and change. Each run of
+   * the file under --repeat-each takes its own, so that runs at the same time do not meet.
+   */
+  manageVisits: [8, 9],
 } as const;
 
 const square = 'SRID=4326;MULTIPOLYGON(((6.8 50.8, 7.1 50.8, 7.1 51.1, 6.8 51.1, 6.8 50.8)))';
@@ -62,7 +67,11 @@ export async function seedE2eDatabase(): Promise<void> {
           (${e2eCities.rating}, 'node', 4, 'Siegburg', 'Siegburg', 'DE', 1, NULL, false, 'town',
             'SRID=4326;POINT(7.2 50.8)', NULL, NULL, NULL, NULL, NULL, NULL),
           (${e2eCities.unrated}, 'node', 5, 'Brühl', 'Brühl', 'DE', 1, NULL, false, 'town',
-            'SRID=4326;POINT(6.9 50.83)', NULL, NULL, NULL, NULL, NULL, NULL)`;
+            'SRID=4326;POINT(6.9 50.83)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.manageVisits[0]}, 'node', 6, 'Hürth', 'Hürth', 'DE', 1, NULL, false, 'town',
+            'SRID=4326;POINT(6.87 50.87)', NULL, NULL, NULL, NULL, NULL, NULL),
+          (${e2eCities.manageVisits[1]}, 'node', 7, 'Kerpen', 'Kerpen', 'DE', 1, NULL, false, 'town',
+            'SRID=4326;POINT(6.7 50.87)', NULL, NULL, NULL, NULL, NULL, NULL)`;
       for (const [index, subjective] of [7, 8, 8.5].entries()) {
         const [user] = await tx<{ id: number }[]>`
           INSERT INTO users (auth_provider_id, username, display_name)

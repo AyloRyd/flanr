@@ -46,6 +46,7 @@ const app = createApp({
   lists: createListStore(sql),
   profiles: createProfileStore(sql),
   accounts: createAccountStore(sql, createClerkAccountRemover(env.CLERK_SECRET_KEY)),
+  writeRateLimit: { limit: env.WRITE_RATE_LIMIT, windowMs: 60_000 },
 });
 
 if (!env.CLERK_SECRET_KEY) {

@@ -4,11 +4,12 @@ import {
   checkVisitDate,
   parseVisitDate,
   visitDateFromFields,
+  type Visit,
   type VisitDatePrecision,
 } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import { logVisit, type VisitProblem } from '@/app/cities/[cityId]/actions';
+import { logVisit, updateVisit, type VisitProblem } from '@/app/cities/[cityId]/actions';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,26 @@ type Precision = VisitDatePrecision | 'none';
 
 const precisions: Precision[] = ['day', 'month', 'year', 'none'];
 
+/** The fields of the form, filled from a dated visit that is edited, or empty. */
+function initialFields(visit: Visit | undefined) {
+  const empty = { precision: 'day' as Precision, day: '', month: '', year: '' };
+  if (!visit?.date) return empty;
+  const date = visit.date;
+  switch (visit.datePrecision) {
+    case 'day':
+      return { ...empty, day: date };
+    case 'month':
+      return {
+        ...empty,
+        precision: 'month' as const,
+        month: String(Number(date.slice(5))),
+        year: date.slice(0, 4),
+      };
+    default:
+      return { ...empty, precision: 'year' as const, year: date };
+  }
+}
+
 const months = Array.from({ length: 12 }, (_, index) => index + 1);
 
 /** A problem the form finds itself, or one of the date rules the API checks too. */
@@ -31,27 +52,32 @@ interface VisitFormProps {
   cityId: number;
   /** The day the user registered, as YYYY-MM-DD. Visits after it need a date (BR-002). */
   registeredOn: string;
+  /** A dated visit to change (FR-VIS-006); without it, the form logs a new visit. */
+  visit?: Visit;
   onSaved: () => void;
   onCancel: () => void;
 }
 
 /**
  * Logs a visit with a date of day, month or year precision, or without a date if the user
- * confirms that it was before their registration (FR-VIS-001…003). The hint explains the
- * recommended visit model (FR-VIS-008).
+ * confirms that it was before their registration (FR-VIS-001…003), or changes the date of a
+ * visit (FR-VIS-006). The hint explains the recommended visit model (FR-VIS-008).
  */
-export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitFormProps) {
+export function VisitForm({ cityId, registeredOn, visit, onSaved, onCancel }: VisitFormProps) {
   const t = useTranslations('city.visitForm');
   const format = useFormatter();
   const id = useId();
-  const [precision, setPrecision] = useState<Precision>('day');
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
+  const [initial] = useState(() => initialFields(visit));
+  const [precision, setPrecision] = useState<Precision>(initial.precision);
+  const [day, setDay] = useState(initial.day);
+  const [month, setMonth] = useState(initial.month);
+  const [year, setYear] = useState(initial.year);
   const [beforeRegistration, setBeforeRegistration] = useState(false);
   const [problem, setProblem] = useState<FormProblem | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // A visit after the registration cannot lose its date (FR-VIS-004), so "no date" is not offered.
+  const offered = visit && !visit.beforeRegistration ? precisions.slice(0, 3) : precisions;
   const today = localToday();
   const registrationDate = formatVisitDateForDisplay(format, registeredOn);
   const monthName = (value: number) =>
@@ -65,7 +91,7 @@ export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitForm
 
     const dateProblem = checkVisitDate(
       { date: date ? parseVisitDate(date) : null, beforeRegistration },
-      { today, registeredOn },
+      { today, registeredOn, previousDate: visit?.date ? parseVisitDate(visit.date) : null },
     );
     if (dateProblem) return { problem: dateProblem };
     return { visit: { date, beforeRegistration: date === null } };
@@ -80,7 +106,9 @@ export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitForm
     }
     setProblem(null);
     startTransition(async () => {
-      const result = await logVisit(cityId, read.visit);
+      const result = visit
+        ? await updateVisit(cityId, visit.id, read.visit)
+        : await logVisit(cityId, read.visit);
       if (result.ok) onSaved();
       else setProblem(result.problem);
     });
@@ -105,7 +133,7 @@ export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitForm
           }}
           className="grid-cols-2 sm:grid-cols-4"
         >
-          {precisions.map((value) => (
+          {offered.map((value) => (
             <Label key={value} className="flex items-center gap-2 font-normal">
               <RadioGroupItem value={value} />
               {t(`precisionOption.${value}`)}

@@ -57,6 +57,39 @@
     "visits": "{count, plural, =0 {No visits yet} one {# visit} other {# visits}}",
     "undatedVisits": "{count, plural, one {# visit without a date} other {# visits without a date}}",
     "moreVisits": "and {count} more",
+    "ownVisits": {
+      "edit": "Change the visit of {date}",
+      "delete": "Delete the visit of {date}",
+      "editTitle": "Change the visit",
+      "changeUndated": "Change",
+      "changeUndatedLabel": "Change the number of visits without a date",
+      "deleteTitle": "Delete this visit?",
+      "deleteText": "The visit of {date} will be deleted.",
+      "deleteWithRating": "The visit of {date} is your only visit to this city, so your rating of it will be deleted too.",
+      "deleteVisit": "Delete visit",
+      "deleteVisitAndRating": "Delete visit and rating",
+      "deleteFailed": "The visit could not be deleted. Please try again.",
+      "status": {
+        "visitChanged": "Visit changed.",
+        "visitDeleted": "Visit deleted.",
+        "undatedChanged": "Visits without a date changed."
+      }
+    },
+    "undatedForm": {
+      "title": "Visits without a date",
+      "description": "Set how many times you visited this city without knowing the dates.",
+      "count": "Number of visits",
+      "beforeRegistration": "The added visits were before I joined Flanr on {date}",
+      "ratingGoes": "No visit to this city will be left, so your rating of it will be deleted too.",
+      "problem": {
+        "invalid": "Enter a whole number from 0 to 1000.",
+        "date_required": "Confirm that the added visits were before you joined Flanr, or log them with a date.",
+        "failed": "The visits could not be changed. Please try again."
+      },
+      "save": "Save",
+      "saveAndDeleteRating": "Save and delete rating",
+      "cancel": "Cancel"
+    },
     "livedHere": "You live here",
     "livedHerePast": "You lived here",
     "livedPeriod": "{from} – {to}",
@@ -67,6 +100,7 @@
     "rate": "Rate this city",
     "changeRating": "Change your rating",
     "ratingSaved": "Rating saved.",
+    "ratingDeleted": "Rating deleted.",
     "ratingForm": {
       "title": "Rate {city}",
       "description": "Rate the criteria you have an opinion on, then give the city your own rating from 1 to 10.",
@@ -80,10 +114,14 @@
       "problem": {
         "subjective_required": "Choose your rating of the city.",
         "not_visited": "You can rate a city once you have visited or lived in it.",
-        "failed": "The rating could not be saved. Please try again."
+        "failed": "The rating could not be saved. Please try again.",
+        "deleteFailed": "The rating could not be deleted. Please try again."
       },
       "save": "Save rating",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "delete": "Delete rating",
+      "deleteTitle": "Delete your rating?",
+      "deleteText": "Your rating and your criteria ratings of this city will be deleted. Your visits stay."
     },
     "inYourLists": "In your lists",
     "noLists": "Not in any of your lists.",
@@ -141,5 +179,8 @@
     "title": "Page not found",
     "text": "There is nothing at this address.",
     "backHome": "Back to the home page"
+  },
+  "confirm": {
+    "cancel": "Cancel"
   }
 }
