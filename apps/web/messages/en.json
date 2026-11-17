@@ -4,7 +4,8 @@
     "tagline": "Track and rate the cities you visit."
   },
   "nav": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "search": "Search"
   },
   "auth": {
     "signIn": "Sign in",
@@ -20,7 +21,8 @@
   "home": {
     "title": "Every city you have been to, in one place",
     "lead": "Log your visits, rate cities on what matters to you and see your travels on a map.",
-    "comingSoon": "Search, the map and your profile are on their way."
+    "comingSoon": "The map and your profile are on their way.",
+    "searchLabel": "Find a city"
   },
   "city": {
     "settlementType": {
@@ -170,6 +172,67 @@
       "openstreetmap": "OpenStreetMap",
       "google-maps": "Google Maps",
       "apple-maps": "Apple Maps"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "listsTitle": "Search lists",
+    "kind": "What to search",
+    "cities": "Cities",
+    "lists": "Lists",
+    "cityLabel": "City name in any language",
+    "listLabel": "Words from the title or description of a list",
+    "submit": "Search",
+    "results": "Results",
+    "noCities": "No city matches this search.",
+    "noLists": "No public list matches this search.",
+    "listHint": "Enter words from the title or description of a list.",
+    "more": "More results",
+    "alsoKnownAs": "also known as {name}",
+    "population": "{population} inhabitants",
+    "listBy": "by {name} (@{username}) · {count, plural, one {# city} other {# cities}}",
+    "problem": {
+      "invalid": "Some of the filters are not valid. Please check them.",
+      "population_range": "The largest population cannot be below the smallest.",
+      "relevance_needs_query": "Sorting by relevance needs a search text."
+    },
+    "filters": {
+      "title": "Filters and sorting",
+      "sort": "Sort by",
+      "sortDefault": "Default",
+      "sortBy": {
+        "relevance": "Relevance",
+        "rating": "Community rating",
+        "ratings": "Number of ratings",
+        "population": "Population",
+        "name": "Name"
+      },
+      "order": "Order",
+      "orderDefault": "Default",
+      "orderDesc": "Highest or Z first",
+      "orderAsc": "Lowest or A first",
+      "country": "Country",
+      "anyCountry": "Any country",
+      "region": "Region",
+      "anyRegion": "Any region",
+      "chooseCountryFirst": "Choose a country first",
+      "regionLevel1": "Regions",
+      "regionLevel2": "Districts",
+      "settlementType": "Settlement type",
+      "settlementTypes": {
+        "city": "City",
+        "town": "Town",
+        "village": "Village",
+        "hamlet": "Hamlet"
+      },
+      "populationMin": "Population from",
+      "populationMax": "Population to",
+      "minRating": "Community rating from",
+      "anyRating": "Any rating",
+      "minRatings": "Ratings at least",
+      "minRatingsHint": "A rating from very few people says little. When you sort or filter by community rating, cities need at least 10 ratings unless you set another number.",
+      "apply": "Apply",
+      "clear": "Clear filters"
     }
   },
   "footer": {

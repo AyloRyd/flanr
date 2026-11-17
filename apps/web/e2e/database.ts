@@ -72,6 +72,11 @@ export async function seedE2eDatabase(): Promise<void> {
             'SRID=4326;POINT(6.87 50.87)', NULL, NULL, NULL, NULL, NULL, NULL),
           (${e2eCities.manageVisits[1]}, 'node', 7, 'Kerpen', 'Kerpen', 'DE', 1, NULL, false, 'town',
             'SRID=4326;POINT(6.7 50.87)', NULL, NULL, NULL, NULL, NULL, NULL)`;
+      // The search looks up cities by these names (FR-SRCH-001).
+      await tx`
+        INSERT INTO city_names (city_id, name, kind)
+        SELECT id, name_local, 'name' FROM cities
+        UNION SELECT id, name_en, 'name' FROM cities`;
       for (const [index, subjective] of [7, 8, 8.5].entries()) {
         const [user] = await tx<{ id: number }[]>`
           INSERT INTO users (auth_provider_id, username, display_name)

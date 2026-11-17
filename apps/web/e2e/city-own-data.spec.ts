@@ -20,16 +20,18 @@ test('a guest who saves a city is asked to sign in and comes back (FR-AUTH-002)'
   await expect(dialog.getByRole('button', { name: en.city.signInPrompt.signUp })).toBeVisible();
   await dialog.getByRole('button', { name: en.city.signInPrompt.signIn }).click();
 
-  // Clerk sends the user back to the city page after signing in. It keeps the address in the
-  // fragment of the sign-in URL: /sign-in#/?redirect_url=…
-  // Clerk can write the fragment a moment after the page has loaded, so the test waits for it.
+  // Clerk sends the user back to the city page after signing in. It keeps the address as
+  // redirect_url, at first in the fragment of the sign-in URL (/sign-in#/?redirect_url=…), which
+  // it sometimes drops once its form has loaded. The links of its form keep it, so the test
+  // reads it from there.
   await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
-  await expect
-    .poll(() => {
-      const fragment = new URL(page.url()).hash.replace(/^#\/?\??/, '');
-      return new URLSearchParams(fragment).get('redirect_url') ?? '';
-    })
-    .toMatch(new RegExp(`/cities/${e2eCities.worringen}$`));
+  const clerkLink = page.locator('a[href*="redirect_url="]').first();
+  await expect(clerkLink).toBeAttached({ timeout: 15_000 });
+  const href = new URL((await clerkLink.getAttribute('href')) ?? '', page.url());
+  const fragment = href.hash.replace(/^#\/?\??/, '');
+  const returnUrl =
+    href.searchParams.get('redirect_url') ?? new URLSearchParams(fragment).get('redirect_url');
+  expect(returnUrl).toMatch(new RegExp(`/cities/${e2eCities.worringen}$`));
 });
 
 test.describe('signed in', () => {

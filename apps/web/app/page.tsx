@@ -1,4 +1,6 @@
+import Form from 'next/form';
 import { useTranslations } from 'next-intl';
+import { SearchField } from '@/components/search/search-field';
 
 export default function HomePage() {
   const t = useTranslations('home');
@@ -9,6 +11,9 @@ export default function HomePage() {
         {t('title')}
       </h1>
       <p className="max-w-xl text-lg text-muted-foreground">{t('lead')}</p>
+      <Form action="/search" className="mt-4 max-w-xl">
+        <SearchField defaultValue="" label={t('searchLabel')} />
+      </Form>
       <p className="text-sm text-muted-foreground">{t('comingSoon')}</p>
     </section>
   );
