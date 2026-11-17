@@ -1,9 +1,10 @@
 import { clerk } from '@clerk/testing/playwright';
+import type { CurrentUser } from '@flanr/shared';
 import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
 import { expect, test } from './test';
-import { callApiAsUser, signInTestUser } from './users';
+import { callApiAsUser, fetchApiAsUser, signInTestUser } from './users';
 
 const lived = en.city.lived;
 const names = [
@@ -107,4 +108,27 @@ test('removing the mark of a rated city without visits deletes the rating too (B
   await expect(ownData(page).getByText(en.city.notRatedByYou)).toBeVisible();
   await expect(page.getByRole('button', { name: en.city.plan })).toBeVisible();
   expect(await callApiAsUser(page, 'GET', `/v1/cities/${cities[0]}/rating`)).toBe(404);
+});
+
+test('others see lived-in cities, but the home city only when it is shown (BR-016, FR-PROF-003)', async ({
+  page,
+  browser,
+}) => {
+  expect(
+    await callApiAsUser(page, 'PUT', `/v1/lived-cities/${cities[0]}`, { isCurrent: true }),
+  ).toBe(200);
+  const me = (await (await fetchApiAsUser(page, 'GET', '/v1/me')).json()) as CurrentUser;
+  expect((await fetchApiAsUser(page, 'PATCH', '/v1/me', { homeCityVisible: false })).status).toBe(
+    200,
+  );
+
+  const guest = await browser.newPage();
+  await guest.goto(`/users/${me.username}`);
+  const city = guest
+    .getByRole('list', { name: en.profile.visited })
+    .getByRole('listitem')
+    .filter({ hasText: cityNames[0] ?? '' });
+  await expect(city).toContainText(en.profile.livedIn);
+  await expect(guest.getByText(en.profile.livesIn)).toHaveCount(0);
+  await guest.close();
 });

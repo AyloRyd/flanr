@@ -6,7 +6,7 @@ import {
   listSchema,
   paginationQuerySchema,
   plannedCityPageSchema,
-  publicVisitedCityPageSchema,
+  visitedCityPageSchema,
   toPage,
 } from '@flanr/shared';
 import type { Context } from 'hono';
@@ -40,7 +40,7 @@ const visitedRoute = createRoute({
   summary: 'The Visited list of a user with a public profile (FR-PROF-004, FR-LIST-005)',
   request: { params: userParams, query: paginationQuerySchema },
   responses: {
-    200: { description: 'One page of visited cities', ...json(publicVisitedCityPageSchema) },
+    200: { description: 'One page of visited cities', ...json(visitedCityPageSchema) },
     ...contentErrors,
   },
 });
@@ -153,11 +153,7 @@ export function registerUserContentRoutes(
     // One row more than the page size shows whether another page exists.
     const rows = await defaultLists.listVisited(found.owner.id, { afterCityId, limit: limit + 1 });
     return c.json(
-      toPage(
-        rows.map(({ cityId }) => ({ cityId })),
-        limit,
-        (city) => String(city.cityId),
-      ),
+      toPage(rows, limit, (city) => String(city.cityId)),
       200,
     );
   });

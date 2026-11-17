@@ -38,8 +38,7 @@ export default async function VisitedPage({ params, searchParams }: VisitedPageP
     loadRatingsByCity(profile.username, isOwner),
   ]);
   if (!page.data) throw new Error(`The Visited list could not be loaded: ${page.response.status}`);
-  // The owner's list has the number of visits and the lived-in mark; others' only the cities.
-  const items: { cityId: number; visitCount?: number; livedIn?: boolean }[] = page.data.items;
+  const items = page.data.items;
   const cities = await loadCitySummaries(items.map((item) => item.cityId));
 
   if (items.length === 0) {
@@ -70,14 +69,12 @@ export default async function VisitedPage({ params, searchParams }: VisitedPageP
           const city = cities.get(item.cityId);
           if (!city) return null;
           const rating = ratings.get(item.cityId);
-          // Only the owner sees the number of visits and the lived-in mark (FR-PROF-003).
-          const own =
-            item.visitCount === undefined
-              ? []
-              : [
-                  item.livedIn && t('livedIn'),
-                  item.visitCount > 0 && t('visitCount', { count: item.visitCount }),
-                ].filter(Boolean);
+          // A lived-in city counts above any number of visits (BR-016); which one is the
+          // home city is not shown here (FR-PROF-003).
+          const own = [
+            item.livedIn && t('livedIn'),
+            item.visitCount > 0 && t('visitCount', { count: item.visitCount }),
+          ].filter(Boolean);
           return (
             <CityListItem
               key={item.cityId}

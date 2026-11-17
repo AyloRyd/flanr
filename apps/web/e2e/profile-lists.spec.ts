@@ -66,7 +66,7 @@ test.describe('a public profile', () => {
     await expect(page.getByRole('list', { name: profile.planned })).toContainText('Erftstadt');
   });
 
-  test('a guest sees the Visited list with ratings but no visit counts (FR-PROF-004, FR-PROF-003)', async ({
+  test('a guest sees the Visited list with visits and ratings (FR-PROF-004)', async ({
     browser,
   }) => {
     const guest = await browser.newPage();
@@ -74,7 +74,7 @@ test.describe('a public profile', () => {
 
     const bergheim = visitedList(guest).getByRole('listitem').filter({ hasText: 'Bergheim' });
     await expect(bergheim).toContainText('7');
-    await expect(bergheim).not.toContainText('visit');
+    await expect(bergheim).toContainText('1 visit');
     await guest.close();
   });
 });
