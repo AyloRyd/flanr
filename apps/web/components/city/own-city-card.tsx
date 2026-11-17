@@ -1,5 +1,6 @@
 import type { Criterion, OwnCityData, Visit } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
+import { LivedCityControl } from '@/components/city/lived-city-control';
 import { OwnVisits } from '@/components/city/own-visits';
 import { RateButton } from '@/components/city/rate-button';
 import { RatingValue } from '@/components/city/rating-value';
@@ -28,12 +29,15 @@ export function OwnCityCard({ cityName, data, criteria, visits, registeredOn }: 
         {t('yours')}
       </h2>
 
-      {data.lived && (
-        <p className="mt-3 inline-block rounded-full bg-secondary px-3 py-1 text-sm">
-          {data.lived.isCurrent ? t('livedHere') : t('livedHerePast')}
-          {livedPeriod(data.lived, date, t)}
-        </p>
-      )}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {data.lived && (
+          <p className="rounded-full bg-secondary px-3 py-1 text-sm">
+            {data.lived.isCurrent ? t('livedHere') : t('livedHerePast')}
+            {livedPeriod(data.lived, date, t)}
+          </p>
+        )}
+        <LivedCityControl cityId={data.cityId} cityName={cityName} data={data} />
+      </div>
 
       <OwnVisits cityId={data.cityId} data={data} visits={visits} registeredOn={registeredOn} />
 
