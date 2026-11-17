@@ -1,4 +1,5 @@
 import { test as base, expect, type Page } from '@playwright/test';
+import { createFreshUser, deleteClerkUser, type ClerkTestUser } from './fresh-user';
 
 /** Waits until React has hydrated the page, see components/hydration-marker.tsx. */
 export async function waitForHydration(page: Page): Promise<void> {
@@ -9,7 +10,15 @@ export async function waitForHydration(page: Page): Promise<void> {
  * Playwright's test, with a page that waits for hydration after every goto and reload.
  * Without that, a test can click a button before React handles clicks, and nothing happens.
  */
-export const test = base.extend({
+export const test = base.extend<{ freshUser: ClerkTestUser }>({
+  /** A Clerk user of the test's own, deleted after it; see fresh-user.ts. */
+  // eslint-disable-next-line no-empty-pattern -- Playwright fixtures must destructure.
+  freshUser: async ({}, provide) => {
+    const user = await createFreshUser();
+    await provide(user);
+    await deleteClerkUser(user.id);
+  },
+
   page: async ({ page }, provide) => {
     const goto = page.goto.bind(page);
     const reload = page.reload.bind(page);

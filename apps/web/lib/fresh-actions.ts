@@ -1,4 +1,6 @@
 import * as cityActions from '@/app/cities/[cityId]/actions';
+import * as onboardingActions from '@/app/onboarding/actions';
+import * as settingsActions from '@/app/settings/actions';
 import * as listActions from '@/lib/list-actions';
 
 /**
@@ -37,3 +39,7 @@ export const addToList = freshly(listActions.addToList);
 export const removeFromList = freshly(listActions.removeFromList);
 export const updateEntry = freshly(listActions.updateEntry);
 export const loadMyLists = freshly(listActions.loadMyLists);
+export const updateProfile = freshly(settingsActions.updateProfile);
+export const deleteAccount = freshly(settingsActions.deleteAccount);
+export const findCities = freshly(onboardingActions.findCities);
+export const savePastVisits = freshly(onboardingActions.savePastVisits);

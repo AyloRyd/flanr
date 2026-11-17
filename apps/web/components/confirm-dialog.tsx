@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,8 @@ interface ConfirmDialogProps {
   pending?: boolean;
   /** Shown when the action failed, so the user can try again. */
   problem?: string | null;
+  /** More content between the text and the buttons, such as a field to confirm with. */
+  children?: ReactNode;
 }
 
 /** Asks before something that cannot be undone, such as deleting a visit or a rating. */
@@ -35,6 +38,7 @@ export function ConfirmDialog({
   onConfirm,
   pending = false,
   problem = null,
+  children,
 }: ConfirmDialogProps) {
   const t = useTranslations('confirm');
 
@@ -45,6 +49,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         {problem && (
           <p role="alert" className="text-sm text-destructive">
             {problem}

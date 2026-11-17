@@ -11,7 +11,8 @@
     "signIn": "Sign in",
     "signInTitle": "Sign in",
     "signUpTitle": "Create an account",
-    "profile": "Your profile"
+    "profile": "Your profile",
+    "settings": "Settings"
   },
   "theme": {
     "label": "Theme",
@@ -276,7 +277,7 @@
     "privateNote": "This profile is private. Only its public lists are shown.",
     "privateOwnerNote": "Your profile is private: others see only your name, picture, bio and public lists.",
     "noVisited": "No visited cities yet.",
-    "noVisitedOwn": "No visited cities yet. <search>Find a city</search> and log a visit.",
+    "noVisitedOwn": "No visited cities yet. <onboarding>Add the cities you have been to</onboarding>, or <search>find a city</search> and log a visit.",
     "noPlanned": "No planned cities yet.",
     "noPlannedOwn": "No planned cities yet. Save a city to Planned on its page.",
     "livedIn": "Lived here",
@@ -354,5 +355,86 @@
   },
   "confirm": {
     "cancel": "Cancel"
+  },
+  "settings": {
+    "title": "Settings",
+    "viewProfile": "View your profile",
+    "profileTitle": "Profile",
+    "privacyTitle": "Privacy",
+    "accountTitle": "Account",
+    "profile": {
+      "username": "Username",
+      "usernameHint": "Part of your profile address. 3 to 30 Latin letters, digits and underscores. The old address stops working when you change it.",
+      "displayName": "Display name",
+      "bio": "Bio (optional)",
+      "avatarNote": "Your picture is the one of your account; change it under Account.",
+      "save": "Save profile",
+      "saved": "Profile saved.",
+      "problem": {
+        "username_length": "A username has 3 to 30 characters.",
+        "username_characters": "A username has only Latin letters, digits and underscores.",
+        "username_reserved": "This username cannot be chosen.",
+        "username_taken": "This username is taken.",
+        "display_name_required": "Enter a display name.",
+        "invalid": "Some of the fields are not valid. Please check them.",
+        "failed": "The profile could not be saved. Please try again."
+      }
+    },
+    "privacy": {
+      "visibility": "Who can see your profile",
+      "public": "Public",
+      "publicNote": "Everyone sees your visited and planned cities, your ratings and your public lists.",
+      "private": "Private",
+      "privateNote": "Others see only your name, picture, bio and public lists. Your ratings still count towards community ratings, without your name.",
+      "homeVisible": "Show where I live on my profile",
+      "homeCity": "Your home is {city}. You change it on a city page.",
+      "noHomeCity": "You have not set where you live. You do it on the page of your city.",
+      "save": "Save privacy",
+      "saved": "Privacy saved.",
+      "failed": "The privacy settings could not be saved. Please try again."
+    },
+    "account": {
+      "signInText": "Your email address, password and sign-in methods are managed with your account.",
+      "manage": "Manage account",
+      "exportTitle": "Your data",
+      "exportText": "Download everything Flanr stores about you as a JSON file.",
+      "export": "Download my data",
+      "deleteTitle": "Delete account",
+      "deleteText": "Deletes your account, visits, ratings and lists for good. This cannot be undone.",
+      "delete": "Delete account",
+      "confirmTitle": "Delete your account?",
+      "confirmText": "Your account and everything in it will be deleted for good, and you will be signed out. You can download your data first.",
+      "typeUsername": "Type your username, {username}, to confirm",
+      "confirmDelete": "Delete my account",
+      "failed": "The account could not be deleted. Please try again."
+    }
+  },
+  "onboarding": {
+    "title": "Where have you been?",
+    "lead": "Add the cities you visited before joining Flanr. The number of visits and a date are up to you; you can change everything later.",
+    "searchLabel": "Find a city",
+    "searchPlaceholder": "City name in any language",
+    "found": "Cities found",
+    "add": "Add {city}",
+    "addShort": "Add",
+    "picked": "Cities to add",
+    "count": "Visits",
+    "countOf": "Visits to {city}",
+    "date": "Date of one visit",
+    "dateOf": "Date of one visit to {city}",
+    "datePlaceholder": "Optional",
+    "dateHint": "A date can be a year, a month or a day: 2018, 2018-05 or 2018-05-10. The other visits are saved without a date.",
+    "remove": "Remove {city}",
+    "beforeRegistration": "The visits without a date were before I joined Flanr on {date}",
+    "problem": {
+      "none_picked": "Add at least one city, or skip this step.",
+      "invalid_count": "Enter a number of visits from 1 to 1000 for each city.",
+      "invalid_date": "Enter dates as 2018, 2018-05 or 2018-05-10.",
+      "date_in_future": "A visit cannot be in the future.",
+      "confirm": "Confirm that the visits without a date were before you joined Flanr, or give each city a date.",
+      "failed": "These cities could not be saved: {cities}. Please try again."
+    },
+    "skip": "Skip for now",
+    "save": "{count, plural, =0 {Save} one {Save # city} other {Save # cities}}"
   }
 }
