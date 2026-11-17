@@ -2,6 +2,18 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-17
+
+- **OpenStreetMap decides what a settlement is, even when it is wrong (OI-021).** Some settlement points stand for a municipality that is not a place of its own: Möhnesee is tagged as a village, but it is the municipality around Körbecke and its population is the municipality's. Such points stay cities until OpenStreetMap is corrected. Wrong data is fixed in OpenStreetMap, which benefits every user of it, and the next import picks the fix up.
+- **Signs of such a point, kept for later.** If Flanr starts to flag or drop these points, three signs together find them:
+  1. the point stands for its municipality: same name or same Wikidata item as the municipality's boundary (`cities.represents_municipality`, already stored);
+  2. the municipality names another settlement as its centre: the `admin_centre` member of its boundary relation is a different point (Möhnesee names Körbecke). The import reads this to link boundaries, but it lives in the `staging` schema, which is dropped at the end of the import;
+  3. the point's Wikidata item is only a municipality, not a settlement: its "instance of" (P31) is, for example, "municipality of Germany" without "village" or "town", as Herbstein has. The import does not fetch P31 yet.
+
+  Signs 2 and 1 together give 82 suspects among the 9,505 German cities that represent their municipality; sign 2 alone also catches real villages, so it cannot decide alone. The classes in sign 3 differ by country and would need a list per country. The plan is to store signs 2 and 3 at the next re-import (the municipality's centre and the Wikidata classes), so that a report of suspects is one query and dropping them stays an option. Until then nothing is filtered.
+- **Trip calendar only for the fully dated period (OI-008, tentative).** The calendar covers the days from which on every visit has a day, so that an empty day means no visit; earlier visits are counted in a note. Showing approximate dates as month or year bands was left for after the MVP, when the statistics are reviewed as a whole.
+- **Indexed city pages (OI-022): 50,000 people, plus a hand-picked list.** In the Europe import this is about 1,450 cities; 100,000 would be about 580. Places that people visit but that are small, such as Hallstatt (388 people), Kotor or Český Krumlov, would be missed by any threshold, so a list kept by the developer adds them. Indexing by the number of visits or ratings can come once there are real users.
+
 ## 2026-11-16
 
 - **One privacy setting (SRS 0.13, FR-PRIV-001, FR-LIST-005).** The profile is public or private, and the two default lists follow it; the separate settings for the Visited and the Planned list (2026-11-13) are removed. With separate settings, a public profile with a hidden Visited list still showed the user's ratings, and every rating proves a visit (BR-005), so the setting hid almost nothing. The Visited list carries the whole travel record: ratings, the map of visited and lived-in cities, the home city and the statistics. Custom lists keep their own visibility. A private profile shows the username, display name, avatar, bio and public custom lists.

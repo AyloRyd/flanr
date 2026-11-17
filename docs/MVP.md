@@ -19,10 +19,10 @@ Resolve the open issues that block the MVP. Each decision is recorded in the spe
 - [x] OI-003 — settlements without a boundary: import as point only (recommended) or skip.
 - [x] OI-005 — what happens to a rating when all visits to the city are deleted. Decided: the rating is deleted too, after a confirmation (BR-005).
 - [x] OI-007 — rounding of the suggested rating. Decided: to the nearest 0.5, halves up (BR-007).
-- [ ] OI-008 — approximate dates in the calendar (recommended for MVP: not shown, only counted in the coverage note).
+- [x] OI-008 — approximate dates in the calendar. Decided for the MVP, to be revisited after it: the calendar covers only the period in which every visit has a day; earlier visits are counted in a note (FR-STAT-003).
 - [x] OI-010 — username rules. Decided: 3–30 characters, changeable at any time, see FR-PROF-001.
 - [x] OI-011 — minimum number of ratings for sorting by community rating. Decided: the user sets it in the sorting form; the default is 10 and will be raised to 100 or more once there are real users (FR-SRCH-003).
-- [ ] OI-017 — hosting (recommended: one VPS in Germany with about 8 GB RAM running web, API and database in Docker, plus a cheap domain; see the hosting discussion).
+- [ ] OI-017 — hosting (most likely a Hetzner VPS; recommended: one VPS in Germany with about 8 GB RAM running web, API and database in Docker, plus a cheap domain; see the hosting discussion).
 - [x] OI-019 — whether lived-in cities have a period (from, to). Decided: an optional period that is not part of time-based statistics (BR-016).
 
 **Done when:** all items above have a decision written into the spec.
@@ -173,7 +173,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [ ] Privacy policy and imprint pages (NFR-GDPR-001).
 - [ ] Hosting in the EU for API and database (NFR-GDPR-005), daily backups kept for 7 days (NFR-REL-001).
 - [ ] Production deployment pipeline from GitHub.
-- [ ] Monthly scheduled city data import with validation (FR-CITY-006).
+- [ ] Monthly scheduled city data import with validation (FR-CITY-006). At the first re-import, also store the municipality's `admin_centre` and the Wikidata classes (P31) of cities, so that settlement points standing for a municipality can be reported later (OI-021, see DECISIONS.md 2026-11-17).
 - [ ] Accessibility check against WCAG 2.2 AA for the main pages (NFR-UX-002).
 - [ ] Performance check: city page LCP, search latency (NFR-PERF-001…002).
 - [ ] Security pass against OWASP ASVS level 1 (NFR-SEC-005).
@@ -190,7 +190,7 @@ Each business rule gets unit tests before or together with its implementation (N
 - [ ] `noindex` for sign-in, sign-up, settings and private profiles (NFR-SEO-003).
 - [ ] `robots.txt` and sitemaps split into files of at most 50,000 URLs (NFR-SEO-004).
 - [ ] JSON-LD on city pages (NFR-SEO-005).
-- [ ] Indexing only cities above the population threshold (NFR-SEO-006, OI-022).
+- [ ] Indexing only cities from 50,000 people and a hand-picked list of well-known smaller cities (NFR-SEO-006).
 - [ ] Register the site in Google Search Console and submit the sitemaps.
 
 **Done when:** the sitemaps list the indexable cities, and a shared link to a city, profile or list shows a preview.

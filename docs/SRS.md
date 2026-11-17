@@ -28,6 +28,7 @@
 | 0.12 | 2026-11-14 | A. Malyshkin | Public custom lists stay visible and findable when the profile is private (FR-PRIV-001, FR-PRIV-003, FR-LIST-005, FR-LIST-006) |
 | 0.13 | 2026-11-16 | A. Malyshkin | One privacy setting: the profile's visibility also decides the visibility of the default lists and of everything that follows from visits; the two list settings of 0.10 are removed (FR-PRIV-001, FR-LIST-005, FR-PROF-004, FR-MAP-007, User entity). A private profile shows its avatar and bio. Following instead of friendship for R2, with requests for private profiles (FR-SOC, OI-001, OI-012). Text reviews show their author (FR-RATE-008) |
 | 0.14 | 2026-11-16 | A. Malyshkin | Search engine optimisation (NFR-SEO), OI-022 for the population threshold of indexed cities |
+| 0.15 | 2026-11-17 | A. Malyshkin | Tentative decision on OI-008: the trip calendar covers only the period in which every visit has a day (FR-STAT-003). Resolved OI-022: cities from 50,000 people are indexed, plus a hand-picked list (NFR-SEO-006). OI-017 leans towards a Hetzner VPS. Resolved OI-021: OpenStreetMap settlement points are kept as they are |
 
 ---
 
@@ -832,9 +833,21 @@ Each mode MUST have a legend.
 
 **Description.** The system MUST show a calendar of dated visits similar to the GitHub contribution graph, where each day is coloured by the number of visits on that day. Visits with month or year precision MUST NOT be placed on specific days.
 
+The calendar covers only a period in which every visit has day precision, so that an empty day really means no visit. The period ends today and starts on the latest of these days:
+- the earliest visit of the user;
+- the registration date, if the user has undated visits (they can lie anywhere before it, BR-002);
+- the day after the month or year of the user's latest visit with month or year precision.
+
+If the period would start after today, the calendar is not shown. Visits before the period are not placed on the calendar; a note next to it says how many there are.
+
+This is a tentative decision for the MVP and will be revisited after the MVP, see OI-008.
+
 **Acceptance criteria.**
 1. Given two visits on 2026-05-10, then that day has a stronger colour than a day with one visit.
 2. Given a visit with month precision, then it does not appear on any day of the calendar.
+3. Given a user registered on 2026-03-01 with 50 undated visits and day-precision visits after that, then the calendar starts on 2026-03-01 and its note says that 50 earlier visits are not shown.
+4. Given a user whose latest visit with month precision is in May 2026, then the calendar starts on 2026-06-01 and does not show the day-precision visits before it, which are counted in the note.
+5. Given a user with a visit with year precision in the current year, then the calendar is not shown.
 
 **Related.** BR-012, OI-008.
 
@@ -1336,7 +1349,7 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | NFR-SEO-003 | Pages that are not public content, such as sign-in, sign-up, settings and private profiles, MUST NOT be indexed. |
 | NFR-SEO-004 | The system MUST serve a `robots.txt` and sitemaps of the indexable pages, split into files within the limits of the sitemap protocol. |
 | NFR-SEO-005 | City pages SHOULD carry structured data (JSON-LD) with the name, the coordinates and links to Wikipedia and Wikidata. |
-| NFR-SEO-006 | Only cities above a population threshold MUST be indexed and listed in the sitemaps; the pages of smaller places stay reachable but are marked not to be indexed. The threshold is decided before launch, see OI-022. |
+| NFR-SEO-006 | Only cities above a population threshold MUST be indexed and listed in the sitemaps; the pages of smaller places stay reachable but are marked not to be indexed. The threshold is 50,000 people. Well-known smaller cities, such as Hallstatt, Kotor or Český Krumlov, are also indexed through a list kept by the developer (OI-022). |
 
 ---
 
@@ -1363,7 +1376,7 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | OI-005 | What happens to a rating when the user deletes all their visits to the city. | Ratings | Resolved 2026-11-12: the rating is deleted after a confirmation, see BR-005 |
 | OI-006 | How text reviews relate to visit posts in the social part. | Ratings, Social | Open, before R2 |
 | OI-007 | Confirm that the suggested subjective rating is the criteria average rounded to the nearest 0.5. | Ratings | Resolved 2026-11-12: confirmed, halves round up, see BR-007 |
-| OI-008 | Whether and how visits with month or year precision appear in the trip calendar or in a separate monthly view. | Statistics | Open |
+| OI-008 | Whether and how visits with month or year precision appear in the trip calendar or in a separate monthly view. | Statistics | Tentative 2026-11-17: the calendar covers only the period in which every visit has a day, earlier visits are counted in a note, see FR-STAT-003; to be revisited after the MVP |
 | OI-009 | Detailed role model and moderation process. | Moderation | Open, before R2 |
 | OI-010 | Username rules: allowed characters, how often it can be changed, whether old profile URLs redirect. | Profile | Resolved 2026-11-12: see FR-PROF-001 |
 | OI-011 | Whether sorting by community rating requires a minimum number of ratings. | Search | Resolved 2026-11-13: the user sets the minimum, 10 by default, see FR-SRCH-003 |
@@ -1372,12 +1385,12 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | OI-014 | Fields of a place and the list of place categories. | Places | Open |
 | OI-015 | Whether a Timeline.json file is processed on the client or on the server, and whether it is stored. | Import | Open |
 | OI-016 | What happens to comments and approved photos when a user deletes their account. | Data | Open, before R2 |
-| OI-017 | Hosting provider for the web client, API and database. | Operations | Open |
+| OI-017 | Hosting provider for the web client, API and database. | Operations | Open, most likely a Hetzner VPS |
 | OI-019 | Whether a lived-in city can have a period (from, to), and how lived-in periods appear in time-based statistics. | Visits | Resolved 2026-11-12: optional period, not part of time-based statistics, see BR-016 |
 | OI-018 | Whether planned trips can have dates, or the Planned list stays a simple set of cities. | Lists | Open |
 | OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
-| OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Open |
-| OI-022 | The population threshold above which city pages are indexed by search engines (NFR-SEO-006). | SEO | Open, before launch |
+| OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Resolved 2026-11-17: the source data is followed, such points stay cities; wrong data is fixed in OpenStreetMap, not in Flanr; the signs for detecting such points later are in DECISIONS.md |
+| OI-022 | The population threshold above which city pages are indexed by search engines (NFR-SEO-006). | SEO | Resolved 2026-11-17: 50,000 people, plus a hand-picked list of well-known smaller cities, see NFR-SEO-006 |
 
 ---
 
