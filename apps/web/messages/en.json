@@ -59,7 +59,6 @@
     "yours": "Your data",
     "visits": "{count, plural, =0 {No visits yet} one {# visit} other {# visits}}",
     "undatedVisits": "{count, plural, one {# visit without a date} other {# visits without a date}}",
-    "moreVisits": "and {count} more",
     "ownVisits": {
       "edit": "Change the visit of {date}",
       "delete": "Delete the visit of {date}",
@@ -76,7 +75,9 @@
         "visitChanged": "Visit changed.",
         "visitDeleted": "Visit deleted.",
         "undatedChanged": "Visits without a date changed."
-      }
+      },
+      "showAll": "Show {count, plural, one {# older visit} other {# older visits}}",
+      "loadFailed": "The visits could not be loaded. Please try again."
     },
     "undatedForm": {
       "title": "Visits without a date",

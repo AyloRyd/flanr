@@ -28,6 +28,7 @@ export const setRating = freshly(cityActions.setRating);
 export const deleteRating = freshly(cityActions.deleteRating);
 export const setLived = freshly(cityActions.setLived);
 export const removeLived = freshly(cityActions.removeLived);
+export const loadVisits = freshly(cityActions.loadVisits);
 export const createList = freshly(listActions.createList);
 export const createListAndOpen = freshly(listActions.createListAndOpen);
 export const updateList = freshly(listActions.updateList);

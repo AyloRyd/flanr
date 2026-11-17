@@ -6,10 +6,12 @@ import {
   type LivedPeriodProblem,
   type SetCityRating,
   type SetLivedCity,
+  type Visit,
   type VisitDateProblem,
 } from '@flanr/shared';
 import { revalidatePath } from 'next/cache';
 import { serverApi } from '@/lib/api';
+import { loadAllPages } from '@/lib/city-summaries';
 
 export type PlanResult = { ok: true } | { ok: false; problem: 'visited' | 'failed' };
 
@@ -203,4 +205,16 @@ export async function removeLived(
     },
   });
   return removalResult(cityId, response);
+}
+
+/** All visits of the signed-in user to the city, newest first, for changing older ones too. */
+export async function loadVisits(cityId: number): Promise<Visit[]> {
+  const api = serverApi();
+  return loadAllPages(async (cursor) => {
+    const { data, response } = await api.GET('/v1/visits', {
+      params: { query: { cityId, limit: 100, ...(cursor ? { cursor } : {}) } },
+    });
+    if (!data) throw new Error(`Visits could not be loaded: ${response.status}`);
+    return data;
+  });
 }

@@ -4,7 +4,7 @@ import type { OwnCityData, Visit } from '@flanr/shared';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
-import { deleteVisit } from '@/lib/fresh-actions';
+import { deleteVisit, loadVisits } from '@/lib/fresh-actions';
 import { UndatedVisitsForm } from '@/components/city/undated-visits-form';
 import { VisitForm } from '@/components/city/visit-form';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -46,12 +46,32 @@ export function OwnVisits({ cityId, data, visits, registeredOn }: OwnVisitsProps
   const [deleteFailed, setDeleteFailed] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
   const [pending, startTransition] = useTransition();
+  // All visits, once the user asked for the older ones too; the page brings the newest only.
+  const [allVisits, setAllVisits] = useState<Visit[] | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  const datedVisits = visits.filter((visit) => visit.date !== null);
+  const datedVisits = (allVisits ?? visits).filter((visit) => visit.date !== null);
   const datedCount = data.visitCount - data.undatedVisitCount;
   const moreDated = datedCount - datedVisits.length;
   const ratingNeedsVisits = data.rating !== null && data.lived === null;
   const deletionTakesRating = ratingConfirmed || (ratingNeedsVisits && data.visitCount === 1);
+
+  function showAllVisits() {
+    setLoadFailed(false);
+    startTransition(async () => {
+      try {
+        setAllVisits(await loadVisits(cityId));
+      } catch {
+        setLoadFailed(true);
+      }
+    });
+  }
+
+  /** Shows what changed; all visits, if shown, are read again. */
+  function changed(next: Status) {
+    setStatus(next);
+    if (allVisits !== null) showAllVisits();
+  }
 
   function startDeleting(visit: Visit) {
     setRatingConfirmed(false);
@@ -66,7 +86,7 @@ export function OwnVisits({ cityId, data, visits, registeredOn }: OwnVisitsProps
       const result = await deleteVisit(cityId, visitId, deletionTakesRating);
       if (result.ok) {
         setDeleting(null);
-        setStatus('visitDeleted');
+        changed('visitDeleted');
       } else if (result.problem === 'rating_needs_confirmation') {
         // The dialog now says that the rating goes too; the next click confirms it.
         setRatingConfirmed(true);
@@ -109,7 +129,24 @@ export function OwnVisits({ cityId, data, visits, registeredOn }: OwnVisitsProps
               </li>
             );
           })}
-          {moreDated > 0 && <li>{t('moreVisits', { count: moreDated })}</li>}
+          {moreDated > 0 && (
+            <li>
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0"
+                disabled={pending}
+                onClick={showAllVisits}
+              >
+                {t('ownVisits.showAll', { count: moreDated })}
+              </Button>
+              {loadFailed && (
+                <span role="alert" className="ml-2 text-sm text-destructive">
+                  {t('ownVisits.loadFailed')}
+                </span>
+              )}
+            </li>
+          )}
         </ul>
       )}
       {data.undatedVisitCount > 0 && (
@@ -143,7 +180,7 @@ export function OwnVisits({ cityId, data, visits, registeredOn }: OwnVisitsProps
               visit={editing}
               onSaved={() => {
                 setEditing(null);
-                setStatus('visitChanged');
+                changed('visitChanged');
               }}
               onCancel={() => setEditing(null)}
             />
@@ -165,7 +202,7 @@ export function OwnVisits({ cityId, data, visits, registeredOn }: OwnVisitsProps
             registeredOn={registeredOn}
             onSaved={() => {
               setUndatedOpen(false);
-              setStatus('undatedChanged');
+              changed('undatedChanged');
             }}
             onCancel={() => setUndatedOpen(false)}
           />
