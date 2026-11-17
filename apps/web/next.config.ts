@@ -11,6 +11,10 @@ if (existsSync(rootEnv)) process.loadEnvFile(rootEnv);
 const nextConfig: NextConfig = {
   // Workspace packages ship TypeScript sources, so Next.js compiles them.
   transpilePackages: ['@flanr/shared'],
+  images: {
+    // Avatars are the pictures of the users' Clerk accounts (FR-PROF-002).
+    remotePatterns: [{ protocol: 'https', hostname: 'img.clerk.com' }],
+  },
 };
 
 // Reads the messages from i18n/request.ts (NFR-L10N-002).

@@ -31,10 +31,12 @@ If the spec is unclear, contradicts itself or is missing something, stop and ask
 - Check authorisation on every API request that reads or changes user data.
 - No secrets in the repository. Use `.env` files that are gitignored, with `.env.example` committed.
 - All user-facing text goes into translation files (English only for now).
-- Keep changes small and focused on one phase or requirement at a time.
+- Keep changes focused on one phase at a time. During the MVP a phase can be one PR or a few, with one commit per feature; requirement IDs go in each commit.
 
 ## Working with the owner
 
 The owner reviews all code. Write code that is easy to read and review: clear names, small functions, comments only where the reason is not obvious. Explain non-obvious decisions in the PR description.
+
+During the MVP the owner does not review every PR before it is merged. Run all checks after every commit (format, lint, typecheck, unit tests and the end-to-end tests twice in a row), and merge your own PR once its CI is green. Keep a "Decisions worth a look" section in the PR description: the owner reads that part.
 
 Chat with the owner in Russian or English. All code, comments, commit messages and documents are in English.

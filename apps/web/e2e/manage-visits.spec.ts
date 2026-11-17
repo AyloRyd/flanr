@@ -1,9 +1,10 @@
 import { clerk } from '@clerk/testing/playwright';
 import type { Visit } from '@flanr/shared';
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
 import { callApiAsUser, fetchApiAsUser, signInTestUser } from './users';
+import { expect, test } from './test';
 
 const own = en.city.ownVisits;
 const cityNames = ['Hürth', 'Kerpen'];
@@ -196,4 +197,20 @@ test('the rating is deleted and the visits stay (FR-RATE-004)', async ({ page })
   await expect(ownData(page).getByText(en.city.notRatedByYou)).toBeVisible();
   expect(await callApiAsUser(page, 'GET', `/v1/cities/${city}/rating`)).toBe(404);
   expect(await visitsToCity(page)).toHaveLength(1);
+});
+
+test('older dated visits can be shown and changed (FR-VIS-006)', async ({ page }) => {
+  // The page brings the ten newest visits; the first one logged here is the eleventh.
+  for (let month = 1; month <= 11; month += 1) {
+    await addVisit(page, `2010-${String(month).padStart(2, '0')}`);
+  }
+  await page.goto(`/cities/${city}`);
+  const oldest = ownData(page).getByRole('button', {
+    name: own.edit.replace('{date}', 'January 2010'),
+  });
+  await expect(oldest).toHaveCount(0);
+
+  await ownData(page).getByRole('button', { name: 'Show 1 older visit' }).click();
+
+  await expect(oldest).toBeVisible();
 });

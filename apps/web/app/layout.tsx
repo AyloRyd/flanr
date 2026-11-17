@@ -4,6 +4,7 @@ import { Figtree } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { HydrationMarker } from '@/components/hydration-marker';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 {children}
               </main>
               <SiteFooter />
+              <HydrationMarker />
             </ThemeProvider>
           </NextIntlClientProvider>
         </ClerkProvider>

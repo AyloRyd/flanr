@@ -1,8 +1,17 @@
 'use server';
 
-import { visitDateProblemMessages, type SetCityRating, type VisitDateProblem } from '@flanr/shared';
+import {
+  livedPeriodProblems,
+  visitDateProblemMessages,
+  type LivedPeriodProblem,
+  type SetCityRating,
+  type SetLivedCity,
+  type Visit,
+  type VisitDateProblem,
+} from '@flanr/shared';
 import { revalidatePath } from 'next/cache';
 import { serverApi } from '@/lib/api';
+import { loadAllPages } from '@/lib/city-summaries';
 
 export type PlanResult = { ok: true } | { ok: false; problem: 'visited' | 'failed' };
 
@@ -150,4 +159,62 @@ function removalResult(cityId: number, response: Response): RemovalResult {
     ok: false,
     problem: response.status === 409 ? 'rating_needs_confirmation' : 'failed',
   };
+}
+
+export type LivedProblem = LivedPeriodProblem | 'failed';
+
+/**
+ * Marks the city as the user's current or a past lived-in city, with an optional period
+ * (FR-VIS-010, BR-016). A new current city makes the previous one a past one.
+ */
+export async function setLived(
+  cityId: number,
+  lived: SetLivedCity,
+): Promise<{ ok: true } | { ok: false; problem: LivedProblem }> {
+  const { response, error } = await serverApi().PUT('/v1/lived-cities/{cityId}', {
+    params: { path: { cityId } },
+    body: lived,
+  });
+  if (response.ok) {
+    revalidatePath(`/cities/${cityId}`);
+    return { ok: true };
+  }
+  const message = error?.errors?.[0]?.message;
+  const problems = Object.entries(livedPeriodProblems) as [
+    LivedPeriodProblem,
+    { message: string },
+  ][];
+  return {
+    ok: false,
+    problem: problems.find(([, problem]) => problem.message === message)?.[0] ?? 'failed',
+  };
+}
+
+/**
+ * Removes the lived-in mark (FR-VIS-010). Without visits to a rated city the rating goes too,
+ * which needs the confirmation (BR-005).
+ */
+export async function removeLived(
+  cityId: number,
+  confirmRatingDeletion: boolean,
+): Promise<RemovalResult> {
+  const { response } = await serverApi().DELETE('/v1/lived-cities/{cityId}', {
+    params: {
+      path: { cityId },
+      query: { confirmRatingDeletion: confirmRatingDeletion ? 'true' : 'false' },
+    },
+  });
+  return removalResult(cityId, response);
+}
+
+/** All visits of the signed-in user to the city, newest first, for changing older ones too. */
+export async function loadVisits(cityId: number): Promise<Visit[]> {
+  const api = serverApi();
+  return loadAllPages(async (cursor) => {
+    const { data, response } = await api.GET('/v1/visits', {
+      params: { query: { cityId, limit: 100, ...(cursor ? { cursor } : {}) } },
+    });
+    if (!data) throw new Error(`Visits could not be loaded: ${response.status}`);
+    return data;
+  });
 }

@@ -1,8 +1,9 @@
 import { clerk } from '@clerk/testing/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
 import { callApiAsUser, signInTestUser } from './users';
+import { expect, test } from './test';
 
 const planButton = (page: Page) => page.getByRole('button', { name: en.city.plan });
 const plannedButton = (page: Page) => page.getByRole('button', { name: en.city.planned });

@@ -1,8 +1,12 @@
 import type { Criterion, OwnCityData, Visit } from '@flanr/shared';
+import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
+import { AddToListButton } from '@/components/city/add-to-list-button';
+import { LivedCityControl } from '@/components/city/lived-city-control';
 import { OwnVisits } from '@/components/city/own-visits';
 import { RateButton } from '@/components/city/rate-button';
 import { RatingValue } from '@/components/city/rating-value';
+import { profilePath } from '@/lib/profile';
 import { formatVisitDateForDisplay } from '@/lib/visit-date';
 
 interface OwnCityCardProps {
@@ -14,10 +18,18 @@ interface OwnCityCardProps {
   visits: Visit[];
   /** The day the user registered, as YYYY-MM-DD. */
   registeredOn: string;
+  username: string;
 }
 
 /** The signed-in user's own data for the city (FR-CITY-004). Only the user sees it. */
-export function OwnCityCard({ cityName, data, criteria, visits, registeredOn }: OwnCityCardProps) {
+export function OwnCityCard({
+  cityName,
+  data,
+  criteria,
+  visits,
+  registeredOn,
+  username,
+}: OwnCityCardProps) {
   const t = useTranslations('city');
   const format = useFormatter();
   const date = (value: string) => formatVisitDateForDisplay(format, value);
@@ -28,12 +40,15 @@ export function OwnCityCard({ cityName, data, criteria, visits, registeredOn }: 
         {t('yours')}
       </h2>
 
-      {data.lived && (
-        <p className="mt-3 inline-block rounded-full bg-secondary px-3 py-1 text-sm">
-          {data.lived.isCurrent ? t('livedHere') : t('livedHerePast')}
-          {livedPeriod(data.lived, date, t)}
-        </p>
-      )}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {data.lived && (
+          <p className="rounded-full bg-secondary px-3 py-1 text-sm">
+            {data.lived.isCurrent ? t('livedHere') : t('livedHerePast')}
+            {livedPeriod(data.lived, date, t)}
+          </p>
+        )}
+        <LivedCityControl cityId={data.cityId} cityName={cityName} data={data} />
+      </div>
 
       <OwnVisits cityId={data.cityId} data={data} visits={visits} registeredOn={registeredOn} />
 
@@ -62,14 +77,26 @@ export function OwnCityCard({ cityName, data, criteria, visits, registeredOn }: 
         {data.lists.length > 0 ? (
           <ul className="mt-1 flex flex-wrap gap-2">
             {data.lists.map((list) => (
-              <li key={list.id} className="rounded-full bg-secondary px-3 py-1 text-sm">
-                {list.title}
+              <li key={list.id}>
+                <Link
+                  href={profilePath(username, `/lists/${list.id}`)}
+                  className="inline-block rounded-full bg-secondary px-3 py-1 text-sm hover:underline"
+                >
+                  {list.title}
+                </Link>
               </li>
             ))}
           </ul>
         ) : (
           <p className="mt-1">{t('noLists')}</p>
         )}
+        <div className="mt-3">
+          <AddToListButton
+            cityId={data.cityId}
+            cityName={cityName}
+            listIds={data.lists.map((list) => list.id)}
+          />
+        </div>
       </div>
     </section>
   );

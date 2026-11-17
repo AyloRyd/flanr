@@ -3543,6 +3543,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/city-summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Short data of several cities at once, for lists of cities
+         * @description The lists of a user and the entries of custom lists carry only city IDs; this gives one page of them their names, places and community ratings in one request. The cities come in the order of `ids`; IDs of no city are left out, a repeated ID comes once. Open to guests.
+         */
+        get: {
+            parameters: {
+                query: {
+                    ids: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The cities */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                id: number;
+                                name: string;
+                                nameEn: string;
+                                /** @enum {string} */
+                                settlementType: "city" | "town" | "village" | "hamlet";
+                                population: number | null;
+                                country: {
+                                    code: string;
+                                    name: string;
+                                };
+                                region: string | null;
+                                municipality: string | null;
+                                rating: number | null;
+                                ratingCount: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/cities/{cityId}": {
         parameters: {
             query?: never;

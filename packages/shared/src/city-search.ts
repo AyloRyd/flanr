@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { SettlementType } from './city-tiles.ts';
-import { paginated, paginationQuerySchema } from './pagination.ts';
+import { maxPageSize, paginated, paginationQuerySchema } from './pagination.ts';
 import { maxRating, minRating } from './rating.ts';
 
 export const settlementTypes = ['city', 'town', 'village', 'hamlet'] as const;
@@ -140,6 +140,28 @@ export const citySearchResultSchema = z.object({
 export type CitySearchResult = z.infer<typeof citySearchResultSchema>;
 
 export const citySearchPageSchema = paginated(citySearchResultSchema);
+
+/**
+ * A city as lists of cities show it: what tells it apart from others of the same name, and its
+ * community rating. The search result without the matched name.
+ */
+export const citySummarySchema = citySearchResultSchema.omit({ matchedName: true });
+
+export type CitySummary = z.infer<typeof citySummarySchema>;
+
+export const citySummaryListSchema = z.object({ items: z.array(citySummarySchema) });
+
+/** Most cities whose summaries one request can ask for: one page of any list. */
+export const maxCitySummaryIds = maxPageSize;
+
+/** City IDs separated by commas: `1,2,3`. */
+export const citySummaryQuerySchema = z.object({
+  ids: z
+    .string()
+    // An empty part becomes 0 and a word NaN, which the check below refuses.
+    .transform((list) => list.split(',').map(Number))
+    .pipe(z.array(z.number().int().positive()).min(1).max(maxCitySummaryIds)),
+});
 
 /** A country that has cities in Flanr, for the country filter. */
 export const countrySchema = z.object({

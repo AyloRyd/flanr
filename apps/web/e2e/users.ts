@@ -8,15 +8,30 @@ export type TestUsers = Partial<Record<string, { id: string; emailAddress: strin
 
 export const testUsersVariable = 'E2E_USERS';
 
+/**
+ * What a test user is for. Signing out happens in a browser of its own user, so that it can
+ * never end a session that other tests of the project are using at the same time. The private
+ * user's profile is made private and stays so.
+ */
+export type TestUserPurpose = 'main' | 'signOut' | 'private';
+
+/** The key of a test user in the environment: the project, and the purpose unless it is main. */
+export const testUserKey = (project: string, purpose: TestUserPurpose = 'main') =>
+  purpose === 'main' ? project : `${project}:${purpose}`;
+
 /** The users that the global setup created, by project. */
 export function testUsers(): TestUsers {
   const value = process.env[testUsersVariable];
   return value ? (JSON.parse(value) as TestUsers) : {};
 }
 
-/** Signs in the test user of the running project on the current page. */
-export async function signInTestUser(page: Page, testInfo: TestInfo): Promise<void> {
-  const user = testUsers()[testInfo.project.name];
+/** Signs in a test user of the running project on the current page. */
+export async function signInTestUser(
+  page: Page,
+  testInfo: TestInfo,
+  purpose: TestUserPurpose = 'main',
+): Promise<void> {
+  const user = testUsers()[testUserKey(testInfo.project.name, purpose)];
   if (!user)
     throw new Error(`The global setup has not created a user for ${testInfo.project.name}`);
   await clerk.signIn({ page, emailAddress: user.emailAddress });
@@ -31,12 +46,18 @@ export const e2eApiUrl = 'http://localhost:8788';
  */
 export async function fetchApiAsUser(
   page: Page,
-  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE' | 'POST',
   path: string,
   body?: unknown,
 ): Promise<Response> {
+  // After a navigation or a refresh Clerk needs a moment until the session is back.
+  await page
+    .waitForFunction(() => Boolean(window.Clerk?.session), undefined, { timeout: 10_000 })
+    .catch(() => {
+      throw new Error('No signed-in user on the page');
+    });
   const token = await page.evaluate(() => window.Clerk.session?.getToken());
-  if (!token) throw new Error('No signed-in user on the page');
+  if (!token) throw new Error('No session token on the page');
   return fetch(`${e2eApiUrl}${path}`, {
     method,
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -47,7 +68,7 @@ export async function fetchApiAsUser(
 /** Like fetchApiAsUser, for calls where only the status matters. */
 export async function callApiAsUser(
   page: Page,
-  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
+  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE' | 'POST',
   path: string,
   body?: unknown,
 ): Promise<number> {

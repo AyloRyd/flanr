@@ -1,7 +1,7 @@
 import { clerk, setupClerkTestingToken } from '@clerk/testing/playwright';
-import { expect, test } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { signInTestUser } from './users';
+import { expect, test } from './test';
 
 const signInButton = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: en.auth.signIn });
@@ -34,7 +34,7 @@ test('a user signs in, sees the account menu and signs out (FR-AUTH-007)', async
   page,
 }, testInfo) => {
   await page.goto('/');
-  await signInTestUser(page, testInfo);
+  await signInTestUser(page, testInfo, 'signOut');
   await page.reload();
 
   // The server renders the signed-in header, so the session reached the proxy too.

@@ -1,9 +1,10 @@
 import { clerk } from '@clerk/testing/playwright';
 import type { CityRating } from '@flanr/shared';
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
 import { callApiAsUser, fetchApiAsUser, signInTestUser } from './users';
+import { expect, test } from './test';
 
 const form = en.city.ratingForm;
 

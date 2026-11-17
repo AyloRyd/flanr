@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
+import { expect, test } from './test';
 
 test('a guest sees the data of a city (FR-CITY-001, FR-AUTH-001)', async ({ page }) => {
   await page.goto(`/cities/${e2eCities.cologne}`);

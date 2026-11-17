@@ -3,7 +3,7 @@
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useOptimistic, useState, useTransition } from 'react';
-import { setPlanned } from '@/app/cities/[cityId]/actions';
+import { setPlanned } from '@/lib/fresh-actions';
 import { SignInPrompt } from '@/components/sign-in-prompt';
 import { Button } from '@/components/ui/button';
 

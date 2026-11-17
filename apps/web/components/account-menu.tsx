@@ -1,12 +1,14 @@
 'use client';
 
 import { Show, SignInButton, UserButton } from '@clerk/nextjs';
+import { UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 /**
  * Sign in for guests, the account menu for signed-in users. Clerk's menu has the account
- * settings, where the email address is changed (FR-AUTH-008), and signing out (FR-AUTH-007).
+ * settings, where the email address is changed (FR-AUTH-008), signing out (FR-AUTH-007) and
+ * a link to the user's own profile.
  * A client component, so that it changes as soon as the user signs in or out; on the server
  * Clerk renders it with the session of the request.
  */
@@ -24,7 +26,15 @@ export function AccountMenu() {
         </SignInButton>
       </Show>
       <Show when="signed-in">
-        <UserButton />
+        <UserButton>
+          <UserButton.MenuItems>
+            <UserButton.Link
+              label={t('profile')}
+              labelIcon={<UserRound className="size-4" />}
+              href="/me"
+            />
+          </UserButton.MenuItems>
+        </UserButton>
       </Show>
     </>
   );
