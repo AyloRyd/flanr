@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatVisitDateForDisplay, localToday } from '@/lib/visit-date';
 
@@ -132,11 +133,10 @@ export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitForm
           {precision === 'month' && (
             <div className="flex flex-1 flex-col gap-2">
               <Label htmlFor={`${id}-month`}>{t('month')}</Label>
-              <select
+              <NativeSelect
                 id={`${id}-month`}
                 value={month}
                 onChange={(event) => setMonth(event.target.value)}
-                className="h-8 rounded-lg border border-input bg-transparent px-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive md:text-sm dark:bg-input/30"
                 {...fieldProps}
               >
                 <option value="">{t('chooseMonth')}</option>
@@ -145,7 +145,7 @@ export function VisitForm({ cityId, registeredOn, onSaved, onCancel }: VisitForm
                     {monthName(value)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
           )}
           <div className="flex w-28 flex-col gap-2">
