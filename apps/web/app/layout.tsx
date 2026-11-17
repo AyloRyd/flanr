@@ -41,6 +41,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           dynamic
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
+          // After signing up without a page to return to, offer adding past visits (FR-VIS-007).
+          signUpFallbackRedirectUrl="/onboarding"
           appearance={clerkAppearance}
         >
           <NextIntlClientProvider>

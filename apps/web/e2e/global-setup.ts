@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import { createClerkClient } from '@clerk/backend';
 import { clerkSetup } from '@clerk/testing/playwright';
 import { clerkKeys } from './clerk-env';
 import { seedE2eDatabase } from './database';
+import { createClerkTestUser } from './fresh-user';
 import {
   projectNames,
   testUserKey,
@@ -29,15 +29,8 @@ export default async function globalSetup(): Promise<void> {
   const purposes: TestUserPurpose[] = ['main', 'signOut', 'private'];
   for (const project of projectNames) {
     for (const purpose of purposes) {
-      const id = randomUUID().replaceAll('-', '').slice(0, 12);
-      const emailAddress = `e2e-${id}+clerk_test@example.com`;
-      const user = await clerk.users.createUser({
-        emailAddress: [emailAddress],
-        // The Clerk instance requires a username; this one also fits FR-PROF-001.
-        username: `e2e_${id}`,
-        skipPasswordRequirement: true,
-      });
-      users[testUserKey(project, purpose)] = { id: user.id, emailAddress };
+      const user = await createClerkTestUser(clerk);
+      users[testUserKey(project, purpose)] = user;
     }
   }
   // Workers inherit the environment of the global setup.

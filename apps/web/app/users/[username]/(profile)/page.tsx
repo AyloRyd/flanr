@@ -52,6 +52,11 @@ export default async function VisitedPage({ params, searchParams }: VisitedPageP
                   {chunks}
                 </Link>
               ),
+              onboarding: (chunks) => (
+                <Link href="/onboarding" className="underline underline-offset-4">
+                  {chunks}
+                </Link>
+              ),
             })
           : t('noVisited')}
       </p>

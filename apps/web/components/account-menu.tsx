@@ -1,7 +1,7 @@
 'use client';
 
 import { Show, SignInButton, UserButton } from '@clerk/nextjs';
-import { UserRound } from 'lucide-react';
+import { Settings, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
@@ -32,6 +32,11 @@ export function AccountMenu() {
               label={t('profile')}
               labelIcon={<UserRound className="size-4" />}
               href="/me"
+            />
+            <UserButton.Link
+              label={t('settings')}
+              labelIcon={<Settings className="size-4" />}
+              href="/settings"
             />
           </UserButton.MenuItems>
         </UserButton>
