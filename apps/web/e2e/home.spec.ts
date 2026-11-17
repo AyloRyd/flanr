@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
+import { expect, test } from './test';
 
 test('home page shows the app name and the lead text', async ({ page }) => {
   await page.goto('/');

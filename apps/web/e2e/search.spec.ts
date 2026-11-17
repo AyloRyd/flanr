@@ -1,6 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { signInTestUser, fetchApiAsUser } from './users';
+import { expect, test } from './test';
 
 const search = en.search;
 const filters = search.filters;
