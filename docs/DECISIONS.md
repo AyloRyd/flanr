@@ -2,6 +2,14 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-18
+
+- **The interface is built around the map (SRS 0.17, FR-MAP-008).** The owner's model is close to common map services: a landing page for guests and search engines, then the map as the main screen. A city opens in a panel on the right, the opposite side from Google Maps, and the panel expands to the full city page with a small map. The user's lists and statistics live in a panel on the left. The pages built in Phases 6–8 stay: the city page is the expanded panel and the page that search engines index, and the profile, list, search, onboarding and settings pages remain pages of their own.
+- **Cities are selected by their names.** The names are Flanr's own layer from the city tiles, so a click still resolves to a Flanr ID (FR-MAP-003); the base map's settlement labels are hidden so that no name appears twice. Mapbox's Standard style can hide place labels only all together, countries included, so the map uses Mapbox's classic styles (light, dark and satellite with streets), where the settlement labels can be hidden one by one. Markers for all cities are an option, off by default.
+- **URLs of the workspace.** `/map` is the map, `/map/cities/{id}` the map with the city panel open. The panel URL is not indexed and names `/cities/{id}` as its canonical URL, so that every city has one indexed page. A signed-in user who opens `/` goes to `/map`.
+- **Larger markers above smaller ones** in the population mode, as the owner asked; the sizes keep the small ones visible. The value of the mode can be shown inside the markers.
+- **On small screens** the city panel opens from the bottom, as in map apps on phones.
+
 ## 2026-11-17
 
 - **The user's cities reach the map as one document, drawn as points of their own (FR-MAP-005…007).** `GET /v1/map-cities` and `GET /v1/users/{username}/map-cities` give the Visited and the Planned list at once, with the centre, settlement type, population, visits, lived-in mark and rating of each city: about 23 kB for the test user's 160 cities, about 140 kB for a thousand. Not paginated, because the map needs them all at once. The map draws them as a GeoJSON layer of its own and not through feature-state on the city tiles, because the tiles have villages only from zoom 9 and hamlets from zoom 11, and a user's map must show every visited city at every zoom. The city tiles stay underneath for clicking any city and for the boundary of the selected one. The browser loads the tiles from the web app's origin, which passes them on to the API, so it needs neither the API's address nor CORS.

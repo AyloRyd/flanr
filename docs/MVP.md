@@ -146,11 +146,28 @@ Each business rule gets unit tests before or together with its implementation (N
 
 ---
 
+## Phase 8b — Map-first interface
+
+The interface is rebuilt around the map, as common map services are (SRS 0.17, §6.1, FR-MAP-008). The design stays minimal for now; it will change.
+
+- [ ] Landing page for guests with a button that opens the map; signed-in users go to the map.
+- [ ] Full-screen map at `/map`: the world map for guests, the own visited cities for signed-in users, the account menu top left (FR-MAP-008).
+- [ ] City names drawn by Flanr and selected by clicking them; markers for all cities as an option (FR-MAP-003).
+- [ ] City panel on the right side, expandable to the city page; the city page gets a link back to the map (FR-MAP-004).
+- [ ] Population mode with larger markers above smaller ones; values inside markers as an option (FR-MAP-005).
+- [ ] Left panel with the Visited and Planned lists (FR-MAP-008).
+- [ ] Trip calendar in the left panel (FR-STAT-003, FR-STAT-004), moved here from Phase 9.
+- [ ] Later in this phase: search on the map, the profile's map opened in the workspace, a remembered default view, pictures for the landing page.
+
+**Done when:** a guest gets from the landing page to any city on the map and its page, and the test user sees their cities in all three modes, their Visited list and their trip calendar.
+
+---
+
 ## Phase 9 — Statistics
 
 - [ ] Summary: cities, countries, visits (FR-STAT-001).
 - [ ] Statistics by country and first-level region (FR-STAT-002).
-- [ ] Trip calendar from dated visits, with the coverage note (FR-STAT-003…004).
+- [ ] Trip calendar from dated visits, with the coverage note (FR-STAT-003…004). Moved to Phase 8b.
 - [ ] Global statistics for guests: most visited and best rated cities (FR-STAT-005).
 
 **Done when:** the statistics for the test user match numbers calculated by hand from the test data.
@@ -205,6 +222,7 @@ Phase 0 → Phase 1 → Phase 2 ─┬→ Phase 3 → Phase 4 → Phase 5 ─┐
                              │                                ├→ Phase 7 → Phase 9 → Phase 10 → Phase 11 → Phase 12
                              └→ Phase 6 ──────────────────────┤
                                                 Phase 8 ──────┘ (needs Phase 2 tiles and Phase 6)
+                                                Phase 8b (map-first interface, after Phase 8)
 ```
 
 Phases 2 and 6 can run in parallel. The map (Phase 8) can start as soon as the city tiles from Phase 2 and the web foundation from Phase 6 exist.

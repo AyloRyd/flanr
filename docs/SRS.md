@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.16 |
+| Version | 0.17 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-17 |
+| Date | 2026-11-18 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -30,6 +30,7 @@
 | 0.14 | 2026-11-16 | A. Malyshkin | Search engine optimisation (NFR-SEO), OI-022 for the population threshold of indexed cities |
 | 0.15 | 2026-11-17 | A. Malyshkin | Tentative decision on OI-008: the trip calendar covers only the period in which every visit has a day (FR-STAT-003). Resolved OI-022: cities from 50,000 people are indexed, plus a hand-picked list (NFR-SEO-006). OI-017 leans towards a Hetzner VPS. Resolved OI-021: OpenStreetMap settlement points are kept as they are |
 | 0.16 | 2026-11-17 | A. Malyshkin | Lived-in cities and the number of visits are part of the travel record that a public profile shows; which lived-in city is the current one is shown only as the home location, when the user shows it (BR-016, FR-PROF-003, FR-PROF-004) |
+| 0.17 | 2026-11-18 | A. Malyshkin | Map-first interface: a landing page leads to the map as the main screen, a city opens in a side panel that can expand to the full city page, and a left panel holds the user's lists and statistics (§6.1, FR-MAP-008). Cities are selected by their names drawn by Flanr; markers for all cities are optional (FR-MAP-003). Selecting a city opens the city panel (FR-MAP-004). In the population mode larger markers cover smaller ones; the value of the mode can be shown inside the markers (FR-MAP-005) |
 
 ---
 
@@ -767,20 +768,23 @@ The two default lists have no visibility of their own: they are public when the 
 #### FR-MAP-003 — City layer
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Technology
 
-**Description.** Cities MUST be drawn as Flanr's own layer on top of the base map, based on Flanr's own data, and not taken from the base map's labels.
+**Description.** Cities MUST be drawn as Flanr's own layer on top of the base map, based on Flanr's own data, and not taken from the base map's labels. The layer shows the names of the cities, and the user selects a city by clicking its name, as on common map services. The base map's own labels of settlements MUST be hidden, so that no name appears twice; its labels of countries and regions stay. The user MAY turn on a marker for every city, which shows where each city is; it is off by default.
 
 **Rationale.** Clicks must resolve to Flanr's own city IDs, and the base map must remain replaceable.
 
 **Acceptance criteria.**
-1. Given the city layer, when the user clicks a city marker, then the system identifies the city by its Flanr ID.
+1. Given the city layer, when the user clicks the name of a city, then the system identifies the city by its Flanr ID.
+2. Given the markers for all cities turned on, when the user clicks a city marker, then the system identifies the city by its Flanr ID.
 
 #### FR-MAP-004 — Selecting a city on the map
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Map and statistics
 
-**Description.** When the user clicks a city on the map, the system MUST highlight its boundary and show a short preview with its name, country, community rating, the user's own data and a link to the city page.
+**Description.** When the user selects a city on the map, the system MUST highlight its boundary and open the city panel at the side of the map. The panel shows what the city page shows (FR-CITY-001…004), with the user's own data and the actions for logging a visit, rating and planning. The panel MUST be able to expand to the full city page, which replaces the map and shows a small map with the city's boundary.
 
 **Acceptance criteria.**
-1. Given the map, when the user clicks Cologne, then its boundary is highlighted and the preview is shown.
+1. Given the map, when the user clicks Cologne, then its boundary is highlighted and the city panel of Cologne is shown.
+2. Given the city panel, when the user expands it, then the full city page of the city is shown.
+3. Given a guest in the city panel, when they choose to log a visit, then they are offered to sign in or to sign up.
 
 #### FR-MAP-005 — Map modes
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Map and statistics
@@ -788,14 +792,15 @@ The two default lists have no visibility of their own: they are public when the 
 **Description.** The personal map MUST offer at least three modes for the user's cities:
 1. By number of visits: marker size and colour depend on the number of visits.
 2. By rating: marker colour depends on the user's subjective rating, using the rating colour scale in Appendix C.
-3. By population: marker size and colour depend on the city's population.
+3. By population: marker size and colour depend on the city's population. Larger markers are drawn above smaller ones, and the sizes are chosen so that the smaller markers stay visible.
 
-Each mode MUST have a legend.
+Each mode MUST have a legend. The user MAY choose to show the value of the mode inside the markers: the number of visits, the rating or the population.
 
 **Acceptance criteria.**
 1. Given a user with one city visited once and another visited ten times, when the visits mode is selected, then the second marker is larger and has a different colour.
 2. Given the rating mode, then cities without a rating are shown in a neutral colour that is explained in the legend.
 3. Given the visits mode, then lived-in cities are shown with a distinct marker that is explained in the legend.
+4. Given the rating mode with values shown, then each rated city's marker shows its rating.
 
 #### FR-MAP-006 — Planned cities on the map
 **Priority:** Should · **Release:** MVP · **Status:** Draft · **Source:** Concept §Lists
@@ -812,6 +817,16 @@ Each mode MUST have a legend.
 
 **Acceptance criteria.**
 1. Given a public profile, when a guest opens its map, then the owner's visited cities are shown.
+
+#### FR-MAP-008 — Map as the main screen
+**Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Owner, 2026-11-18
+
+**Description.** The map MUST be the main screen of the web client, the user's workspace (§6.1). A guest sees the world map with Flanr's cities and can select any of them. A signed-in user sees their own map with their visited cities in the modes of FR-MAP-005. A panel at the left side of the map MUST offer the user's Visited and Planned lists and the trip calendar (FR-STAT-003); selecting a city in a list moves the map to it and opens its city panel (FR-MAP-004).
+
+**Acceptance criteria.**
+1. Given a guest, when they open the map, then the world map is shown without personal data.
+2. Given a signed-in user, when they open the map, then their visited cities are shown.
+3. Given the Visited list in the left panel, when the user selects Cologne there, then the city panel of Cologne is shown.
 
 ### 4.8 Statistics (`FR-STAT`)
 
@@ -1221,13 +1236,15 @@ Settlements that have no mapped boundary in OSM MUST be imported with their cent
 
 ### 6.1 User interfaces
 
-The web client MUST be responsive and usable on desktop and mobile screens. The MVP contains at least the following screens:
+The web client MUST be responsive and usable on desktop and mobile screens. It is built around the map, as common map services are: the map is the main screen and the user's workspace (FR-MAP-008), and most content opens in panels next to it.
 
 | Screen | Content |
 |---|---|
-| Home | Search, global statistics, entry points to the map and profile |
-| City page | City data, map with boundary, community rating, personal data, log visit and rate actions |
-| Map | Personal map with modes and style switch |
+| Landing page | What Flanr is, with pictures of the product, for guests and search engines; a button that opens the map. A signed-in user goes to the map instead |
+| Map | The full-screen map with its modes, legend and style switch. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel |
+| City panel | Opens at the right side of the map when a city is selected: the city's data, community rating, the user's own data and the actions to log a visit, rate and plan. On small screens it opens from the bottom. It can expand to the city page |
+| City page | The full page of a city: everything of the city panel and a small map with the boundary. The page that search engines index |
+| Left panel | Next to the map: the Visited and Planned lists and the trip calendar, later the other statistics |
 | Profile | Profile information, lists, ratings, map, statistics |
 | List page | Title, description, entries with notes |
 | Search | Cities and lists with filters and sorting |
@@ -1349,7 +1366,7 @@ City pages are the main way new people find Flanr, so public pages must be reada
 |---|---|
 | NFR-SEO-001 | Every public page MUST have its own title, description and canonical URL. |
 | NFR-SEO-002 | Public pages SHOULD have Open Graph and Twitter preview data, so that a shared link to a city, profile or list shows a title, a description and an image. |
-| NFR-SEO-003 | Pages that are not public content, such as sign-in, sign-up, settings and private profiles, MUST NOT be indexed. |
+| NFR-SEO-003 | Pages that are not public content, such as sign-in, sign-up, settings and private profiles, MUST NOT be indexed. The map with an open city panel MUST NOT be indexed either and names the city page as its canonical URL, so that a city has one indexed page. |
 | NFR-SEO-004 | The system MUST serve a `robots.txt` and sitemaps of the indexable pages, split into files within the limits of the sitemap protocol. |
 | NFR-SEO-005 | City pages SHOULD carry structured data (JSON-LD) with the name, the coordinates and links to Wikipedia and Wikidata. |
 | NFR-SEO-006 | Only cities above a population threshold MUST be indexed and listed in the sitemaps; the pages of smaller places stay reachable but are marked not to be indexed. The threshold is 50,000 people. Well-known smaller cities, such as Hallstatt, Kotor or Český Krumlov, are also indexed through a list kept by the developer (OI-022). |
@@ -1408,7 +1425,7 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | Cities the user has lived in | BR-016, FR-VIS-010, FR-MAP-005, FR-STAT-001 |
 | Rating cities | BR-005…BR-009, FR-RATE-001…008, FR-CITY-003, FR-SRCH-003 |
 | Lists | BR-004, FR-LIST-001…007, FR-MAP-006, FR-SRCH-004 |
-| Map and statistics | FR-MAP-001…007, FR-STAT-001…006, FR-IMP-001, BR-014 |
+| Map and statistics | FR-MAP-001…008, FR-STAT-001…006, FR-IMP-001, BR-014, §6.1 |
 | Social features | FR-PROF-004, FR-SOC-001…006, FR-SRCH-005 |
 | Privacy | BR-013, FR-PRIV-001…003, FR-LIST-005 |
 | Photos and attachments | FR-ATT-001…002 |
