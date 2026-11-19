@@ -69,6 +69,8 @@ describe('GET /v1/map-cities (FR-MAP-005, FR-MAP-006)', () => {
     expect(data?.visited).toEqual([
       {
         cityId: wuppertal,
+        name: 'Wuppertal',
+        countryCode: 'DE',
         longitude: 7.15,
         latitude: 51.25621,
         settlementType: 'city',
@@ -79,6 +81,8 @@ describe('GET /v1/map-cities (FR-MAP-005, FR-MAP-006)', () => {
       },
       {
         cityId: bonn,
+        name: 'Bonn',
+        countryCode: 'DE',
         longitude: 7,
         latitude: 51,
         settlementType: 'city',
@@ -96,6 +100,8 @@ describe('GET /v1/map-cities (FR-MAP-005, FR-MAP-006)', () => {
     expect(data?.planned).toEqual([
       {
         cityId: aachen,
+        name: 'Aachen',
+        countryCode: 'DE',
         longitude: 7,
         latitude: 51,
         settlementType: 'city',

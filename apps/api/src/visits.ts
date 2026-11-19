@@ -1,5 +1,6 @@
 import {
   formatVisitDate,
+  type CalendarVisit,
   type ParsedVisitDate,
   type Visit,
   type VisitDatePrecision,
@@ -44,6 +45,8 @@ export interface VisitStore {
    */
   remove(userId: number, visitId: number, confirmRatingDeletion: boolean): Promise<RemovalResult>;
   countUndated(userId: number, cityId: number): Promise<number>;
+  /** All visits of the user with their dates, for the trip calendar (FR-STAT-003). */
+  calendarVisits(userId: number): Promise<CalendarVisit[]>;
   /**
    * Adds or removes undated visits until the user has `count` of them in the city (FR-VIS-005).
    * Removing the last visits needs the same confirmation as `remove`.
@@ -147,6 +150,12 @@ export function createVisitStore(sql: Sql): VisitStore {
 
     async countUndated(userId, cityId) {
       return countUndated(sql, userId, cityId);
+    },
+
+    async calendarVisits(userId) {
+      return sql<CalendarVisit[]>`
+        SELECT city_id AS "cityId", date::text AS date, date_precision AS precision
+        FROM visits WHERE user_id = ${userId}`;
     },
 
     async setUndatedCount(userId, cityId, count, confirmRatingDeletion) {

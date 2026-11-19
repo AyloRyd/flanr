@@ -111,6 +111,8 @@ const visitedMarks = (sql: Sql, userId: number) => sql`
  */
 const mapCityColumns = (sql: Sql) => sql`
   c.id AS "cityId",
+  c.name_local AS name,
+  c.country_code AS "countryCode",
   round(ST_X(c.centre)::numeric, 5)::float8 AS longitude,
   round(ST_Y(c.centre)::numeric, 5)::float8 AS latitude,
   c.settlement_type AS "settlementType",

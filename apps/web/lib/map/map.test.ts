@@ -7,6 +7,8 @@ import { mapViewQuery, readMapView } from './view-state.ts';
 
 const city = (cityId: number, own: Partial<VisitedMapCity> = {}): VisitedMapCity => ({
   cityId,
+  name: `City ${cityId}`,
+  countryCode: 'DE',
   longitude: 7,
   latitude: 51,
   settlementType: 'city',
@@ -126,6 +128,8 @@ describe('map layers', () => {
     planned: [
       {
         cityId: 3,
+        name: 'Berlin',
+        countryCode: 'DE',
         longitude: 13.4,
         latitude: 52.5,
         settlementType: 'city' as const,

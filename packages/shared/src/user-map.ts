@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { settlementTypeSchema } from './city-search.ts';
 
-/** What the map needs to place a city and size its marker (FR-MAP-005). */
+/** What the map needs to place a city and size its marker (FR-MAP-005), and to list it. */
 export const mapCitySchema = z.object({
   cityId: z.number().int(),
+  /** The local name, for the lists next to the map. */
+  name: z.string(),
+  countryCode: z.string(),
   longitude: z.number(),
   latitude: z.number(),
   settlementType: settlementTypeSchema,

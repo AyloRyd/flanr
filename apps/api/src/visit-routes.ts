@@ -1,5 +1,6 @@
 import { createRoute, z, type OpenAPIHono } from '@hono/zod-openapi';
 import {
+  buildTripCalendar,
   checkVisitDate,
   createVisitSchema,
   isBeforeRegistration,
@@ -7,6 +8,7 @@ import {
   paginationQuerySchema,
   parseVisitDate,
   toPage,
+  tripCalendarSchema,
   undatedVisitCountSchema,
   updateVisitSchema,
   visitDateProblemMessages,
@@ -128,7 +130,25 @@ const setUndatedVisitsRoute = createRoute({
 });
 
 /** Paths that need a signed-in user; the app puts requireAuth in front of them. */
-export const visitPaths = ['/v1/visits', '/v1/visits/*', '/v1/cities/:cityId/undated-visits'];
+const tripCalendarRoute = createRoute({
+  method: 'get',
+  path: '/v1/trip-calendar',
+  summary: 'The trip calendar of the signed-in user (FR-STAT-003, FR-STAT-004)',
+  description:
+    'The days with visits in the period in which every visit has a day, and the number of visits that are not on the calendar. `from` is null when the calendar is not shown.',
+  security,
+  responses: {
+    200: { description: 'The trip calendar', ...json(tripCalendarSchema) },
+    401: problemResponse('No valid session token'),
+  },
+});
+
+export const visitPaths = [
+  '/v1/visits',
+  '/v1/visits/*',
+  '/v1/cities/:cityId/undated-visits',
+  '/v1/trip-calendar',
+];
 
 export function registerVisitRoutes(
   app: OpenAPIHono<AuthEnv>,
@@ -164,6 +184,13 @@ export function registerVisitRoutes(
 
   const invalidDate = (c: Context<AuthEnv>, message: string) =>
     problem(c, 400, 'Invalid request', undefined, [{ path: 'date', message }]);
+
+  app.openapi(tripCalendarRoute, async (c) => {
+    const user = c.get('user');
+    const visitsOfUser = await visits.calendarVisits(user.id);
+    // The calendar ends today wherever the user is, as a visit's date may (latestToday).
+    return c.json(buildTripCalendar(visitsOfUser, registeredOn(user), latestToday(now())), 200);
+  });
 
   app.openapi(createVisitRoute, async (c) => {
     const body = c.req.valid('json');
