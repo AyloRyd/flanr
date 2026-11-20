@@ -6,7 +6,15 @@ import {
   type UserMap,
   type VisitedMapCity,
 } from '@flanr/shared';
-import { markerClass, plannedStyle, type MapMode, type MarkerStyle } from './markers';
+import {
+  markerClass,
+  markerValue,
+  plannedStyle,
+  radiusWithValue,
+  textColorOn,
+  type MapMode,
+  type MarkerStyle,
+} from './markers';
 
 /** What every marker of the user's layers carries; the map's paint rules read it. */
 export interface MarkerProperties extends MarkerStyle {
@@ -14,6 +22,9 @@ export interface MarkerProperties extends MarkerStyle {
   settlementType: SettlementType;
   /** Higher keys are drawn above lower ones. */
   sortKey: number;
+  /** What the marker shows inside when values are turned on; empty for none. */
+  value: string;
+  textColor: string;
 }
 
 export type MarkerCollection = GeoJSON.FeatureCollection<GeoJSON.Point, MarkerProperties>;
@@ -22,23 +33,40 @@ function feature(
   city: MapCity,
   style: MarkerStyle,
   sortKey: number,
+  value = '',
 ): GeoJSON.Feature<GeoJSON.Point, MarkerProperties> {
   return {
     type: 'Feature',
     id: city.cityId,
     geometry: { type: 'Point', coordinates: [city.longitude, city.latitude] },
-    properties: { cityId: city.cityId, settlementType: city.settlementType, sortKey, ...style },
+    properties: {
+      cityId: city.cityId,
+      settlementType: city.settlementType,
+      sortKey,
+      value,
+      textColor: textColorOn(style.color),
+      ...style,
+    },
   };
 }
 
-/** The visited cities of a user, styled for the mode (FR-MAP-005). */
-export function visitedLayer(mode: MapMode, cities: VisitedMapCity[]): MarkerCollection {
+/**
+ * The visited cities of a user, styled for the mode (FR-MAP-005). A higher class is drawn
+ * above a lower one: in the population mode larger markers cover smaller ones. With `values`,
+ * every marker grows to hold the value of the mode.
+ */
+export function visitedLayer(
+  mode: MapMode,
+  cities: VisitedMapCity[],
+  { values = false }: { values?: boolean } = {},
+): MarkerCollection {
   return {
     type: 'FeatureCollection',
     features: cities.map((city) => {
       const { style, rank } = markerClass(mode, city);
-      // Large populations have large markers, which would hide the small ones under them.
-      return feature(city, style, mode === 'population' ? -rank : rank);
+      if (!values) return feature(city, style, rank);
+      const grown = { ...style, radius: radiusWithValue(style.radius) };
+      return feature(city, grown, rank, markerValue(mode, city));
     }),
   };
 }

@@ -153,3 +153,32 @@ export function legendFor(mode: MapMode, cities: VisitedMapCity[]): LegendEntry[
 
 /** Planned cities have a hollow marker, apart from the visited ones (FR-MAP-006). */
 export const plannedStyle = { color: '#7c3aed', radius: 5, strokeWidth: 2.5 } as const;
+
+const compactNumber = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumSignificantDigits: 2,
+});
+
+/**
+ * The value of the mode for the inside of a city's marker (FR-MAP-005): the number of visits,
+ * the rating or the population. Empty when the city has none.
+ */
+export function markerValue(mode: MapMode, city: VisitedMapCity): string {
+  if (mode === 'visits') return city.visitCount > 0 ? String(city.visitCount) : '';
+  if (mode === 'rating') return city.rating === null ? '' : String(city.rating);
+  return city.population === null ? '' : compactNumber.format(city.population);
+}
+
+/** Markers that show a value grow so that the value fits; their order of size stays. */
+export function radiusWithValue(radius: number): number {
+  return Math.round(radius * 1.2 + 6);
+}
+
+/** Dark text on light markers, white on dark ones, by the colour's relative luminance. */
+export function textColorOn(color: string): string {
+  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((start) => {
+    const channel = parseInt(color.slice(start, start + 2), 16) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? '#111827' : '#ffffff';
+}

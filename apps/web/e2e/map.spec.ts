@@ -53,7 +53,9 @@ const legendList = (page: Page) => page.getByRole('list', { name: legend.title }
 
 /** Expects the legend line with this label to count this many cities. */
 async function expectCount(page: Page, label: string, count: number) {
-  const line = legendList(page).getByRole('listitem').filter({ hasText: label });
+  const line = legendList(page)
+    .getByRole('listitem')
+    .filter({ has: page.getByText(label, { exact: true }) });
   await expect(line).toHaveText(new RegExp(`${label}\\s*${count}$`));
 }
 

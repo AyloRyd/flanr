@@ -164,7 +164,7 @@ export function UserMapView({ data, ownerName, initialView }: UserMapViewProps) 
         initialView={mapInitialView}
         onStyleLoad={onStyleLoad}
         onMap={setMap}
-        className="h-[60vh] min-h-80"
+        className="h-[60vh] min-h-80 rounded-2xl border"
       />
       <div className="flex flex-col gap-5">
         {picked && (

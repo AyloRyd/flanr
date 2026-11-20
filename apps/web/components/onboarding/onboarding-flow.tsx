@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { PastVisits } from '@/app/onboarding/actions';
+import type { PastVisits } from '@/app/(site)/onboarding/actions';
 import { findCities, savePastVisits } from '@/lib/fresh-actions';
 import { formatVisitDateForDisplay, localToday } from '@/lib/visit-date';
 

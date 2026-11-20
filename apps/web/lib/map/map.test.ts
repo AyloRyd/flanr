@@ -2,7 +2,15 @@ import { ratingColor, type VisitedMapCity } from '@flanr/shared';
 import { describe, expect, it } from 'vitest';
 import en from '../../messages/en.json' with { type: 'json' };
 import { boundaryZoom, boundsOf, ownMapData, plannedLayer, visitedLayer } from './layers.ts';
-import { legendFor, mapModes, markerClass, neutralColor, plannedStyle } from './markers.ts';
+import {
+  legendFor,
+  mapModes,
+  markerClass,
+  markerValue,
+  neutralColor,
+  plannedStyle,
+  textColorOn,
+} from './markers.ts';
 import { mapViewQuery, readMapView } from './view-state.ts';
 
 const city = (cityId: number, own: Partial<VisitedMapCity> = {}): VisitedMapCity => ({
@@ -221,5 +229,31 @@ describe('legend', () => {
     const keys = mapModes.flatMap((mode) => legendFor(mode, []).map((entry) => entry.key));
 
     expect(Object.keys(en.map.legend)).toEqual(expect.arrayContaining(keys));
+  });
+});
+
+describe('values inside the markers (FR-MAP-005)', () => {
+  it('shows the rating, the number of visits or the population of the mode', () => {
+    const rated = city(1, { rating: 7.5, visitCount: 3, population: 355_100 });
+
+    expect(markerValue('rating', rated)).toBe('7.5');
+    expect(markerValue('visits', rated)).toBe('3');
+    expect(markerValue('population', rated)).toBe('360K');
+    expect(markerValue('rating', city(2))).toBe('');
+  });
+
+  it('puts the value into every marker and keeps their order of size', () => {
+    const cities = [city(1, { population: 5_000 }), city(2, { population: 2_000_000 })];
+
+    const [small, large] = visitedLayer('population', cities, { values: true }).features;
+
+    expect(large?.properties.value).toBe('2M');
+    expect(large?.properties.radius).toBeGreaterThan(small?.properties.radius ?? Infinity);
+    expect(large?.properties.sortKey).toBeGreaterThan(small?.properties.sortKey ?? Infinity);
+  });
+
+  it('writes dark on light markers and white on dark ones', () => {
+    expect(textColorOn('#f4cf3f')).toBe('#111827');
+    expect(textColorOn('#172554')).toBe('#ffffff');
   });
 });

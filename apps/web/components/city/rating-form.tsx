@@ -8,7 +8,7 @@ import {
 } from '@flanr/shared';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import type { RatingProblem } from '@/app/cities/[cityId]/actions';
+import type { RatingProblem } from '@/app/(site)/cities/[cityId]/actions';
 import { deleteRating, setRating } from '@/lib/fresh-actions';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';

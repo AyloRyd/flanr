@@ -23,8 +23,25 @@
   "home": {
     "title": "Every city you have been to, in one place",
     "lead": "Log your visits, rate cities on what matters to you and see your travels on a map.",
-    "comingSoon": "The map and your statistics are on their way.",
-    "searchLabel": "Find a city"
+    "explore": "Explore the world",
+    "features": {
+      "log": {
+        "title": "Log your visits",
+        "text": "Mark the cities you have been to, with a date or without, and the ones you have lived in."
+      },
+      "rate": {
+        "title": "Rate cities",
+        "text": "Rate a city on what matters to you and see how others rate it."
+      },
+      "map": {
+        "title": "Your map",
+        "text": "See your cities by visits, by rating or by population."
+      },
+      "calendar": {
+        "title": "Your trip calendar",
+        "text": "Every day you travelled, in one picture of the year."
+      }
+    }
   },
   "city": {
     "settlementType": {
@@ -310,7 +327,7 @@
       "visits5": "5 to 9 visits",
       "visits2": "2 to 4 visits",
       "visits1": "1 visit",
-      "rated": "Rated, from 1 to 10",
+      "rated": "Rated",
       "unrated": "Not rated",
       "population1m": "1 million people or more",
       "population100k": "100,000 to 999,999 people",
@@ -333,6 +350,49 @@
       "planned": "Planned",
       "notVisited": "Not visited",
       "open": "Open the city page"
+    }
+  },
+  "workspace": {
+    "title": "Map",
+    "toggleLeftPanel": "Your lists and calendar",
+    "leftPanel": "Your lists and calendar",
+    "guest": "Sign in to see the cities you have been to, your plans and your trip calendar.",
+    "signIn": "Sign in",
+    "controls": "Map settings",
+    "values": "Values on markers",
+    "cityMarkers": "Markers for all cities",
+    "showOnMap": "Show on the map",
+    "filter": "Filter",
+    "filterOf": "Filter {list}",
+    "tabs": {
+      "visited": "Visited ({count})",
+      "planned": "Planned ({count})",
+      "calendar": "Calendar"
+    },
+    "lists": {
+      "visited": "Visited cities",
+      "planned": "Planned cities",
+      "noVisited": "No visited cities yet. Select a city on the map and log a visit.",
+      "noPlanned": "No planned cities yet.",
+      "livedIn": "Lived here",
+      "visits": "{count, plural, one {# visit} other {# visits}}"
+    },
+    "panel": {
+      "label": "City panel of {city}",
+      "expand": "Open the full page",
+      "close": "Close the panel"
+    },
+    "calendar": {
+      "title": "Trip calendar",
+      "years": "Year",
+      "summary": "{visits, plural, one {# visit} other {# visits}} on {days, plural, one {# day} other {# days}} in {year}",
+      "dayLabel": "{date}: {count, plural, one {# visit} other {# visits}}, {cities}",
+      "citiesOfDay": "Cities of the day",
+      "less": "Less",
+      "more": "More",
+      "period": "The calendar covers the days from {from}, from which on every visit has a day.",
+      "before": "{count, plural, one {# earlier visit is} other {# earlier visits are}} not on it.",
+      "notShown": "The calendar needs a period in which every visit has a day. {count, plural, =0 {Log a visit with its day to start it.} other {Your # visits have no day or a less exact date for now.}}"
     }
   },
   "lists": {

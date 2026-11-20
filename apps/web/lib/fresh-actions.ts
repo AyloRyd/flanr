@@ -1,6 +1,6 @@
-import * as cityActions from '@/app/cities/[cityId]/actions';
-import * as onboardingActions from '@/app/onboarding/actions';
-import * as settingsActions from '@/app/settings/actions';
+import * as cityActions from '@/app/(site)/cities/[cityId]/actions';
+import * as onboardingActions from '@/app/(site)/onboarding/actions';
+import * as settingsActions from '@/app/(site)/settings/actions';
 import * as listActions from '@/lib/list-actions';
 import * as mapActions from '@/lib/map-actions';
 

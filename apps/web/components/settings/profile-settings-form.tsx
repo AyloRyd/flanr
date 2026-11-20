@@ -9,7 +9,7 @@ import {
 } from '@flanr/shared';
 import { useTranslations } from 'next-intl';
 import { useId, useState, useTransition, type FormEvent } from 'react';
-import type { ProfileProblem } from '@/app/settings/actions';
+import type { ProfileProblem } from '@/app/(site)/settings/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

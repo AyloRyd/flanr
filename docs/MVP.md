@@ -150,13 +150,13 @@ Each business rule gets unit tests before or together with its implementation (N
 
 The interface is rebuilt around the map, as common map services are (SRS 0.17, §6.1, FR-MAP-008). The design stays minimal for now; it will change.
 
-- [ ] Landing page for guests with a button that opens the map; signed-in users go to the map.
-- [ ] Full-screen map at `/map`: the world map for guests, the own visited cities for signed-in users, the account menu top left (FR-MAP-008).
-- [ ] City names drawn by Flanr and selected by clicking them; markers for all cities as an option (FR-MAP-003).
-- [ ] City panel on the right side, expandable to the city page; the city page gets a link back to the map (FR-MAP-004).
-- [ ] Population mode with larger markers above smaller ones; values inside markers as an option (FR-MAP-005).
-- [ ] Left panel with the Visited and Planned lists (FR-MAP-008).
-- [ ] Trip calendar in the left panel (FR-STAT-003, FR-STAT-004), moved here from Phase 9.
+- [x] Landing page for guests with a button that opens the map; signed-in users go to the map. Text only for now; the pictures come later.
+- [x] Full-screen map at `/map`: the world map for guests, the own visited cities for signed-in users, the account menu top left (FR-MAP-008). The pages around the map moved into the `(site)` route group, which has the header and footer. The map settings (mode, toggles, base style) are remembered in the browser.
+- [x] City names drawn by Flanr and selected by clicking them; markers for all cities as an option (FR-MAP-003). Mapbox's classic light, dark and satellite-streets styles, with their settlement labels hidden.
+- [x] City panel on the right side, expandable to the city page; the city page gets a link back to the map (FR-MAP-004). `/map/cities/{id}`, not indexed, with the city page as canonical URL. It opens from the bottom on phones. Changes in the panel refresh the map.
+- [x] Population mode with larger markers above smaller ones; values inside markers as an option (FR-MAP-005).
+- [x] Left panel with the Visited and Planned lists (FR-MAP-008), with a filter.
+- [x] Trip calendar in the left panel (FR-STAT-003, FR-STAT-004), moved here from Phase 9. `GET /v1/trip-calendar`; a year at a time, a day's cities on click.
 - [ ] Later in this phase: search on the map, the profile's map opened in the workspace, a remembered default view, pictures for the landing page.
 
 **Done when:** a guest gets from the landing page to any city on the map and its page, and the test user sees their cities in all three modes, their Visited list and their trip calendar.
