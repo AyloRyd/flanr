@@ -302,6 +302,71 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/trip-calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The trip calendar of the signed-in user (FR-STAT-003, FR-STAT-004)
+         * @description The days with visits in the period in which every visit has a day, and the number of visits that are not on the calendar. `from` is null when the calendar is not shown.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The trip calendar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            from: string | null;
+                            to: string;
+                            days: {
+                                date: string;
+                                cityIds: number[];
+                            }[];
+                            visitsBefore: number;
+                        };
+                    };
+                };
+                /** @description No valid session token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail?: string;
+                            errors?: {
+                                path: string;
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/visits": {
         parameters: {
             query?: never;
@@ -1343,6 +1408,8 @@ export interface paths {
                         "application/json": {
                             visited: {
                                 cityId: number;
+                                name: string;
+                                countryCode: string;
                                 longitude: number;
                                 latitude: number;
                                 /** @enum {string} */
@@ -1354,6 +1421,8 @@ export interface paths {
                             }[];
                             planned: {
                                 cityId: number;
+                                name: string;
+                                countryCode: string;
                                 longitude: number;
                                 latitude: number;
                                 /** @enum {string} */
@@ -4271,6 +4340,8 @@ export interface paths {
                         "application/json": {
                             visited: {
                                 cityId: number;
+                                name: string;
+                                countryCode: string;
                                 longitude: number;
                                 latitude: number;
                                 /** @enum {string} */
@@ -4282,6 +4353,8 @@ export interface paths {
                             }[];
                             planned: {
                                 cityId: number;
+                                name: string;
+                                countryCode: string;
                                 longitude: number;
                                 latitude: number;
                                 /** @enum {string} */

@@ -13,6 +13,15 @@ import { revalidatePath } from 'next/cache';
 import { serverApi } from '@/lib/api';
 import { loadAllPages } from '@/lib/city-summaries';
 
+/**
+ * A change to the user's data of a city shows on its page and in the map workspace, where the
+ * city panel and the markers come from the map's layout.
+ */
+function refreshCity(cityId: number): void {
+  revalidatePath(`/cities/${cityId}`);
+  revalidatePath('/map', 'layout');
+}
+
 export type PlanResult = { ok: true } | { ok: false; problem: 'visited' | 'failed' };
 
 /**
@@ -29,7 +38,7 @@ export async function setPlanned(cityId: number, planned: boolean): Promise<Plan
   // Removing a city that is no longer planned leaves the list as the user wanted it.
   const done = response.ok || (!planned && response.status === 404);
   if (done) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   return { ok: false, problem: response.status === 409 ? 'visited' : 'failed' };
@@ -51,7 +60,7 @@ export async function logVisit(cityId: number, visit: VisitChange): Promise<LogV
     body: { cityId, ...visit },
   });
   if (response.ok) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   return { ok: false, problem: dateProblemOf(error?.errors) ?? 'failed' };
@@ -80,7 +89,7 @@ export async function setRating(cityId: number, rating: SetCityRating): Promise<
     body: rating,
   });
   if (response.ok) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   return { ok: false, problem: response.status === 409 ? 'not_visited' : 'failed' };
@@ -97,7 +106,7 @@ export async function updateVisit(
     body: visit,
   });
   if (response.ok) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   return { ok: false, problem: dateProblemOf(error?.errors) ?? 'failed' };
@@ -152,7 +161,7 @@ export async function deleteRating(cityId: number): Promise<RemovalResult> {
 /** A 404 means the thing is already gone, which is what the user asked for. */
 function removalResult(cityId: number, response: Response): RemovalResult {
   if (response.ok || response.status === 404) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   return {
@@ -176,7 +185,7 @@ export async function setLived(
     body: lived,
   });
   if (response.ok) {
-    revalidatePath(`/cities/${cityId}`);
+    refreshCity(cityId);
     return { ok: true };
   }
   const message = error?.errors?.[0]?.message;

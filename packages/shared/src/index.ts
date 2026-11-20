@@ -15,3 +15,4 @@ export * from './city-search.ts';
 export * from './city.ts';
 export * from './rating-colors.ts';
 export * from './user-map.ts';
+export * from './trip-calendar.ts';

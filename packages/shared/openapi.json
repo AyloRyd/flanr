@@ -649,6 +649,118 @@
         }
       }
     },
+    "/v1/trip-calendar": {
+      "get": {
+        "summary": "The trip calendar of the signed-in user (FR-STAT-003, FR-STAT-004)",
+        "description": "The days with visits in the period in which every visit has a day, and the number of visits that are not on the calendar. `from` is null when the calendar is not shown.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The trip calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "to": {
+                      "type": "string"
+                    },
+                    "days": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "string"
+                          },
+                          "cityIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "required": [
+                          "date",
+                          "cityIds"
+                        ]
+                      }
+                    },
+                    "visitsBefore": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "days",
+                    "visitsBefore"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session token",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/visits": {
       "post": {
         "summary": "Log a visit to a city (FR-VIS-001…004)",
@@ -2951,6 +3063,12 @@
                           "cityId": {
                             "type": "integer"
                           },
+                          "name": {
+                            "type": "string"
+                          },
+                          "countryCode": {
+                            "type": "string"
+                          },
                           "longitude": {
                             "type": "number"
                           },
@@ -2988,6 +3106,8 @@
                         },
                         "required": [
                           "cityId",
+                          "name",
+                          "countryCode",
                           "longitude",
                           "latitude",
                           "settlementType",
@@ -3005,6 +3125,12 @@
                         "properties": {
                           "cityId": {
                             "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "countryCode": {
+                            "type": "string"
                           },
                           "longitude": {
                             "type": "number"
@@ -3030,6 +3156,8 @@
                         },
                         "required": [
                           "cityId",
+                          "name",
+                          "countryCode",
                           "longitude",
                           "latitude",
                           "settlementType",
@@ -9664,6 +9792,12 @@
                           "cityId": {
                             "type": "integer"
                           },
+                          "name": {
+                            "type": "string"
+                          },
+                          "countryCode": {
+                            "type": "string"
+                          },
                           "longitude": {
                             "type": "number"
                           },
@@ -9701,6 +9835,8 @@
                         },
                         "required": [
                           "cityId",
+                          "name",
+                          "countryCode",
                           "longitude",
                           "latitude",
                           "settlementType",
@@ -9718,6 +9854,12 @@
                         "properties": {
                           "cityId": {
                             "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "countryCode": {
+                            "type": "string"
                           },
                           "longitude": {
                             "type": "number"
@@ -9743,6 +9885,8 @@
                         },
                         "required": [
                           "cityId",
+                          "name",
+                          "countryCode",
                           "longitude",
                           "latitude",
                           "settlementType",

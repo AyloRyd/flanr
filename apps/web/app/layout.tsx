@@ -5,8 +5,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { HydrationMarker } from '@/components/hydration-marker';
-import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header';
 import { ThemeProvider } from '@/components/theme-provider';
 import { clerkAppearance } from '@/lib/clerk-appearance';
 import './globals.css';
@@ -53,11 +51,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               >
                 {t('skipToContent')}
               </a>
-              <SiteHeader />
-              <main id="main" className="flex-1">
-                {children}
-              </main>
-              <SiteFooter />
+              {/* The pages bring their own frame: the site header or the map workspace. */}
+              {children}
               <HydrationMarker />
             </ThemeProvider>
           </NextIntlClientProvider>

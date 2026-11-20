@@ -70,7 +70,7 @@ export function CityMap({ city }: { city: Pick<CityDetails, 'name' | 'centre' | 
       initialView={shape.view}
       onStyleLoad={onStyleLoad}
       cooperativeGestures
-      className="h-72 sm:h-96"
+      className="h-72 rounded-2xl border sm:h-96"
     />
   );
 }

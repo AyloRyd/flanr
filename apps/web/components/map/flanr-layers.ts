@@ -14,6 +14,8 @@ export const layerIds = {
   boundaryLine: 'flanr-city-boundary-line',
   boundaryCasing: 'flanr-city-boundary-casing',
   cityPoints: 'flanr-city-points',
+  cityLabels: 'flanr-city-labels',
+  visitedValues: 'flanr-visited-values',
   visited: 'flanr-visited',
   planned: 'flanr-planned',
   selection: 'flanr-selection',
@@ -169,9 +171,12 @@ export function addSelectionLayer(map: MapboxMap, position: [number, number] | n
 /** Highlights the boundary of one city in the tiles, or none (FR-MAP-004). */
 export function selectBoundary(map: MapboxMap, cityId: number | null, previous: number | null) {
   if (!map.getSource(citySourceId)) return;
-  const target = { source: citySourceId, sourceLayer: cityTileLayers.boundaries };
-  if (previous !== null) map.setFeatureState({ ...target, id: previous }, { selected: false });
-  if (cityId !== null) map.setFeatureState({ ...target, id: cityId }, { selected: true });
+  // The boundary and the name of the city, which share the city's ID in the tiles.
+  for (const sourceLayer of [cityTileLayers.boundaries, cityTileLayers.points]) {
+    const target = { source: citySourceId, sourceLayer };
+    if (previous !== null) map.setFeatureState({ ...target, id: previous }, { selected: false });
+    if (cityId !== null) map.setFeatureState({ ...target, id: cityId }, { selected: true });
+  }
 }
 
 function setSourceData(map: MapboxMap, id: string, data: GeoJSON.FeatureCollection): void {
@@ -182,8 +187,96 @@ function setSourceData(map: MapboxMap, id: string, data: GeoJSON.FeatureCollecti
 
 /** The layers a click looks in for a city, the topmost first. */
 export const clickableLayers = [
+  layerIds.visitedValues,
   layerIds.visited,
   layerIds.planned,
+  layerIds.cityLabels,
   layerIds.cityPoints,
   layerIds.boundaryFill,
 ];
+
+/** The settlement labels of Mapbox's classic styles; those of countries and regions stay. */
+const baseSettlementLabels = [
+  'settlement-major-label',
+  'settlement-minor-label',
+  'settlement-subdivision-label',
+];
+
+/**
+ * Hides the base map's own names of settlements, so that Flanr's names are the only ones and
+ * no name appears twice (FR-MAP-003).
+ */
+export function hideBaseSettlementLabels(map: MapboxMap): void {
+  for (const id of baseSettlementLabels) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+  }
+}
+
+/** The fonts of Mapbox's classic styles. */
+const labelFont = ['DIN Pro Medium', 'Arial Unicode MS Regular'];
+
+/**
+ * Flanr's names of the cities from the tiles, which the user clicks to select a city
+ * (FR-MAP-003). Larger places win where names would overlap.
+ */
+export function addCityLabels(map: MapboxMap, dark: boolean): void {
+  if (map.getLayer(layerIds.cityLabels)) return;
+  const byType = (city: number, town: number, village: number, hamlet: number) =>
+    ['match', ['get', 'type'], 'city', city, 'town', town, 'village', village, hamlet] as const;
+  map.addLayer({
+    id: layerIds.cityLabels,
+    type: 'symbol',
+    source: citySourceId,
+    'source-layer': cityTileLayers.points,
+    minzoom: 2,
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-font': labelFont,
+      'text-size': [...byType(14, 12.5, 11.5, 10.5)],
+      // Under the point, so that a marker on the city does not cover its name.
+      'text-anchor': 'top',
+      'text-offset': [0, 0.5],
+      'text-padding': 3,
+      'text-max-width': 8,
+      'symbol-sort-key': ['-', 0, ['coalesce', ['get', 'population'], 0]],
+    },
+    paint: {
+      'text-color': ['case', selected, highlightText(dark), dark ? '#e5e7eb' : '#1f2937'],
+      'text-halo-color': dark ? '#111827' : '#ffffff',
+      'text-halo-width': 1.5,
+    },
+  });
+}
+
+const highlightText = (dark: boolean) => (dark ? '#fbbf24' : '#b45309');
+// Drawn above the user's markers, so that a large marker never hides a name.
+
+/** A marker for every city, which shows where each one is (FR-MAP-003); off by default. */
+export function showCityMarkers(map: MapboxMap, visible: boolean): void {
+  if (map.getLayer(layerIds.cityPoints)) {
+    map.setLayoutProperty(layerIds.cityPoints, 'visibility', visible ? 'visible' : 'none');
+  }
+}
+
+/** The value of the mode inside the user's markers, when values are shown (FR-MAP-005). */
+export function addVisitedValues(map: MapboxMap, visible: boolean): void {
+  if (!map.getLayer(layerIds.visitedValues)) {
+    map.addLayer({
+      id: layerIds.visitedValues,
+      type: 'symbol',
+      source: layerIds.visited,
+      filter: ['!=', ['get', 'value'], ''],
+      layout: {
+        'text-field': ['get', 'value'],
+        'text-font': labelFont,
+        'text-size': 11,
+        'text-allow-overlap': true,
+        'text-ignore-placement': true,
+        'symbol-sort-key': ['get', 'sortKey'],
+        'symbol-z-order': 'source',
+      },
+      paint: { 'text-color': ['get', 'textColor'] },
+    });
+  }
+  map.setLayoutProperty(layerIds.visitedValues, 'visibility', visible ? 'visible' : 'none');
+}
