@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.17 |
+| Version | 0.18 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-18 |
+| Date | 2026-11-21 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -31,6 +31,7 @@
 | 0.15 | 2026-11-17 | A. Malyshkin | Tentative decision on OI-008: the trip calendar covers only the period in which every visit has a day (FR-STAT-003). Resolved OI-022: cities from 50,000 people are indexed, plus a hand-picked list (NFR-SEO-006). OI-017 leans towards a Hetzner VPS. Resolved OI-021: OpenStreetMap settlement points are kept as they are |
 | 0.16 | 2026-11-17 | A. Malyshkin | Lived-in cities and the number of visits are part of the travel record that a public profile shows; which lived-in city is the current one is shown only as the home location, when the user shows it (BR-016, FR-PROF-003, FR-PROF-004) |
 | 0.17 | 2026-11-18 | A. Malyshkin | Map-first interface: a landing page leads to the map as the main screen, a city opens in a side panel that can expand to the full city page, and a left panel holds the user's lists and statistics (§6.1, FR-MAP-008). Cities are selected by their names drawn by Flanr; markers for all cities are optional (FR-MAP-003). Selecting a city opens the city panel (FR-MAP-004). In the population mode larger markers cover smaller ones; the value of the mode can be shown inside the markers (FR-MAP-005) |
+| 0.18 | 2026-11-21 | A. Malyshkin | Adding cities to a custom list by rules: country, regions, settlement types, population range and sorting, with a preview (FR-LIST-008, R2). Suggested rules from the cities of a list or from the Visited and Planned lists (FR-LIST-009, Later). OI-023 and OI-024 |
 
 ---
 
@@ -179,7 +180,7 @@ The web client does not access the database directly. All data access goes throu
 - Registration and sign-in.
 - Logging visits to cities, with exact, approximate or no dates.
 - Rating cities by criteria and with a subjective overall rating.
-- Default and custom lists of cities.
+- Default and custom lists of cities, also filled by rules such as country and population (R2).
 - A world map with several visualisation modes and clickable city boundaries.
 - Personal statistics and a trip calendar.
 - City search with filters and sorting.
@@ -746,6 +747,43 @@ The two default lists have no visibility of their own: they are public when the 
 **Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Lists
 
 **Description.** Registered users SHOULD be able to like other users' public lists and save them for later. The number of likes SHOULD be shown on the list.
+
+#### FR-LIST-008 — Add cities by rules
+**Priority:** Should · **Release:** R2 · **Status:** Draft · **Source:** Concept §Lists
+
+**Description.** Besides adding cities one by one (FR-LIST-004), the owner of a custom list SHOULD be able to add a set of cities at once by rules, for example every city in Germany with more than 100,000 people. The rules work like the city filters and sorting of the search (FR-SRCH-003):
+
+- a country, which is required;
+- one or more first-level regions of that country, or all of them, which is the default;
+- one or more settlement types (city, town, village, hamlet, see BR-001), or all of them, which is the default;
+- a population range: any population, which is the default, at least a minimum, at most a maximum, or between the two;
+- a sorting by population, name or community rating, which sets the order in which the cities are added.
+
+Before anything is added, the system MUST show how many cities match the rules and which ones, so that the owner can check them. The matching cities are then added after the existing entries, in the chosen order. Cities that are already in the list keep their place and are not added again (FR-LIST-004). When the rules have a population bound, cities without a known population do not match.
+
+Adding by rules is a one-time action. The list does not stay linked to the rules and does not change when the city data is updated (FR-CITY-006). The added entries are ordinary entries: they can be removed, reordered and given notes. The number of cities one addition can add is limited, see OI-023.
+
+**Rationale.** A list such as "every German city over 100,000 people" is a natural goal to work through, and adding dozens of cities one by one is tedious.
+
+**Acceptance criteria.**
+1. Given an empty list and the rules country = Germany, all regions, all settlement types, population at least 100,000, sorted by population, when the owner adds the cities, then the list has every German city with at least 100,000 people, Berlin first.
+2. Given rules that match 80 cities, when the owner opens the preview, then it shows 80 cities and nothing has been added yet.
+3. Given a list that already has Hamburg, when the owner adds the cities of the same rules, then Hamburg keeps its place and appears once.
+4. Given rules with a population minimum, then a city without a known population is not added.
+
+**Related.** FR-LIST-004, FR-LIST-009, FR-SRCH-003, OI-023.
+
+#### FR-LIST-009 — Suggested rules
+**Priority:** Could · **Release:** Later · **Status:** Draft · **Source:** Concept §Lists
+
+**Description.** The system MAY suggest rules for adding cities (FR-LIST-008) from the cities the user already has:
+
+- In a custom list: when the cities of the list have something in common that rules can describe, the system MAY suggest the set they belong to. For example, when the user has added two German cities from different regions with more than 200,000 people each, it MAY suggest adding the cities in Germany with more than 200,000 people.
+- Before a list exists: from the Visited and Planned lists, the system MAY suggest creating a new list from rules, for example the large cities of a country in which the user has already visited or planned several.
+
+Accepting a suggestion MUST open the form of FR-LIST-008 filled in with the suggested rules, and for a new list with a suggested title, so that the user can change them. Nothing MUST be added or created without the user's confirmation. A suggestion the user dismisses SHOULD NOT be shown again. Suggestions are made only from the user's own data and are shown only to the user. How suggestions are found is still open, see OI-024.
+
+**Related.** FR-LIST-008, OI-024.
 
 ### 4.7 Map (`FR-MAP`)
 
@@ -1411,6 +1449,8 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | OI-020 | How cities that are part of a municipality count in statistics and filters, for example whether "cities visited" can exclude them, and how population totals avoid counting people twice (BR-017). | Statistics | Open |
 | OI-021 | How to treat OpenStreetMap settlement points that stand for a municipality which is not a settlement (for example Möhnesee): detect and drop them on import, or correct them by hand. In Germany 82 of 9,505 cities that represent their municipality are suspects: the municipality names a different settlement as its seat. | Data | Resolved 2026-11-17: the source data is followed, such points stay cities; wrong data is fixed in OpenStreetMap, not in Flanr; the signs for detecting such points later are in DECISIONS.md |
 | OI-022 | The population threshold above which city pages are indexed by search engines (NFR-SEO-006). | SEO | Resolved 2026-11-17: 50,000 people, plus a hand-picked list of well-known smaller cities, see NFR-SEO-006 |
+| OI-023 | How many cities one addition by rules can add (FR-LIST-008), and what the preview shows when the rules match more, for example all villages of a country. | Lists | Open, before R2 |
+| OI-024 | How suggested rules are found (FR-LIST-009): how many cities of a list or of the default lists it takes, which population thresholds are offered, and how dismissed suggestions are remembered. | Lists | Open |
 
 ---
 
@@ -1424,7 +1464,7 @@ City pages are the main way new people find Flanr, so public pages must be reada
 | Visits and dates | BR-002, BR-003, BR-011, BR-012, FR-VIS-001…009, FR-STAT-004 |
 | Cities the user has lived in | BR-016, FR-VIS-010, FR-MAP-005, FR-STAT-001 |
 | Rating cities | BR-005…BR-009, FR-RATE-001…008, FR-CITY-003, FR-SRCH-003 |
-| Lists | BR-004, FR-LIST-001…007, FR-MAP-006, FR-SRCH-004 |
+| Lists | BR-004, FR-LIST-001…009, FR-MAP-006, FR-SRCH-004 |
 | Map and statistics | FR-MAP-001…008, FR-STAT-001…006, FR-IMP-001, BR-014, §6.1 |
 | Social features | FR-PROF-004, FR-SOC-001…006, FR-SRCH-005 |
 | Privacy | BR-013, FR-PRIV-001…003, FR-LIST-005 |

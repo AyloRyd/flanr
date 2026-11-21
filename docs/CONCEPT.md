@@ -66,6 +66,10 @@ Lists work the same way as on Letterboxd: they group cities together by some ide
 
 Every user has two default lists: visited and planned. A city can be in only one of these two lists at a time: when the user logs a visit to a city from the planned list, it automatically moves to the visited list. On top of that, users can create as many custom lists as they want. A custom list can have a description, its cities can be ordered, and each entry can have a note. Users can like and save other people's lists.
 
+Cities can also be added to a list in bulk, by rules instead of one by one. The rules work like the city filters in search: first a country, then optionally one or more regions, settlement types and a population range, and a sorting that sets the order of the added cities. That way, a list of all German cities with more than 100,000 people, to visit them all over time, takes one step to create. The cities are added once, and the list does not follow the rules afterwards.
+
+Flanr can also suggest such rules. When a user adds a few cities to a list, for example two large German cities from different regions, the app may notice what they have in common and offer to add the rest, such as "Large cities in Germany, more than 200,000 people". Suggestions can also come before a list exists, from the cities the user has already visited or planned.
+
 Both default and custom lists can be either public or private, and everything is public by default. Public default lists are visible through the user's profile. Public custom lists are visible through the profile and can also be found through search.
 
 ## Map and statistics
