@@ -14,6 +14,7 @@ import {
   addVisitedLayer,
   clickableLayers,
   layerIds,
+  outlineBoundaries,
   selectBoundary,
   setLabelTheme,
   setMarkedCities,
@@ -72,13 +73,34 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
       ),
     [data, prefs.planned],
   );
+  const outlined = useMemo(
+    () => (prefs.boundaries ? (data?.visited ?? []).map((city) => city.cityId) : []),
+    [data, prefs.boundaries],
+  );
   const selectedPosition = selection?.position ?? null;
   const selectedId = selection?.cityId ?? null;
 
-  // The map adds its layers again after every change of style, from the newest state.
-  const current = useRef({ visited, planned, marked, prefs, selectedPosition, selectedId });
+  /**
+   * The boundaries the map shows now: the selected one and the outlined ones. Kept apart from
+   * the state, so that the map clears exactly what it highlighted, also when the highlight came
+   * with the style.
+   */
+  const highlighted = useRef<{ selected: number | null; outlined: number[] }>({
+    selected: null,
+    outlined: [],
+  });
+
+  const current = useRef({
+    visited,
+    planned,
+    marked,
+    outlined,
+    prefs,
+    selectedPosition,
+    selectedId,
+  });
   useEffect(() => {
-    current.current = { visited, planned, marked, prefs, selectedPosition, selectedId };
+    current.current = { visited, planned, marked, outlined, prefs, selectedPosition, selectedId };
   });
   const onStyleLoad = useCallback((target: MapboxMap, { dark }: { dark: boolean }) => {
     const now = current.current;
@@ -88,7 +110,10 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
     addVisitedLayer(target, now.visited);
     addCityLabels(target, dark, now.marked);
     addSelectionLayer(target, now.selectedPosition);
+    // A new style starts without any highlight.
     selectBoundary(target, now.selectedId, null);
+    outlineBoundaries(target, now.outlined, []);
+    highlighted.current = { selected: now.selectedId, outlined: now.outlined };
   }, []);
 
   useEffect(() => {
@@ -108,14 +133,19 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
     if (map) showCityMarkers(map, prefs.cityMarkers);
   }, [map, prefs.cityMarkers]);
 
-  const previousSelected = useRef<number | null>(null);
+  // Before the style has loaded there is nothing to change; onStyleLoad starts from the state.
   useEffect(() => {
-    if (map?.getSource(layerIds.selection)) {
-      addSelectionLayer(map, selectedPosition);
-      selectBoundary(map, selectedId, previousSelected.current);
-      previousSelected.current = selectedId;
-    }
+    if (!map?.getSource(layerIds.selection)) return;
+    addSelectionLayer(map, selectedPosition);
+    selectBoundary(map, selectedId, highlighted.current.selected);
+    highlighted.current.selected = selectedId;
   }, [map, selectedId, selectedPosition]);
+
+  useEffect(() => {
+    if (!map?.getSource(layerIds.selection)) return;
+    outlineBoundaries(map, outlined, highlighted.current.outlined);
+    highlighted.current.outlined = outlined;
+  }, [map, outlined]);
 
   // The map moves to a selected city once, and fits its boundary when the panel has it.
   const moved = useRef<{ cityId: number; fitted: boolean } | null>(null);

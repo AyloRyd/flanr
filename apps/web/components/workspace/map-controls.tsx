@@ -33,7 +33,7 @@ export function MapControls({ data, prefs, onChange, className }: MapControlsPro
   const tw = useTranslations('workspace');
   const legend = useMemo(() => legendFor(prefs.mode, data?.visited ?? []), [prefs.mode, data]);
 
-  const toggle = (key: 'planned' | 'values' | 'cityMarkers', label: string) => (
+  const toggle = (key: 'planned' | 'values' | 'cityMarkers' | 'boundaries', label: string) => (
     <Label className="font-normal">
       <Checkbox
         checked={prefs[key]}
@@ -90,6 +90,7 @@ export function MapControls({ data, prefs, onChange, className }: MapControlsPro
         <div className="flex flex-col gap-3 p-3">
           {data && toggle('values', tw('values'))}
           {data && toggle('planned', t('showPlanned'))}
+          {data && toggle('boundaries', tw('boundaries'))}
           {toggle('cityMarkers', tw('cityMarkers'))}
         </div>
         <div className="flex flex-col gap-2 p-3">

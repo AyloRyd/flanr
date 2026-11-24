@@ -367,6 +367,7 @@
     },
     "values": "Values on markers",
     "cityMarkers": "Markers for all cities",
+    "boundaries": "Boundaries of visited cities",
     "showOnMap": "Show on the map",
     "filter": "Filter",
     "filterOf": "Filter {list}",

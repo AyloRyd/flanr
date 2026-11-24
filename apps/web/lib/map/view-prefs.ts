@@ -10,6 +10,8 @@ export interface MapPrefs {
   values: boolean;
   /** A marker for every city of Flanr (FR-MAP-003). */
   cityMarkers: boolean;
+  /** The boundaries of all visited cities, shown as the selected one's (FR-MAP-004). */
+  boundaries: boolean;
   baseStyle: BaseStyleName;
 }
 
@@ -18,6 +20,7 @@ export const defaultMapPrefs: MapPrefs = {
   planned: false,
   values: false,
   cityMarkers: false,
+  boundaries: false,
   baseStyle: 'standard',
 };
 
@@ -37,6 +40,7 @@ export function readMapPrefs(stored: string | null): MapPrefs {
     planned: flag('planned'),
     values: flag('values'),
     cityMarkers: flag('cityMarkers'),
+    boundaries: flag('boundaries'),
     baseStyle: baseStyleNames.find((style) => style === raw.baseStyle) ?? defaultMapPrefs.baseStyle,
   };
 }
