@@ -3,7 +3,7 @@
 import type { MapCity, TripCalendar, UserMap } from '@flanr/shared';
 import { PanelLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { AccountMenu } from '@/components/account-menu';
@@ -81,14 +81,21 @@ export function MapWorkspace({ data, calendar, children }: MapWorkspaceProps) {
   const t = useTranslations('workspace');
   const tApp = useTranslations('app');
   const router = useRouter();
+  const panelOpen = usePathname().startsWith('/map/cities/');
   const [prefs, changePrefs] = useMapPrefs();
   const [leftOpen, setLeftOpen] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
 
   const select = useCallback((next: Selection | null) => {
     setSelection((before) => {
-      // The city panel reports the city it shows; one the user just picked keeps its move.
-      if (next && before?.cityId === next.cityId) return { ...next, move: before.move };
+      // A city picked again keeps what its panel reported, which comes only once.
+      if (next && before?.cityId === next.cityId) {
+        return {
+          ...next,
+          position: next.position ?? before.position,
+          bounds: next.bounds ?? before.bounds,
+        };
+      }
       return next;
     });
   }, []);
@@ -100,7 +107,6 @@ export function MapWorkspace({ data, calendar, children }: MapWorkspaceProps) {
       position: positionOf(city),
       settlementType: city.settlementType,
       bounds: null,
-      move: true,
     });
     router.push(`/map/cities/${city.cityId}`);
     // On a phone the list covers the map, so it makes way for the city.
@@ -144,10 +150,8 @@ export function MapWorkspace({ data, calendar, children }: MapWorkspaceProps) {
           data={data}
           prefs={prefs}
           onChange={changePrefs}
-          className={cn(
-            'absolute bottom-8 left-3 z-10',
-            leftOpen && 'hidden sm:block sm:left-[25.5rem]',
-          )}
+          // Beside the city panel while it is open; on phones the panel opens from the bottom.
+          className={cn('absolute top-3 right-3 z-20', panelOpen && 'sm:right-[27.75rem]')}
         />
 
         {children}

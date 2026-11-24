@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.18 |
+| Version | 0.19 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-21 |
+| Date | 2026-11-24 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -32,6 +32,7 @@
 | 0.16 | 2026-11-17 | A. Malyshkin | Lived-in cities and the number of visits are part of the travel record that a public profile shows; which lived-in city is the current one is shown only as the home location, when the user shows it (BR-016, FR-PROF-003, FR-PROF-004) |
 | 0.17 | 2026-11-18 | A. Malyshkin | Map-first interface: a landing page leads to the map as the main screen, a city opens in a side panel that can expand to the full city page, and a left panel holds the user's lists and statistics (§6.1, FR-MAP-008). Cities are selected by their names drawn by Flanr; markers for all cities are optional (FR-MAP-003). Selecting a city opens the city panel (FR-MAP-004). In the population mode larger markers cover smaller ones; the value of the mode can be shown inside the markers (FR-MAP-005) |
 | 0.18 | 2026-11-21 | A. Malyshkin | Adding cities to a custom list by rules: country, regions, settlement types, population range and sorting, with a preview (FR-LIST-008, R2). Suggested rules from the cities of a list or from the Visited and Planned lists (FR-LIST-009, Later). OI-023 and OI-024 |
+| 0.19 | 2026-11-24 | A. Malyshkin | Lived-in cities are marked with a house; the population mode has a class below 5,000 people (FR-MAP-005). The map settings are a button at the top right that opens a popup (§6.1). Satellite imagery from Sentinel-2 cloudless until Mapbox's is available (§6.3, NFR-LIC-001) |
 
 ---
 
@@ -830,14 +831,14 @@ Accepting a suggestion MUST open the form of FR-LIST-008 filled in with the sugg
 **Description.** The personal map MUST offer at least three modes for the user's cities:
 1. By number of visits: marker size and colour depend on the number of visits.
 2. By rating: marker colour depends on the user's subjective rating, using the rating colour scale in Appendix C.
-3. By population: marker size and colour depend on the city's population. Larger markers are drawn above smaller ones, and the sizes are chosen so that the smaller markers stay visible.
+3. By population: marker size and colour depend on the city's population, with places under 5,000 people in a near-white colour. Larger markers are drawn above smaller ones and cover them completely, value included, and the sizes are chosen so that the smaller markers stay visible.
 
-Each mode MUST have a legend. The user MAY choose to show the value of the mode inside the markers: the number of visits, the rating or the population.
+Each mode MUST have a legend. The user MAY choose to show the value of the mode inside the markers: the number of visits, the rating or the population. A marker has the same size with and without its value.
 
 **Acceptance criteria.**
 1. Given a user with one city visited once and another visited ten times, when the visits mode is selected, then the second marker is larger and has a different colour.
 2. Given the rating mode, then cities without a rating are shown in a neutral colour that is explained in the legend.
-3. Given the visits mode, then lived-in cities are shown with a distinct marker that is explained in the legend.
+3. Given the visits mode, then lived-in cities are shown with a distinct marker with a house that is explained in the legend.
 4. Given the rating mode with values shown, then each rated city's marker shows its rating.
 
 #### FR-MAP-006 — Planned cities on the map
@@ -1279,7 +1280,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. It i
 | Screen | Content |
 |---|---|
 | Landing page | What Flanr is, with pictures of the product, for guests and search engines; a button that opens the map. A signed-in user goes to the map instead |
-| Map | The full-screen map with its modes, legend and style switch. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel |
+| Map | The full-screen map. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel. Top right: the map settings button, which opens a popup with the modes, the options, the style switch and the legend; it moves aside while the city panel is open |
 | City panel | Opens at the right side of the map when a city is selected: the city's data, community rating, the user's own data and the actions to log a visit, rate and plan. On small screens it opens from the bottom. It can expand to the city page |
 | City page | The full page of a city: everything of the city panel and a small map with the boundary. The page that search engines index |
 | Left panel | Next to the map: the Visited and Planned lists and the trip calendar, later the other statistics |
@@ -1304,6 +1305,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. It i
 |---|---|---|
 | Clerk | Authentication and user management | MVP |
 | Mapbox | Base map, globe, satellite imagery | MVP |
+| EOX Sentinel-2 cloudless 2016 | Satellite imagery until Mapbox's is available (CC BY 4.0) | MVP |
 | OpenStreetMap, Wikidata | City data import | MVP |
 | Object storage | Photos | R2 |
 | Accommodation aggregator | Affiliate offers | Later |
@@ -1392,7 +1394,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. It i
 
 | ID | Requirement |
 |---|---|
-| NFR-LIC-001 | The map and city pages MUST show the attribution required by OpenStreetMap and Mapbox. |
+| NFR-LIC-001 | The map and city pages MUST show the attribution required by OpenStreetMap, Mapbox and the satellite imagery. |
 | NFR-LIC-002 | The use of OSM data MUST comply with the ODbL. |
 | NFR-LIC-003 | Images from Wikimedia Commons MUST be shown with author and licence. |
 

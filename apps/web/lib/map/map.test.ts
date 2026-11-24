@@ -8,6 +8,7 @@ import {
   markerClass,
   markerValue,
   neutralColor,
+  populationClass,
   plannedStyle,
   textColorOn,
 } from './markers.ts';
@@ -54,6 +55,7 @@ describe('visits mode (FR-MAP-005)', () => {
     expect(lived.rank).toBeGreaterThan(often.rank);
     expect(lived.style.radius).toBeGreaterThan(often.style.radius);
     expect(lived.style.color).not.toBe(often.style.color);
+    expect(lived.style.symbol).toBe('house');
   });
 
   it('explains lived-in cities in the legend and counts the cities of each class', () => {
@@ -121,9 +123,20 @@ describe('population mode (FR-MAP-005)', () => {
       ['population1m', 1],
       ['population100k', 0],
       ['population10k', 1],
+      ['population5k', 0],
       ['population0', 0],
       ['populationUnknown', 1],
     ]);
+  });
+
+  it('shows places under 5,000 people near white and the next class in colour', () => {
+    const [tiny, small] = [4_999, 5_000].map((population) =>
+      populationClass(city(1, { population })),
+    );
+
+    expect(tiny?.key).toBe('population0');
+    expect(small?.key).toBe('population5k');
+    expect(textColorOn(tiny?.style.color ?? '')).toBe('#111827');
   });
 });
 
@@ -250,6 +263,26 @@ describe('values inside the markers (FR-MAP-005)', () => {
     expect(large?.properties.value).toBe('2M');
     expect(large?.properties.radius).toBeGreaterThan(small?.properties.radius ?? Infinity);
     expect(large?.properties.sortKey).toBeGreaterThan(small?.properties.sortKey ?? Infinity);
+  });
+
+  it('keeps the size of the markers without values and gives them another image', () => {
+    const cities = [city(1, { population: 2_000_000 })];
+
+    const [plain] = visitedLayer('population', cities).features;
+    const [withValue] = visitedLayer('population', cities, { values: true }).features;
+
+    expect(plain?.properties.value).toBe('');
+    expect(plain?.properties.radius).toBe(withValue?.properties.radius);
+    expect(plain?.properties.image).not.toBe(withValue?.properties.image);
+  });
+
+  it('shows the house of a lived-in city in place of its number of visits (BR-016)', () => {
+    const cities = [city(1, { livedIn: true, visitCount: 4 })];
+
+    const [lived] = visitedLayer('visits', cities, { values: true }).features;
+
+    expect(lived?.properties.symbol).toBe('house');
+    expect(lived?.properties.value).toBe('');
   });
 
   it('writes dark on light markers and white on dark ones', () => {

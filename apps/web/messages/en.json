@@ -332,7 +332,8 @@
       "population1m": "1 million people or more",
       "population100k": "100,000 to 999,999 people",
       "population10k": "10,000 to 99,999 people",
-      "population0": "Fewer than 10,000 people",
+      "population5k": "5,000 to 9,999 people",
+      "population0": "Fewer than 5,000 people",
       "populationUnknown": "Population unknown",
       "planned": "Planned"
     },
@@ -359,6 +360,11 @@
     "guest": "Sign in to see the cities you have been to, your plans and your trip calendar.",
     "signIn": "Sign in",
     "controls": "Map settings",
+    "modes": {
+      "visits": "Visits",
+      "rating": "Rating",
+      "population": "Population"
+    },
     "values": "Values on markers",
     "cityMarkers": "Markers for all cities",
     "showOnMap": "Show on the map",

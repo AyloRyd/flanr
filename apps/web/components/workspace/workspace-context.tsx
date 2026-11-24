@@ -11,11 +11,6 @@ export interface Selection {
   settlementType: SettlementType | null;
   /** The box around the city's boundary, when the city panel has loaded it. */
   bounds: Bounds | null;
-  /**
-   * Whether the map moves to the city: yes when it was chosen in a list or by its URL, no when
-   * the user clicked it on the map, where it already is.
-   */
-  move: boolean;
 }
 
 export interface Workspace {

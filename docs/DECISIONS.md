@@ -2,6 +2,14 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-24
+
+- **Back to Mapbox's Standard style, without its settlement labels.** The owner preferred the Standard look to the classic styles of 0.17. Its configuration can hide place labels only all together, so the map loads the Standard style once, hides its three settlement label layers and imports it with these changes as the basemap. Countries, regions and seas keep Mapbox's labels; settlements have only Flanr's names. Only the workspace map hides them; the profile and city page maps keep Mapbox's names, since they draw none of their own.
+- **Free satellite imagery for now.** Mapbox's satellite tiles are not available on the account (429). Until they are, the satellite style lays Sentinel-2 cloudless 2016 by EOX under the Standard style's roads and labels. The 2016 imagery is CC BY 4.0; later years are for non-commercial use only. Its resolution of 10 m blurs from about zoom 14 on. Esri's World Imagery is sharper but its terms require an ArcGIS account.
+- **Markers are images with their value drawn in.** Mapbox draws the text of a symbol layer above all circles, so values of small markers showed on top of larger markers. Each marker is now one image, a circle with its value or a house, so a larger marker covers a smaller one completely. A marker keeps its size with values turned off. City names lie below the markers and move to another side of their city, or give way, where they would overlap one.
+- **Population colours** from the owner: dark red for a million people or more, then red, orange and yellow, and near white below 5,000 people (a new class of 5,000 to 9,999 joins the four).
+- **Switching the style or the theme changes the map in place** (the Standard style's light preset and the imagery layer), instead of loading a new style, which also loses Mapbox's labels when it goes from the standard to the satellite style.
+
 ## 2026-11-18
 
 - **The interface is built around the map (SRS 0.17, FR-MAP-008).** The owner's model is close to common map services: a landing page for guests and search engines, then the map as the main screen. A city opens in a panel on the right, the opposite side from Google Maps, and the panel expands to the full city page with a small map. The user's lists and statistics live in a panel on the left. The pages built in Phases 6–8 stay: the city page is the expanded panel and the page that search engines index, and the profile, list, search, onboarding and settings pages remain pages of their own.

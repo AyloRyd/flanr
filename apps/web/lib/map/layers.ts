@@ -9,22 +9,21 @@ import {
 import {
   markerClass,
   markerValue,
+  markerImageId,
   plannedStyle,
-  radiusWithValue,
-  textColorOn,
   type MapMode,
+  type MarkerImage,
   type MarkerStyle,
 } from './markers';
 
-/** What every marker of the user's layers carries; the map's paint rules read it. */
-export interface MarkerProperties extends MarkerStyle {
+/** What every marker of the user's layers carries; the map draws its image from it. */
+export interface MarkerProperties extends MarkerImage {
   cityId: number;
   settlementType: SettlementType;
   /** Higher keys are drawn above lower ones. */
   sortKey: number;
-  /** What the marker shows inside when values are turned on; empty for none. */
-  value: string;
-  textColor: string;
+  /** The name of the marker's image on the map (markerImageId). */
+  image: string;
 }
 
 export type MarkerCollection = GeoJSON.FeatureCollection<GeoJSON.Point, MarkerProperties>;
@@ -43,8 +42,8 @@ function feature(
       cityId: city.cityId,
       settlementType: city.settlementType,
       sortKey,
+      image: markerImageId({ ...style, value }),
       value,
-      textColor: textColorOn(style.color),
       ...style,
     },
   };
@@ -53,7 +52,7 @@ function feature(
 /**
  * The visited cities of a user, styled for the mode (FR-MAP-005). A higher class is drawn
  * above a lower one: in the population mode larger markers cover smaller ones. With `values`,
- * every marker grows to hold the value of the mode.
+ * every marker shows the value of the mode inside, at the same size.
  */
 export function visitedLayer(
   mode: MapMode,
@@ -64,9 +63,9 @@ export function visitedLayer(
     type: 'FeatureCollection',
     features: cities.map((city) => {
       const { style, rank } = markerClass(mode, city);
-      if (!values) return feature(city, style, rank);
-      const grown = { ...style, radius: radiusWithValue(style.radius) };
-      return feature(city, grown, rank, markerValue(mode, city));
+      // A sign such as the house of a lived-in city stays in place of the value.
+      const value = values && !style.symbol ? markerValue(mode, city) : '';
+      return feature(city, style, rank, value);
     }),
   };
 }

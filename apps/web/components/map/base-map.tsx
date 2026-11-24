@@ -1,25 +1,44 @@
 'use client';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import type { Map as MapboxMap, MapOptions } from 'mapbox-gl';
+import type { Map as MapboxMap, MapOptions, StyleSpecification } from 'mapbox-gl';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { baseStyleNames, type BaseStyleName } from '@/lib/map/base-styles';
+import {
+  basemapConfig,
+  basemapId,
+  baseStyleNames,
+  mapStyle,
+  satelliteLayer,
+  satelliteSource,
+  satelliteSourceId,
+  withoutSettlementLabels,
+  type BaseStyleName,
+} from '@/lib/map/base-styles';
 import type { Bounds } from '@/lib/map/layers';
 
 /** The public token of the Mapbox account; without it the map is not shown. */
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
 
+/** Mapbox's Standard style, loaded once for all maps of the page. */
+let standardStyle: Promise<StyleSpecification | null> | null = null;
+
 /**
- * Mapbox's classic styles (FR-MAP-001). Unlike the Standard style they let Flanr hide the
- * settlement labels alone and keep the countries' (FR-MAP-003); the standard style follows the
- * light or dark theme of the site.
+ * Loads Mapbox's Standard style, so that a map can hide its settlement labels (FR-MAP-003).
+ * Without it the map still works, with Mapbox's names next to Flanr's.
  */
-function styleUrl(style: BaseStyleName, dark: boolean): string {
-  if (style === 'satellite') return 'mapbox://styles/mapbox/satellite-streets-v12';
-  return dark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+function loadStandardStyle(): Promise<StyleSpecification | null> {
+  standardStyle ??= fetch(
+    `https://api.mapbox.com/styles/v1/mapbox/standard?access_token=${mapboxToken}`,
+  )
+    .then((response) => (response.ok ? (response.json() as Promise<StyleSpecification>) : null))
+    .catch((error: unknown) => {
+      console.warn('The Standard style could not be loaded', error);
+      return null;
+    });
+  return standardStyle;
 }
 
 export type InitialView =
@@ -30,14 +49,17 @@ interface BaseMapProps {
   label: string;
   initialView: InitialView;
   /**
-   * Adds the page's own sources and layers. A change of the base style removes them, so it is
-   * called again after every one.
+   * Adds the page's own sources and layers, once the style has loaded.
    */
   onStyleLoad: (map: MapboxMap, context: { dark: boolean }) => void;
+  /** Called when the site's theme changes, for the page's layers with colours of their own. */
+  onThemeChange?: (map: MapboxMap, dark: boolean) => void;
   /** Called once the map exists, and with null when it is gone. */
   onMap?: (map: MapboxMap | null) => void;
   /** The base style chosen outside; without it the map shows its own switch. */
   baseStyle?: BaseStyleName;
+  /** Hides the base map's names of settlements, for a map that draws Flanr's (FR-MAP-003). */
+  ownCityNames?: boolean;
   /** Scrolling the page over the map does not zoom it; for maps inside a longer page. */
   cooperativeGestures?: boolean;
   className?: string | undefined;
@@ -45,16 +67,18 @@ interface BaseMapProps {
 
 /**
  * A Mapbox map with a standard and a satellite style and a globe at low zoom
- * (FR-MAP-001, FR-MAP-002). It keeps the attribution of Mapbox and OpenStreetMap and adds the
- * one of Flanr's city data (NFR-LIC-001). Without a Mapbox token or WebGL it shows a note
+ * (FR-MAP-001, FR-MAP-002). It keeps the attribution of Mapbox, OpenStreetMap and the imagery
+ * and adds the one of Flanr's city data (NFR-LIC-001). Without a Mapbox token or WebGL it shows a note
  * instead, and the rest of the page keeps working.
  */
 export function BaseMap({
   label,
   initialView,
   onStyleLoad,
+  onThemeChange,
   onMap,
   baseStyle,
+  ownCityNames = false,
   cooperativeGestures = false,
   className,
 }: BaseMapProps) {
@@ -68,17 +92,19 @@ export function BaseMap({
   const [failed, setFailed] = useState(!mapboxToken);
 
   // The callbacks change while the map lives; the map reads the newest ones.
-  const latest = useRef({ onStyleLoad, onMap, dark });
+  const latest = useRef({ onStyleLoad, onThemeChange, onMap, dark, style });
   useEffect(() => {
-    latest.current = { onStyleLoad, onMap, dark };
+    latest.current = { onStyleLoad, onThemeChange, onMap, dark, style };
   });
+  /** The style and theme the map shows, so that it changes only when one of them does. */
+  const shown = useRef<string | null>(null);
 
   // The map is created once; the initial view and the options are read only then.
   const created = useRef({
     initialView,
     cooperativeGestures,
     attribution: t('attribution'),
-    style,
+    ownCityNames,
   });
 
   useEffect(() => {
@@ -86,8 +112,11 @@ export function BaseMap({
     let removed = false;
     const element = container.current;
 
-    void import('mapbox-gl').then(({ default: mapboxgl }) => {
+    void Promise.all([import('mapbox-gl'), loadStandardStyle()]).then(([module, standard]) => {
       if (removed) return;
+      const mapboxgl = module.default;
+      const basemap =
+        standard && created.current.ownCityNames ? withoutSettlementLabels(standard) : standard;
       const { initialView: view, cooperativeGestures: cooperative, attribution } = created.current;
       const viewOptions: Partial<MapOptions> =
         'bounds' in view
@@ -98,7 +127,8 @@ export function BaseMap({
         map = new mapboxgl.Map({
           container: element,
           accessToken: mapboxToken,
-          style: styleUrl(created.current.style, latest.current.dark),
+          // The newest style and theme: the stored ones may have come while the map loaded.
+          style: mapStyle(latest.current.style, latest.current.dark, basemap),
           projection: 'globe',
           customAttribution: attribution,
           cooperativeGestures: cooperative,
@@ -115,6 +145,7 @@ export function BaseMap({
         latest.current.onStyleLoad(map, { dark: latest.current.dark });
       });
       mapRef.current = map;
+      shown.current = `${latest.current.style}-${latest.current.dark}`;
       latest.current.onMap?.(map);
     });
 
@@ -126,19 +157,30 @@ export function BaseMap({
     };
   }, []);
 
-  // A new style, or the light one for the dark one; Flanr's layers come back on style.load.
-  const shownUrl = useRef<string | null>(null);
+  // Another base style or theme changes the map in place; a new style would also remove
+  // Flanr's layers, and Mapbox loses the labels when it replaces the style this way.
   useEffect(() => {
-    const url = styleUrl(style, dark);
-    if (shownUrl.current === null) {
-      shownUrl.current = url;
-      return;
-    }
-    if (url === shownUrl.current) return;
-    shownUrl.current = url;
-    // The cast: the types of mapbox-gl 3.34 wrongly require the two font options.
-    const options = { diff: false } as Parameters<MapboxMap['setStyle']>[1];
-    mapRef.current?.setStyle(url, options);
+    const map = mapRef.current;
+    const key = `${style}-${dark}`;
+    if (!map || key === shown.current) return;
+    const darkBefore = shown.current?.endsWith('-true') ?? dark;
+    shown.current = key;
+    const apply = () => {
+      for (const [name, value] of Object.entries(basemapConfig(style, dark))) {
+        map.setConfigProperty(basemapId, name, value);
+      }
+      const imagery = Boolean(map.getLayer(satelliteSourceId));
+      if (style === 'satellite' && !imagery) {
+        map.addSource(satelliteSourceId, satelliteSource);
+        map.addLayer(satelliteLayer);
+      } else if (style !== 'satellite' && imagery) {
+        map.removeLayer(satelliteSourceId);
+        map.removeSource(satelliteSourceId);
+      }
+      if (dark !== darkBefore) latest.current.onThemeChange?.(map, dark);
+    };
+    if (map.isStyleLoaded()) apply();
+    else map.once('style.load', apply);
   }, [style, dark]);
 
   if (failed) {
@@ -184,7 +226,7 @@ export function BaseStyleSwitch({
     <div
       role="group"
       aria-label={t('style.label')}
-      className={cn('flex rounded-lg border bg-background/90 p-0.5 text-sm shadow-sm', className)}
+      className={cn('grid grid-cols-2 rounded-lg bg-muted p-0.5 text-xs font-medium', className)}
     >
       {baseStyleNames.map((style) => (
         <button
@@ -193,8 +235,10 @@ export function BaseStyleSwitch({
           aria-pressed={value === style}
           onClick={() => onChange(style)}
           className={cn(
-            'rounded-md px-2.5 py-1',
-            value === style ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+            'rounded-md px-2.5 py-1.5',
+            value === style
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
           )}
         >
           {t(`style.${style}`)}

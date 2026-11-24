@@ -15,8 +15,8 @@ interface MapSelectionProps {
 }
 
 /**
- * Tells the map which city the page shows, so that it highlights the city and, when the city was
- * opened by its URL, moves to it (FR-MAP-004). Without a city it clears the selection.
+ * Tells the map which city the page shows, so that it highlights the city and moves to its
+ * boundary (FR-MAP-004). Without a city it clears the selection.
  */
 export function MapSelection({ city }: MapSelectionProps) {
   const { select } = useWorkspace();
@@ -35,7 +35,6 @@ export function MapSelection({ city }: MapSelectionProps) {
       position: [longitude, latitude],
       settlementType: type,
       bounds: bounds ? (JSON.parse(bounds) as Bounds) : null,
-      move: true,
     });
   }, [select, id, longitude, latitude, type, bounds]);
 
