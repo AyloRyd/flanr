@@ -1,14 +1,16 @@
 'use client';
 
 import type { UserMap } from '@flanr/shared';
-import { ChevronDown } from 'lucide-react';
+import { Map as MapIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { ToggleGroup } from 'radix-ui';
+import { useMemo } from 'react';
 import { BaseStyleSwitch } from '@/components/map/base-map';
 import { MapLegend } from '@/components/map/map-legend';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { legendFor, mapModes, type MapMode } from '@/lib/map/markers';
 import type { MapPrefs } from '@/lib/map/view-prefs';
 import { cn } from '@/lib/utils';
@@ -22,14 +24,13 @@ interface MapControlsProps {
 }
 
 /**
- * How the map shows things: the mode with its legend (FR-MAP-005), the planned cities
- * (FR-MAP-006), values inside markers, markers for all cities (FR-MAP-003) and the base style
- * (FR-MAP-001).
+ * How the map shows things, behind a small button at the corner of the map: the mode with its
+ * legend (FR-MAP-005), the planned cities (FR-MAP-006), values inside markers, markers for all
+ * cities (FR-MAP-003) and the base style (FR-MAP-001).
  */
 export function MapControls({ data, prefs, onChange, className }: MapControlsProps) {
   const t = useTranslations('map');
   const tw = useTranslations('workspace');
-  const [open, setOpen] = useState(true);
   const legend = useMemo(() => legendFor(prefs.mode, data?.visited ?? []), [prefs.mode, data]);
 
   const toggle = (key: 'planned' | 'values' | 'cityMarkers', label: string) => (
@@ -43,55 +44,67 @@ export function MapControls({ data, prefs, onChange, className }: MapControlsPro
   );
 
   return (
-    <section
-      aria-label={tw('controls')}
-      className={cn('w-64 rounded-xl border bg-background/95 shadow-md backdrop-blur', className)}
-    >
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium"
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={tw('controls')}
+          title={tw('controls')}
+          className={cn('size-10 rounded-xl bg-background shadow-md', className)}
+        >
+          <MapIcon className="size-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        aria-label={tw('controls')}
+        className="flex w-72 flex-col divide-y text-sm"
       >
-        {tw('controls')}
-        <ChevronDown
-          aria-hidden
-          className={cn('size-4 transition-transform', open && 'rotate-180')}
-        />
-      </button>
-      {open && (
-        <div className="flex max-h-[50svh] flex-col gap-4 overflow-y-auto px-3 pb-3">
-          {data && (
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-sm text-muted-foreground">{t('mode.label')}</legend>
-              <RadioGroup
-                value={prefs.mode}
-                onValueChange={(mode) => onChange({ mode: mode as MapMode })}
-              >
-                {mapModes.map((mode) => (
-                  <Label key={mode} className="font-normal">
-                    <RadioGroupItem value={mode} />
-                    {t(`mode.${mode}`)}
-                  </Label>
-                ))}
-              </RadioGroup>
-            </fieldset>
-          )}
-          <div className="flex flex-col gap-3">
-            {data && toggle('values', tw('values'))}
-            {data && toggle('planned', t('showPlanned'))}
-            {toggle('cityMarkers', tw('cityMarkers'))}
+        {data && (
+          <div className="flex flex-col gap-2 p-3">
+            <p id="map-mode" className="text-xs font-medium text-muted-foreground">
+              {t('mode.label')}
+            </p>
+            <ToggleGroup.Root
+              type="single"
+              value={prefs.mode}
+              // Choosing the chosen mode again keeps it rather than leaving none.
+              onValueChange={(mode) => mode && onChange({ mode: mode as MapMode })}
+              aria-labelledby="map-mode"
+              className="grid grid-cols-3 rounded-lg bg-muted p-0.5"
+            >
+              {mapModes.map((mode) => (
+                <ToggleGroup.Item
+                  key={mode}
+                  value={mode}
+                  aria-label={t(`mode.${mode}`)}
+                  className="rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+                >
+                  {tw(`modes.${mode}`)}
+                </ToggleGroup.Item>
+              ))}
+            </ToggleGroup.Root>
           </div>
+        )}
+        <div className="flex flex-col gap-3 p-3">
+          {data && toggle('values', tw('values'))}
+          {data && toggle('planned', t('showPlanned'))}
+          {toggle('cityMarkers', tw('cityMarkers'))}
+        </div>
+        <div className="flex flex-col gap-2 p-3">
+          <p className="text-xs font-medium text-muted-foreground">{t('style.label')}</p>
           <BaseStyleSwitch
             value={prefs.baseStyle}
             onChange={(baseStyle) => onChange({ baseStyle })}
-            className="self-start"
           />
-          {data && (
-            <MapLegend entries={legend} plannedCount={prefs.planned ? data.planned.length : null} />
-          )}
         </div>
-      )}
-    </section>
+        {data && (
+          <div className="p-3">
+            <MapLegend entries={legend} plannedCount={prefs.planned ? data.planned.length : null} />
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -98,7 +98,9 @@ test('a signed-in user sees their cities, lists and trip calendar next to the ma
   await page.goto('/');
   await expect(page).toHaveURL(/\/map$/);
 
-  // The modes and their legends (FR-MAP-005).
+  // The modes and their legends (FR-MAP-005), behind the map settings button.
+  const settings = page.getByRole('button', { name: workspace.controls });
+  await settings.click();
   const legendList = page.getByRole('list', { name: legend.title });
   await expect(legendList.getByRole('listitem').filter({ hasText: legend.lived })).toHaveText(
     new RegExp(`${legend.lived}\\s*1$`),
@@ -110,8 +112,10 @@ test('a signed-in user sees their cities, lists and trip calendar next to the ma
   await page.getByRole('checkbox', { name: workspace.values }).check();
   // The choice is remembered in this browser.
   await page.reload();
+  await settings.click();
   await expect(page.getByRole('radio', { name: en.map.mode.population })).toBeChecked();
   await expect(page.getByRole('checkbox', { name: workspace.values })).toBeChecked();
+  await page.keyboard.press('Escape');
 
   // The Visited list opens a city's panel.
   await page.getByRole('button', { name: workspace.toggleLeftPanel }).click();

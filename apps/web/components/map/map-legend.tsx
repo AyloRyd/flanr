@@ -1,24 +1,29 @@
+import { House } from 'lucide-react';
 import { useTranslations, type Messages } from 'next-intl';
 import type { LegendEntry, MarkerStyle } from '@/lib/map/markers';
-import { plannedStyle } from '@/lib/map/markers';
+import { plannedStyle, textColorOn } from '@/lib/map/markers';
 
 /** The keys of the legend entries are the message keys of their labels. */
 type LegendKey = Exclude<keyof Messages['map']['legend'], 'title' | 'planned'>;
 
-/** A marker as the map draws it, for the legend. */
+/** A marker as the map draws it, at a smaller scale that keeps the order of the sizes. */
 function Swatch({ style, hollow = false }: { style: MarkerStyle; hollow?: boolean }) {
-  const size = style.radius * 2;
+  const size = Math.round(style.radius * 1.2);
   return (
     <span className="flex w-6 shrink-0 justify-center" aria-hidden>
       <span
-        className="rounded-full"
+        className="flex items-center justify-center rounded-full"
         style={{
           width: size,
           height: size,
           backgroundColor: hollow ? 'transparent' : style.color,
           boxShadow: `0 0 0 ${style.strokeWidth}px ${hollow ? style.color : 'var(--border)'}`,
         }}
-      />
+      >
+        {style.symbol === 'house' && (
+          <House className="size-3" strokeWidth={2.5} color={textColorOn(style.color)} />
+        )}
+      </span>
     </span>
   );
 }
