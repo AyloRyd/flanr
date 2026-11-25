@@ -32,7 +32,7 @@
 | 0.16 | 2026-11-17 | A. Malyshkin | Lived-in cities and the number of visits are part of the travel record that a public profile shows; which lived-in city is the current one is shown only as the home location, when the user shows it (BR-016, FR-PROF-003, FR-PROF-004) |
 | 0.17 | 2026-11-18 | A. Malyshkin | Map-first interface: a landing page leads to the map as the main screen, a city opens in a side panel that can expand to the full city page, and a left panel holds the user's lists and statistics (§6.1, FR-MAP-008). Cities are selected by their names drawn by Flanr; markers for all cities are optional (FR-MAP-003). Selecting a city opens the city panel (FR-MAP-004). In the population mode larger markers cover smaller ones; the value of the mode can be shown inside the markers (FR-MAP-005) |
 | 0.18 | 2026-11-21 | A. Malyshkin | Adding cities to a custom list by rules: country, regions, settlement types, population range and sorting, with a preview (FR-LIST-008, R2). Suggested rules from the cities of a list or from the Visited and Planned lists (FR-LIST-009, Later). OI-023 and OI-024 |
-| 0.19 | 2026-11-24 | A. Malyshkin | Lived-in cities are marked with a house; the population mode has a class below 5,000 people (FR-MAP-005). The map settings are a button at the top right that opens a popup (§6.1). Satellite imagery from Sentinel-2 cloudless until Mapbox's is available (§6.3, NFR-LIC-001) |
+| 0.19 | 2026-11-24 | A. Malyshkin | Lived-in cities are marked with a house; the population mode has a class below 5,000 people (FR-MAP-005). The map settings are a button at the top right that opens a popup, with an option to show the boundaries of all visited cities (§6.1). Satellite imagery from Sentinel-2 cloudless until Mapbox's is available (§6.3, NFR-LIC-001) |
 
 ---
 
@@ -1280,7 +1280,7 @@ The web client MUST be responsive and usable on desktop and mobile screens. It i
 | Screen | Content |
 |---|---|
 | Landing page | What Flanr is, with pictures of the product, for guests and search engines; a button that opens the map. A signed-in user goes to the map instead |
-| Map | The full-screen map. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel. Top right: the map settings button, which opens a popup with the modes, the options, the style switch and the legend; it moves aside while the city panel is open |
+| Map | The full-screen map. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel. Top right: the map settings button, which opens a popup with the modes, the options (values on markers, planned cities, boundaries of all visited cities, markers for all cities), the style switch and the legend; it moves aside while the city panel is open |
 | City panel | Opens at the right side of the map when a city is selected: the city's data, community rating, the user's own data and the actions to log a visit, rate and plan. On small screens it opens from the bottom. It can expand to the city page |
 | City page | The full page of a city: everything of the city panel and a small map with the boundary. The page that search engines index |
 | Left panel | Next to the map: the Visited and Planned lists and the trip calendar, later the other statistics |

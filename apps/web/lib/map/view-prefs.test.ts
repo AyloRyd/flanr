@@ -3,12 +3,18 @@ import { defaultMapPrefs, readMapPrefs } from './view-prefs.ts';
 
 describe('remembered map preferences (FR-MAP-008)', () => {
   it('reads what the user chose', () => {
-    const stored = JSON.stringify({ mode: 'population', values: true, baseStyle: 'satellite' });
+    const stored = JSON.stringify({
+      mode: 'population',
+      values: true,
+      boundaries: true,
+      baseStyle: 'satellite',
+    });
 
     expect(readMapPrefs(stored)).toEqual({
       ...defaultMapPrefs,
       mode: 'population',
       values: true,
+      boundaries: true,
       baseStyle: 'satellite',
     });
   });

@@ -28,6 +28,12 @@ const casing = '#ffffff';
 const emissive = 1;
 
 const selected: ExpressionSpecification = ['boolean', ['feature-state', 'selected'], false];
+/** A boundary shown like the selected one: selected, or one of the user's outlined cities. */
+const shown: ExpressionSpecification = [
+  'any',
+  selected,
+  ['boolean', ['feature-state', 'outlined'], false],
+];
 
 /** All cities of Flanr from the API's vector tiles, and their boundaries for the highlight. */
 export function addCityTiles(map: MapboxMap): void {
@@ -38,14 +44,14 @@ export function addCityTiles(map: MapboxMap): void {
     maxzoom: cityTileMaxZoom,
   });
   const boundaries = { source: citySourceId, 'source-layer': cityTileLayers.boundaries };
-  // Boundaries are invisible until selected; the fill also lets a click inside a city find it.
+  // Boundaries are invisible until shown; the fill also lets a click inside a city find it.
   map.addLayer({
     id: layerIds.boundaryFill,
     type: 'fill',
     ...boundaries,
     paint: {
       'fill-color': highlight,
-      'fill-opacity': ['case', selected, 0.12, 0],
+      'fill-opacity': ['case', shown, 0.12, 0],
       'fill-emissive-strength': emissive,
     },
   });
@@ -56,7 +62,7 @@ export function addCityTiles(map: MapboxMap): void {
     paint: {
       'line-color': casing,
       'line-width': 5,
-      'line-opacity': ['case', selected, 0.9, 0],
+      'line-opacity': ['case', shown, 0.9, 0],
       'line-emissive-strength': emissive,
     },
   });
@@ -67,7 +73,7 @@ export function addCityTiles(map: MapboxMap): void {
     paint: {
       'line-color': highlight,
       'line-width': 2.5,
-      'line-opacity': ['case', selected, 1, 0],
+      'line-opacity': ['case', shown, 1, 0],
       'line-emissive-strength': emissive,
     },
   });
@@ -197,6 +203,20 @@ export function selectBoundary(map: MapboxMap, cityId: number | null, previous: 
     if (previous !== null) map.setFeatureState({ ...target, id: previous }, { selected: false });
     if (cityId !== null) map.setFeatureState({ ...target, id: cityId }, { selected: true });
   }
+}
+
+/**
+ * Shows the boundaries of these cities as the selected one's is shown, and hides those of the
+ * cities shown before that are not among them.
+ */
+export function outlineBoundaries(map: MapboxMap, cityIds: number[], previous: number[]): void {
+  if (!map.getSource(citySourceId)) return;
+  const target = { source: citySourceId, sourceLayer: cityTileLayers.boundaries };
+  const next = new Set(cityIds);
+  for (const id of previous) {
+    if (!next.has(id)) map.setFeatureState({ ...target, id }, { outlined: false });
+  }
+  for (const id of next) map.setFeatureState({ ...target, id }, { outlined: true });
 }
 
 function setSourceData(map: MapboxMap, id: string, data: GeoJSON.FeatureCollection): void {
