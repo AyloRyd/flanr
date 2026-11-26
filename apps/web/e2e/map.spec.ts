@@ -51,12 +51,13 @@ async function signInWithMap(
 
 const legendList = (page: Page) => page.getByRole('list', { name: legend.title });
 
-/** Expects the legend line with this label to count this many cities. */
+/**
+ * Expects the legend line with this label to count this many cities. The line is the label's
+ * row; the rating's scale below it has numbers of its own.
+ */
 async function expectCount(page: Page, label: string, count: number) {
-  const line = legendList(page)
-    .getByRole('listitem')
-    .filter({ has: page.getByText(label, { exact: true }) });
-  await expect(line).toHaveText(new RegExp(`${label}\\s*${count}$`));
+  const line = legendList(page).getByText(label, { exact: true }).locator('..');
+  await expect(line).toHaveText(new RegExp(`^${label}\\s*${count}$`));
 }
 
 const mapPath = (username: string, query = '') => `/users/${username}/map${query}`;
