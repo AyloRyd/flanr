@@ -37,3 +37,16 @@ export const test = base.extend<{ freshUser: ClerkTestUser }>({
 });
 
 export { expect };
+
+/**
+ * Chooses an item of Clerk's account menu. Clerk renders the menu again while it settles, so an
+ * item can leave the page under the click; the menu is then opened and the item clicked again.
+ */
+export async function chooseFromAccountMenu(page: Page, item: string): Promise<void> {
+  const menuButton = page.getByRole('button', { name: /open user menu/i });
+  const entry = page.getByRole('button', { name: item });
+  await expect(async () => {
+    if (!(await entry.isVisible())) await menuButton.click();
+    await entry.click({ timeout: 2_000 });
+  }).toPass({ timeout: 15_000 });
+}

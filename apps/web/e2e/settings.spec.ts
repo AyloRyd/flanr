@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import en from '../messages/en.json' with { type: 'json' };
 import type { ClerkTestUser } from './fresh-user';
-import { expect, test } from './test';
+import { chooseFromAccountMenu, expect, test } from './test';
 import { fetchApiAsUser } from './users';
 
 const settings = en.settings;
@@ -25,8 +25,7 @@ test('the settings change the username, display name and bio (FR-PROF-001, FR-PR
   freshUser,
 }) => {
   const oldUsername = await signInFresh(page, freshUser);
-  await page.getByRole('button', { name: /open user menu/i }).click();
-  await page.getByRole('button', { name: en.auth.settings }).click();
+  await chooseFromAccountMenu(page, en.auth.settings);
   await expect(page.getByRole('heading', { level: 1, name: settings.title })).toBeVisible();
 
   const profile = page.getByRole('region', { name: settings.profileTitle });

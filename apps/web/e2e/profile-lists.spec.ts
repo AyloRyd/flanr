@@ -3,7 +3,7 @@ import type { CurrentUser, List } from '@flanr/shared';
 import type { Page, TestInfo } from '@playwright/test';
 import en from '../messages/en.json' with { type: 'json' };
 import { e2eCities } from './database';
-import { expect, test } from './test';
+import { chooseFromAccountMenu, expect, test } from './test';
 import { callApiAsUser, fetchApiAsUser, signInTestUser, type TestUserPurpose } from './users';
 
 const profile = en.profile;
@@ -53,8 +53,7 @@ test.describe('a public profile', () => {
   test('the owner reaches it from the account menu and sees visits, ratings and plans (FR-PROF-004)', async ({
     page,
   }) => {
-    await page.getByRole('button', { name: /open user menu/i }).click();
-    await page.getByRole('button', { name: en.auth.profile }).click();
+    await chooseFromAccountMenu(page, en.auth.profile);
     await expect(page).toHaveURL(new RegExp(`/users/${username}$`));
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
