@@ -5,6 +5,7 @@ import type { Map as MapboxMap, MapOptions, StyleSpecification } from 'mapbox-gl
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
+import { Segmented } from '@/components/ui/segmented';
 import { cn } from '@/lib/utils';
 import {
   basemapConfig,
@@ -14,8 +15,10 @@ import {
   satelliteLayer,
   satelliteSource,
   satelliteSourceId,
+  withDarkerSpace,
   withoutSettlementLabels,
   type BaseStyleName,
+  type ProjectionName,
 } from '@/lib/map/base-styles';
 import type { Bounds } from '@/lib/map/layers';
 
@@ -58,6 +61,8 @@ interface BaseMapProps {
   onMap?: (map: MapboxMap | null) => void;
   /** The base style chosen outside; without it the map shows its own switch. */
   baseStyle?: BaseStyleName;
+  /** The globe, by default, or the flat map (FR-MAP-002). */
+  projection?: ProjectionName;
   /** Hides the base map's names of settlements, for a map that draws Flanr's (FR-MAP-003). */
   ownCityNames?: boolean;
   /** Scrolling the page over the map does not zoom it; for maps inside a longer page. */
@@ -78,6 +83,7 @@ export function BaseMap({
   onThemeChange,
   onMap,
   baseStyle,
+  projection = 'globe',
   ownCityNames = false,
   cooperativeGestures = false,
   className,
@@ -92,9 +98,9 @@ export function BaseMap({
   const [failed, setFailed] = useState(!mapboxToken);
 
   // The callbacks change while the map lives; the map reads the newest ones.
-  const latest = useRef({ onStyleLoad, onThemeChange, onMap, dark, style });
+  const latest = useRef({ onStyleLoad, onThemeChange, onMap, dark, style, projection });
   useEffect(() => {
-    latest.current = { onStyleLoad, onThemeChange, onMap, dark, style };
+    latest.current = { onStyleLoad, onThemeChange, onMap, dark, style, projection };
   });
   /** The style and theme the map shows, so that it changes only when one of them does. */
   const shown = useRef<string | null>(null);
@@ -115,8 +121,9 @@ export function BaseMap({
     void Promise.all([import('mapbox-gl'), loadStandardStyle()]).then(([module, standard]) => {
       if (removed) return;
       const mapboxgl = module.default;
+      const darker = standard && withDarkerSpace(standard);
       const basemap =
-        standard && created.current.ownCityNames ? withoutSettlementLabels(standard) : standard;
+        darker && created.current.ownCityNames ? withoutSettlementLabels(darker) : darker;
       const { initialView: view, cooperativeGestures: cooperative, attribution } = created.current;
       const viewOptions: Partial<MapOptions> =
         'bounds' in view
@@ -129,7 +136,7 @@ export function BaseMap({
           accessToken: mapboxToken,
           // The newest style and theme: the stored ones may have come while the map loaded.
           style: mapStyle(latest.current.style, latest.current.dark, basemap),
-          projection: 'globe',
+          projection: latest.current.projection,
           customAttribution: attribution,
           cooperativeGestures: cooperative,
           ...viewOptions,
@@ -156,6 +163,11 @@ export function BaseMap({
       mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && map.getProjection().name !== projection) map.setProjection(projection);
+  }, [projection]);
 
   // Another base style or theme changes the map in place; a new style would also remove
   // Flanr's layers, and Mapbox loses the labels when it replaces the style this way.
@@ -223,27 +235,13 @@ export function BaseStyleSwitch({
 }) {
   const t = useTranslations('map');
   return (
-    <div
-      role="group"
-      aria-label={t('style.label')}
-      className={cn('grid grid-cols-2 rounded-lg bg-muted p-0.5 text-xs font-medium', className)}
-    >
-      {baseStyleNames.map((style) => (
-        <button
-          key={style}
-          type="button"
-          aria-pressed={value === style}
-          onClick={() => onChange(style)}
-          className={cn(
-            'rounded-md px-2.5 py-1.5',
-            value === style
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {t(`style.${style}`)}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      label={t('style.label')}
+      options={baseStyleNames}
+      value={value}
+      onChange={onChange}
+      optionLabel={(style) => t(`style.${style}`)}
+      className={className}
+    />
   );
 }

@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Segmented } from '@/components/ui/segmented';
+import { projectionNames } from '@/lib/map/base-styles';
 import { legendFor, mapModes, type MapMode } from '@/lib/map/markers';
 import type { MapPrefs } from '@/lib/map/view-prefs';
 import { cn } from '@/lib/utils';
@@ -26,7 +28,7 @@ interface MapControlsProps {
 /**
  * How the map shows things, behind a small button at the corner of the map: the mode with its
  * legend (FR-MAP-005), the planned cities (FR-MAP-006), values inside markers, markers for all
- * cities (FR-MAP-003) and the base style (FR-MAP-001).
+ * cities (FR-MAP-003), the base style (FR-MAP-001) and the projection (FR-MAP-002).
  */
 export function MapControls({ data, prefs, onChange, className }: MapControlsProps) {
   const t = useTranslations('map');
@@ -51,7 +53,11 @@ export function MapControls({ data, prefs, onChange, className }: MapControlsPro
           size="icon"
           aria-label={tw('controls')}
           title={tw('controls')}
-          className={cn('size-10 rounded-xl bg-background shadow-md', className)}
+          // Opaque in both themes: the outline button is see-through in the dark one.
+          className={cn(
+            'size-10 rounded-xl bg-background shadow-md dark:bg-background dark:hover:bg-muted dark:aria-expanded:bg-muted',
+            className,
+          )}
         >
           <MapIcon className="size-5" />
         </Button>
@@ -99,10 +105,18 @@ export function MapControls({ data, prefs, onChange, className }: MapControlsPro
             value={prefs.baseStyle}
             onChange={(baseStyle) => onChange({ baseStyle })}
           />
+          <p className="mt-1 text-xs font-medium text-muted-foreground">{t('projection.label')}</p>
+          <Segmented
+            label={t('projection.label')}
+            options={projectionNames}
+            value={prefs.projection}
+            onChange={(projection) => onChange({ projection })}
+            optionLabel={(projection) => t(`projection.${projection}`)}
+          />
         </div>
         {data && (
           <div className="p-3">
-            <MapLegend entries={legend} plannedCount={prefs.planned ? data.planned.length : null} />
+            <MapLegend entries={legend} />
           </div>
         )}
       </PopoverContent>

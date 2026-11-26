@@ -4,10 +4,10 @@
 |---|---|
 | Document | Software Requirements Specification (SRS) |
 | Product | Flanr |
-| Version | 0.19 |
+| Version | 0.20 |
 | Status | Draft |
 | Author | Andrii Malyshkin |
-| Date | 2026-11-24 |
+| Date | 2026-11-26 |
 | Source documents | CONCEPT.md |
 
 ## Revision history
@@ -33,6 +33,7 @@
 | 0.17 | 2026-11-18 | A. Malyshkin | Map-first interface: a landing page leads to the map as the main screen, a city opens in a side panel that can expand to the full city page, and a left panel holds the user's lists and statistics (§6.1, FR-MAP-008). Cities are selected by their names drawn by Flanr; markers for all cities are optional (FR-MAP-003). Selecting a city opens the city panel (FR-MAP-004). In the population mode larger markers cover smaller ones; the value of the mode can be shown inside the markers (FR-MAP-005) |
 | 0.18 | 2026-11-21 | A. Malyshkin | Adding cities to a custom list by rules: country, regions, settlement types, population range and sorting, with a preview (FR-LIST-008, R2). Suggested rules from the cities of a list or from the Visited and Planned lists (FR-LIST-009, Later). OI-023 and OI-024 |
 | 0.19 | 2026-11-24 | A. Malyshkin | Lived-in cities are marked with a house; the population mode has a class below 5,000 people (FR-MAP-005). The map settings are a button at the top right that opens a popup, with an option to show the boundaries of all visited cities (§6.1). Satellite imagery from Sentinel-2 cloudless until Mapbox's is available (§6.3, NFR-LIC-001) |
+| 0.20 | 2026-11-26 | A. Malyshkin | The user can switch the map between the globe and a flat view (FR-MAP-002, §6.1). The criteria of the community rating are folded in the city panel (§6.1) |
 
 ---
 
@@ -799,10 +800,11 @@ Accepting a suggestion MUST open the form of FR-LIST-008 filled in with the sugg
 #### FR-MAP-002 — Globe and flat view
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Technology
 
-**Description.** The map MUST support a globe view at low zoom levels and a flat view at high zoom levels.
+**Description.** The map MUST support a globe view at low zoom levels and a flat view at high zoom levels. The globe is the default; the user MAY switch the map to a flat view at all zoom levels in the map settings.
 
 **Acceptance criteria.**
 1. Given the map zoomed out to the whole world, then the Earth is shown as a globe.
+2. Given the flat view chosen in the map settings, when the user zooms out to the whole world, then the world is shown as a flat map.
 
 #### FR-MAP-003 — City layer
 **Priority:** Must · **Release:** MVP · **Status:** Draft · **Source:** Concept §Technology
@@ -1280,8 +1282,8 @@ The web client MUST be responsive and usable on desktop and mobile screens. It i
 | Screen | Content |
 |---|---|
 | Landing page | What Flanr is, with pictures of the product, for guests and search engines; a button that opens the map. A signed-in user goes to the map instead |
-| Map | The full-screen map. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel. Top right: the map settings button, which opens a popup with the modes, the options (values on markers, planned cities, boundaries of all visited cities, markers for all cities), the style switch and the legend; it moves aside while the city panel is open |
-| City panel | Opens at the right side of the map when a city is selected: the city's data, community rating, the user's own data and the actions to log a visit, rate and plan. On small screens it opens from the bottom. It can expand to the city page |
+| Map | The full-screen map. A guest sees the world map, a signed-in user their own cities. Top left: the account menu (profile, settings) and the button for the left panel. Top right: the map settings button, which opens a popup with the modes, the options (values on markers, planned cities, boundaries of all visited cities, markers for all cities), the style switch, the choice of globe or flat map and the legend; it moves aside while the city panel is open |
+| City panel | Opens at the right side of the map when a city is selected: the city's data, community rating, the user's own data and the actions to log a visit, rate and plan. The criteria of the community rating are folded and open on a click. On small screens it opens from the bottom. It can expand to the city page |
 | City page | The full page of a city: everything of the city panel and a small map with the boundary. The page that search engines index |
 | Left panel | Next to the map: the Visited and Planned lists and the trip calendar, later the other statistics |
 | Profile | Profile information, lists, ratings, map, statistics |

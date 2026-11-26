@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { defaultMapPrefs, readMapPrefs } from './view-prefs.ts';
 
-describe('remembered map preferences (FR-MAP-008)', () => {
+describe('remembered map preferences (FR-MAP-008, FR-MAP-002)', () => {
   it('reads what the user chose', () => {
     const stored = JSON.stringify({
       mode: 'population',
       values: true,
       boundaries: true,
       baseStyle: 'satellite',
+      projection: 'mercator',
     });
 
     expect(readMapPrefs(stored)).toEqual({
@@ -16,12 +17,15 @@ describe('remembered map preferences (FR-MAP-008)', () => {
       values: true,
       boundaries: true,
       baseStyle: 'satellite',
+      projection: 'mercator',
     });
   });
 
   it('keeps the defaults for nothing stored, a broken value or unknown values', () => {
     expect(readMapPrefs(null)).toEqual(defaultMapPrefs);
     expect(readMapPrefs('{not json')).toEqual(defaultMapPrefs);
-    expect(readMapPrefs(JSON.stringify({ mode: 'heat', planned: 'yes' }))).toEqual(defaultMapPrefs);
+    expect(
+      readMapPrefs(JSON.stringify({ mode: 'heat', planned: 'yes', projection: 'cone' })),
+    ).toEqual(defaultMapPrefs);
   });
 });

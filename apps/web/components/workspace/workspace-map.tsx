@@ -21,7 +21,14 @@ import {
   showCityMarkers,
 } from '@/components/map/flanr-layers';
 import { useWorkspace } from '@/components/workspace/workspace-context';
-import { boundaryZoom, boundsOf, plannedLayer, positionOf, visitedLayer } from '@/lib/map/layers';
+import {
+  boundaryZoom,
+  boundsOf,
+  plannedLayer,
+  positionOf,
+  visitedLayer,
+  type Bounds,
+} from '@/lib/map/layers';
 import type { MapPrefs } from '@/lib/map/view-prefs';
 
 interface WorkspaceMapProps {
@@ -49,6 +56,18 @@ function flyToCity(map: MapboxMap, position: [number, number], type: SettlementT
     // Half the city panel to the left; a padding here would stay on the map for good.
     offset: window.innerWidth >= 640 ? [-214, 0] : [0, 0],
   });
+}
+
+/**
+ * Fits a city's boundary beside the city panel. The camera is worked out first, because
+ * fitBounds would keep the padding on the map, and the globe would stay off centre after the
+ * panel closes.
+ */
+function fitCity(map: MapboxMap, bounds: Bounds) {
+  const camera = map.cameraForBounds(bounds, { padding: panelPadding(), maxZoom: 12 });
+  if (camera?.center && camera.zoom !== undefined) {
+    map.flyTo({ center: camera.center, zoom: camera.zoom });
+  }
 }
 
 /**
@@ -159,7 +178,7 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
     const done = moved.current?.cityId === cityId ? moved.current : null;
     if (bounds) {
       if (done?.fitted) return;
-      map.fitBounds(bounds, { padding: panelPadding(), maxZoom: 12 });
+      fitCity(map, bounds);
       moved.current = { cityId, fitted: true };
     } else if (!done && position && settlementType) {
       flyToCity(map, position, settlementType);
@@ -226,6 +245,7 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
       onThemeChange={setLabelTheme}
       onMap={setMap}
       baseStyle={prefs.baseStyle}
+      projection={prefs.projection}
       ownCityNames
       className={className}
     />
