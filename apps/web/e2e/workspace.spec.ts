@@ -8,7 +8,7 @@ import { expect, test } from './test';
 import { callApiAsUser, fetchApiAsUser } from './users';
 
 // The map workspace (FR-MAP-008, SRS §6.1). As in map.spec.ts, the tests run without a Mapbox
-// token: they check the panels, lists, legends and calendar around the map, not the map itself.
+// token: they check the panels, lists and legends around the map, not the map itself.
 const workspace = en.workspace;
 const legend = en.map.legend;
 const { cologne } = e2eCities;
@@ -89,7 +89,7 @@ test('the city panel is not indexed and points to the city page (NFR-SEO-003)', 
   );
 });
 
-test('a signed-in user sees their cities, lists and trip calendar next to the map (FR-MAP-008, FR-STAT-003)', async ({
+test('a signed-in user sees their cities and lists next to the map (FR-MAP-008)', async ({
   page,
   freshUser,
 }) => {
@@ -136,17 +136,4 @@ test('a signed-in user sees their cities, lists and trip calendar next to the ma
   await expect(leftPanel(page).getByRole('list', { name: workspace.lists.planned })).toContainText(
     'Zons',
   );
-
-  // The trip calendar: today has the two visits to Leverkusen (FR-STAT-003).
-  await leftPanel(page).getByRole('tab', { name: workspace.tabs.calendar }).click();
-  const calendar = page.getByRole('region', { name: workspace.calendar.title });
-  const today = calendar.getByRole('button', { name: /2 visits, Leverkusen, Leverkusen/ });
-  await expect(today).toBeVisible();
-  await today.click();
-  await calendar
-    .getByRole('list', { name: workspace.calendar.citiesOfDay })
-    .getByRole('button')
-    .first()
-    .click();
-  await expect(page).toHaveURL(new RegExp(`/map/cities/${visited}$`));
 });

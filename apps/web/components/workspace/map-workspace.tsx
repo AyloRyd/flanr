@@ -1,6 +1,6 @@
 'use client';
 
-import type { MapCity, TripCalendar, UserMap } from '@flanr/shared';
+import type { MapCity, UserMap } from '@flanr/shared';
 import { PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -67,7 +67,6 @@ function useMapPrefs(): [MapPrefs, (change: Partial<MapPrefs>) => void] {
 interface MapWorkspaceProps {
   /** The signed-in user's cities; null for a guest. */
   data: UserMap | null;
-  calendar: TripCalendar | null;
   /** The city panel, when the URL names a city. */
   children: ReactNode;
 }
@@ -77,7 +76,7 @@ interface MapWorkspaceProps {
  * map, the account menu and the left panel at the top left, the map controls, and the city panel
  * on the right that the pages under /map render.
  */
-export function MapWorkspace({ data, calendar, children }: MapWorkspaceProps) {
+export function MapWorkspace({ data, children }: MapWorkspaceProps) {
   const t = useTranslations('workspace');
   const tApp = useTranslations('app');
   const router = useRouter();
@@ -139,7 +138,6 @@ export function MapWorkspace({ data, calendar, children }: MapWorkspaceProps) {
         {leftOpen && (
           <LeftPanel
             data={data}
-            calendar={calendar}
             onSelectCity={openCity}
             // On a phone the open list lies above the city panel, which opens from the bottom.
             className="absolute top-17 bottom-0 left-0 z-40 w-full rounded-none sm:bottom-3 sm:left-3 sm:z-10 sm:w-[24rem] sm:rounded-xl"

@@ -36,6 +36,7 @@ export async function getCityTile(sql: Sql, { z, x, y }: TileParams): Promise<Ui
     WITH bounds AS (SELECT ST_TileEnvelope(${z}, ${x}, ${y}) AS geom),
     points AS (
       SELECT c.id, c.name_local AS name, c.name_en, c.settlement_type::text AS type, c.population,
+             c.capital_status::text AS capital,
              ST_AsMVTGeom(ST_Transform(c.centre, 3857), b.geom, ${tileExtent}, ${tileBuffer}) AS geom
       FROM cities c, bounds b
       WHERE c.in_source

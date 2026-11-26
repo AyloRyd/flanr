@@ -1,6 +1,6 @@
 import { cityTileLayers, cityTileMaxZoom } from '@flanr/shared';
 import type { ExpressionSpecification, GeoJSONSource, Map as MapboxMap } from 'mapbox-gl';
-import { addMarkerImages } from '@/components/map/marker-images';
+import { addCityDot, addMarkerImages, cityDotImage } from '@/components/map/marker-images';
 import type { MarkerCollection } from '@/lib/map/layers';
 
 /**
@@ -237,6 +237,62 @@ export const clickableLayers = [
 /** The font of Mapbox's Standard style, with one that has all scripts. */
 const labelFont = ['DIN Pro Medium', 'Arial Unicode MS Regular'];
 
+const population: ExpressionSpecification = ['coalesce', ['get', 'population'], 0];
+const capital: ExpressionSpecification = ['get', 'capital'];
+
+/**
+ * Which cities have a name at a zoom: zoomed out only capitals of countries and large cities,
+ * closer in also capitals of regions and ever smaller places, and every place from zoom 10.
+ * Fewer names are easier to read and quicker to draw.
+ */
+const labelFilter = (() => {
+  const atLeast = (people: number): ExpressionSpecification => [
+    'any',
+    ['==', capital, 'national'],
+    ['==', capital, 'regional'],
+    ['>=', population, people],
+  ];
+  return [
+    'step',
+    ['zoom'],
+    ['any', ['==', capital, 'national'], ['>=', population, 500_000]],
+    4,
+    atLeast(200_000),
+    5,
+    atLeast(100_000),
+    6,
+    atLeast(50_000),
+    7,
+    atLeast(20_000),
+    8,
+    atLeast(5_000),
+    9,
+    atLeast(1_000),
+    10,
+    true,
+  ] as ExpressionSpecification;
+})();
+
+/**
+ * The size of a city's name: larger for more people, and for capitals of countries and regions
+ * at least the size of a large city.
+ */
+const labelSize: ExpressionSpecification = [
+  'max',
+  ['step', population, 10.5, 10_000, 11.5, 100_000, 12.5, 500_000, 14, 1_000_000, 15],
+  ['match', capital, 'national', 16, 'regional', 13, 0],
+];
+
+/**
+ * Which names are placed first where they would collide: capitals of countries, then of
+ * regions, then by the number of people. Mapbox places lower keys first.
+ */
+const labelRank: ExpressionSpecification = [
+  '-',
+  0,
+  ['+', population, ['match', capital, 'national', 2e9, 'regional', 1e9, 0]],
+];
+
 /**
  * Flanr's names of the cities from the tiles, which the user clicks to select a city
  * (FR-MAP-003). They lie below the user's markers and make way for them: a name that would
@@ -248,8 +304,7 @@ export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): 
     setMarkedCities(map, marked);
     return;
   }
-  const byType = (city: number, town: number, village: number, hamlet: number) =>
-    ['match', ['get', 'type'], 'city', city, 'town', town, 'village', village, hamlet] as const;
+  addCityDot(map);
   const below = [layerIds.planned, layerIds.visited].find((id) => map.getLayer(id));
   map.addLayer(
     {
@@ -258,17 +313,29 @@ export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): 
       source: citySourceId,
       'source-layer': cityTileLayers.points,
       minzoom: 2,
+      filter: labelFilter,
       layout: {
         'text-field': ['get', 'name'],
         'text-font': labelFont,
-        'text-size': [...byType(14, 12.5, 11.5, 10.5)],
+        'text-size': labelSize,
         'text-variable-anchor': ['top', 'bottom', 'right', 'left'],
         'text-radial-offset': labelOffset(marked),
-        'text-padding': 3,
+        // A dot where the city is, as on common map services; under a marker it is not needed.
+        // A name and its dot are shown together or not at all.
+        'icon-image': labelIcon(marked),
+        'icon-size': ['match', capital, 'national', 1.3, 1],
+        // Room around each name, so that about half as many fit as names alone would need.
+        'text-padding': 12,
         'text-max-width': 8,
-        'symbol-sort-key': ['-', 0, ['coalesce', ['get', 'population'], 0]],
+        'symbol-sort-key': labelRank,
       },
-      paint: { ...labelColors(dark), 'text-halo-width': 1.5, 'text-emissive-strength': emissive },
+      paint: {
+        ...labelColors(dark),
+        'text-halo-width': 1.5,
+        'text-emissive-strength': emissive,
+        'icon-halo-width': 1.5,
+        'icon-emissive-strength': emissive,
+      },
     },
     below,
   );
@@ -283,6 +350,8 @@ function labelColors(dark: boolean) {
       dark ? '#e5e7eb' : '#1f2937',
     ] as ExpressionSpecification,
     'text-halo-color': dark ? '#111827' : '#ffffff',
+    'icon-color': dark ? '#d1d5db' : '#4b5563',
+    'icon-halo-color': dark ? '#111827' : '#ffffff',
   };
 }
 
@@ -296,13 +365,19 @@ export function setLabelTheme(map: MapboxMap, dark: boolean): void {
 
 /** The distance of a name from its city, in ems: clear of the largest marker where it has one. */
 function labelOffset(marked: number[]): ExpressionSpecification {
-  return ['case', ['in', ['id'], ['literal', marked]], 1.6, 0.4];
+  return ['case', ['in', ['id'], ['literal', marked]], 1.6, 0.6];
+}
+
+/** The dot beside the name, left out for cities with a marker. */
+function labelIcon(marked: number[]): ExpressionSpecification {
+  return ['case', ['in', ['id'], ['literal', marked]], '', cityDotImage];
 }
 
 /** Tells the names which cities have a marker now. */
 export function setMarkedCities(map: MapboxMap, marked: number[]): void {
   if (map.getLayer(layerIds.cityLabels)) {
     map.setLayoutProperty(layerIds.cityLabels, 'text-radial-offset', labelOffset(marked));
+    map.setLayoutProperty(layerIds.cityLabels, 'icon-image', labelIcon(marked));
   }
 }
 

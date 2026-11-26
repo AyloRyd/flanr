@@ -48,13 +48,13 @@ export function CityList<City extends MapCity>({
         placeholder={t('filter')}
         aria-label={t('filterOf', { list: label })}
       />
-      <ul aria-label={label} className="-mx-1 flex flex-col overflow-y-auto">
+      <ul aria-label={label} className="flex flex-col overflow-y-auto">
         {shown.map((city) => (
           <li key={city.cityId}>
             <button
               type="button"
               onClick={() => onSelect(city)}
-              className="flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm hover:bg-muted"
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm hover:bg-muted"
             >
               <span className="min-w-0 flex-1 truncate">
                 {city.name}

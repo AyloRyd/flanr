@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
-import type { TripCalendar, UserMap } from '@flanr/shared';
+import type { UserMap } from '@flanr/shared';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -11,19 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('title') };
 }
 
-/** The signed-in user's cities and trip calendar; null for a guest. */
-async function loadWorkspaceData(): Promise<{ map: UserMap; calendar: TripCalendar } | null> {
+/** The signed-in user's cities; null for a guest. */
+async function loadWorkspaceData(): Promise<UserMap | null> {
   const { userId } = await auth();
   if (!userId) return null;
-  const api = serverApi();
-  const [map, calendar] = await Promise.all([
-    api.GET('/v1/map-cities'),
-    api.GET('/v1/trip-calendar'),
-  ]);
-  if (!map.data || !calendar.data) {
-    throw new Error(`The workspace could not be loaded: ${map.response.status}`);
-  }
-  return { map: map.data, calendar: calendar.data };
+  const { data, response } = await serverApi().GET('/v1/map-cities');
+  if (!data) throw new Error(`The workspace could not be loaded: ${response.status}`);
+  return data;
 }
 
 /**
@@ -32,9 +26,5 @@ async function loadWorkspaceData(): Promise<{ map: UserMap; calendar: TripCalend
  */
 export default async function MapLayout({ children }: { children: ReactNode }) {
   const data = await loadWorkspaceData();
-  return (
-    <MapWorkspace data={data?.map ?? null} calendar={data?.calendar ?? null}>
-      {children}
-    </MapWorkspace>
-  );
+  return <MapWorkspace data={data}>{children}</MapWorkspace>;
 }

@@ -98,3 +98,27 @@ export function addMarkerImages(
     map.addImage(marker.image, drawMarker(marker), { pixelRatio });
   }
 }
+
+/** The ID of the dot that a city's name stands beside (FR-MAP-003). */
+export const cityDotImage = 'flanr-city-dot';
+
+/**
+ * Adds the dot beside the city names: a signed distance field, so that the map gives it the
+ * theme's colour and an outline. The alpha falls from 0.75 at the dot's edge, as Mapbox
+ * expects of such images.
+ */
+export function addCityDot(map: MapboxMap) {
+  if (map.hasImage(cityDotImage)) return;
+  const size = 24;
+  const radius = 3.5 * pixelRatio;
+  const spread = 4 * pixelRatio;
+  const data = new Uint8ClampedArray(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const distance = Math.hypot(x + 0.5 - size / 2, y + 0.5 - size / 2) - radius;
+      const alpha = Math.min(1, Math.max(0, 0.75 - (distance / spread) * 0.75));
+      data.set([255, 255, 255, Math.round(alpha * 255)], (y * size + x) * 4);
+    }
+  }
+  map.addImage(cityDotImage, { width: size, height: size, data }, { pixelRatio, sdf: true });
+}

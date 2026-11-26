@@ -1,38 +1,28 @@
 'use client';
 
-import type { MapCity, TripCalendar, UserMap, VisitedMapCity } from '@flanr/shared';
+import type { MapCity, UserMap, VisitedMapCity } from '@flanr/shared';
 import { SignInButton } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { RatingValue } from '@/components/city/rating-value';
 import { Button } from '@/components/ui/button';
 import { CityList } from '@/components/workspace/city-list';
-import { TripCalendarView } from '@/components/workspace/trip-calendar';
 import { cn } from '@/lib/utils';
 
-const tabs = ['visited', 'planned', 'calendar'] as const;
+const tabs = ['visited', 'planned'] as const;
 type Tab = (typeof tabs)[number];
 
 interface LeftPanelProps {
-  /** The signed-in user's cities and calendar; null for a guest. */
+  /** The signed-in user's cities; null for a guest. */
   data: UserMap | null;
-  calendar: TripCalendar | null;
   onSelectCity: (city: MapCity) => void;
   className?: string;
 }
 
-/** The panel at the left of the map: the user's lists and trip calendar (FR-MAP-008). */
-export function LeftPanel({ data, calendar, onSelectCity, className }: LeftPanelProps) {
+/** The panel at the left of the map: the user's Visited and Planned lists (FR-MAP-008). */
+export function LeftPanel({ data, onSelectCity, className }: LeftPanelProps) {
   const t = useTranslations('workspace');
   const [tab, setTab] = useState<Tab>('visited');
-  const cities = useMemo(
-    () => new Map([...(data?.visited ?? []), ...(data?.planned ?? [])].map((c) => [c.cityId, c])),
-    [data],
-  );
-  const names = useMemo(
-    () => new Map([...cities.values()].map((city) => [city.cityId, city.name])),
-    [cities],
-  );
 
   return (
     <aside
@@ -60,19 +50,20 @@ export function LeftPanel({ data, calendar, onSelectCity, className }: LeftPanel
                 aria-selected={tab === key}
                 onClick={() => setTab(key)}
                 className={cn(
-                  '-mb-px border-b-2 px-2 py-1.5 text-sm font-medium',
+                  '-mb-px border-b-2 px-2.5 py-1.5 text-sm font-medium',
                   tab === key
                     ? 'border-primary text-foreground'
                     : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >
-                {key === 'calendar'
-                  ? t('tabs.calendar')
-                  : t(`tabs.${key}`, { count: data[key].length })}
+                {t(`tabs.${key}`, { count: data[key].length })}
               </button>
             ))}
           </div>
-          <div role="tabpanel" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <div
+            role="tabpanel"
+            className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
+          >
             {tab === 'visited' && (
               <CityList
                 label={t('lists.visited')}
@@ -88,16 +79,6 @@ export function LeftPanel({ data, calendar, onSelectCity, className }: LeftPanel
                 cities={data.planned}
                 empty={t('lists.noPlanned')}
                 onSelect={onSelectCity}
-              />
-            )}
-            {tab === 'calendar' && calendar && (
-              <TripCalendarView
-                calendar={calendar}
-                names={names}
-                onSelectCity={(cityId) => {
-                  const city = cities.get(cityId);
-                  if (city) onSelectCity(city);
-                }}
               />
             )}
           </div>

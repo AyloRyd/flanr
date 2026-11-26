@@ -359,9 +359,9 @@
   },
   "workspace": {
     "title": "Map",
-    "toggleLeftPanel": "Your lists and calendar",
-    "leftPanel": "Your lists and calendar",
-    "guest": "Sign in to see the cities you have been to, your plans and your trip calendar.",
+    "toggleLeftPanel": "Your lists",
+    "leftPanel": "Your lists",
+    "guest": "Sign in to see the cities you have been to and your plans.",
     "signIn": "Sign in",
     "controls": "Map settings",
     "modes": {
@@ -377,8 +377,7 @@
     "filterOf": "Filter {list}",
     "tabs": {
       "visited": "Visited ({count})",
-      "planned": "Planned ({count})",
-      "calendar": "Calendar"
+      "planned": "Planned ({count})"
     },
     "lists": {
       "visited": "Visited cities",

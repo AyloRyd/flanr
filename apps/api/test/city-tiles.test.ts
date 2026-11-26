@@ -99,6 +99,7 @@ describe('getCityTile (FR-MAP-003)', () => {
       name_en: 'Stadt',
       type: 'city',
       population: 1000,
+      capital: 'none',
     });
   });
 
