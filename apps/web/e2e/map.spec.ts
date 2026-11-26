@@ -90,9 +90,9 @@ test('the owner’s map shows the cities in three modes with legends (FR-MAP-005
   await expectCount(page, legend.population1m, 1);
 
   // Planned cities are a layer of their own that the user turns on.
-  await expect(legendList(page).getByText(legend.planned)).toBeHidden();
-  await page.getByRole('checkbox', { name: map.showPlanned }).check();
-  await expectCount(page, legend.planned, 1);
+  const showPlanned = page.getByRole('checkbox', { name: map.showPlanned });
+  await expect(showPlanned).not.toBeChecked();
+  await showPlanned.check();
 
   // The view is in the URL and survives a reload.
   await expect(page).toHaveURL(/\?mode=population&planned=1$/);

@@ -200,7 +200,7 @@ export function UserMapView({ data, ownerName, initialView }: UserMapViewProps) 
           />
           {t('showPlanned')}
         </Label>
-        <MapLegend entries={legend} plannedCount={view.planned ? data.planned.length : null} />
+        <MapLegend entries={legend} />
       </div>
     </div>
   );

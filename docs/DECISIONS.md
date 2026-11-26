@@ -2,6 +2,12 @@
 
 Decisions made while preparing the project, with the reasons behind them. The concept and the SRS describe what Flanr is; this file explains why some choices were made. Newest first.
 
+## 2026-11-26
+
+- **Globe or flat map** as a map setting, remembered in the browser like the others (FR-MAP-002). The globe stays the default.
+- **A darker space around the globe.** Only the Standard style's space colour at low zoom is replaced; the sky closer in stays Mapbox's.
+- **The map moves to a city without a lasting padding.** Mapbox's `fitBounds` keeps its padding on the map, so after the city panel closed the globe stayed off centre. The map now works out the camera for the city's bounds with the padding and flies there without it.
+
 ## 2026-11-24
 
 - **Back to Mapbox's Standard style, without its settlement labels.** The owner preferred the Standard look to the classic styles of 0.17. Its configuration can hide place labels only all together, so the map loads the Standard style once, hides its three settlement label layers and imports it with these changes as the basemap. Countries, regions and seas keep Mapbox's labels; settlements have only Flanr's names. Only the workspace map hides them; the profile and city page maps keep Mapbox's names, since they draw none of their own.

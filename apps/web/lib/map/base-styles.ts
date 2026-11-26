@@ -4,6 +4,10 @@ import type { LayerSpecification, SourceSpecification, StyleSpecification } from
 export const baseStyleNames = ['standard', 'satellite'] as const;
 export type BaseStyleName = (typeof baseStyleNames)[number];
 
+/** The globe, or the flat map in Web Mercator (FR-MAP-002). */
+export const projectionNames = ['globe', 'mercator'] as const;
+export type ProjectionName = (typeof projectionNames)[number];
+
 export const standardStyleUrl = 'mapbox://styles/mapbox/standard';
 
 /** The ID of Mapbox's Standard style inside Flanr's style, for its configuration. */
@@ -30,6 +34,25 @@ export function withoutSettlementLabels(standard: StyleSpecification): StyleSpec
         : layer,
     ),
   };
+}
+
+/** The space around the globe, darker than Mapbox's blue so that the stars stand out. */
+const spaceColor = 'hsl(222, 45%, 3%)';
+
+/**
+ * The Standard style with a darker space around the globe. Its space colour changes with the
+ * zoom; only the colour of the globe's zoom range is replaced, closer in the sky stays as it is.
+ */
+export function withDarkerSpace(standard: StyleSpecification): StyleSpecification {
+  const space: unknown = standard.fog?.['space-color'];
+  // ["interpolate", easing, ["zoom"], zoom, colour, ...]: the colour of the first stop.
+  if (!Array.isArray(space) || space[0] !== 'interpolate' || space.length < 5) return standard;
+  const darker = [...space];
+  darker[4] = spaceColor;
+  return {
+    ...standard,
+    fog: { ...standard.fog, 'space-color': darker as typeof space },
+  } as StyleSpecification;
 }
 
 /**

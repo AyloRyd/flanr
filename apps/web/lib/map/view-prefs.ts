@@ -1,4 +1,9 @@
-import { baseStyleNames, type BaseStyleName } from './base-styles';
+import {
+  baseStyleNames,
+  projectionNames,
+  type BaseStyleName,
+  type ProjectionName,
+} from './base-styles';
 import { mapModes, type MapMode } from './markers';
 
 /** How the user set up the map workspace; remembered in the browser (FR-MAP-008). */
@@ -13,6 +18,8 @@ export interface MapPrefs {
   /** The boundaries of all visited cities, shown as the selected one's (FR-MAP-004). */
   boundaries: boolean;
   baseStyle: BaseStyleName;
+  /** The globe or the flat map (FR-MAP-002). */
+  projection: ProjectionName;
 }
 
 export const defaultMapPrefs: MapPrefs = {
@@ -22,6 +29,7 @@ export const defaultMapPrefs: MapPrefs = {
   cityMarkers: false,
   boundaries: false,
   baseStyle: 'standard',
+  projection: 'globe',
 };
 
 /** Reads stored preferences; anything missing or not understood keeps its default. */
@@ -42,5 +50,7 @@ export function readMapPrefs(stored: string | null): MapPrefs {
     cityMarkers: flag('cityMarkers'),
     boundaries: flag('boundaries'),
     baseStyle: baseStyleNames.find((style) => style === raw.baseStyle) ?? defaultMapPrefs.baseStyle,
+    projection:
+      projectionNames.find((name) => name === raw.projection) ?? defaultMapPrefs.projection,
   };
 }

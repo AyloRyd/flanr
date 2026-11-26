@@ -313,6 +313,11 @@
       "standard": "Standard",
       "satellite": "Satellite"
     },
+    "projection": {
+      "label": "Projection",
+      "globe": "Globe",
+      "mercator": "Flat"
+    },
     "mode": {
       "label": "Show cities by",
       "visits": "Number of visits",
@@ -334,8 +339,7 @@
       "population10k": "10,000 to 99,999 people",
       "population5k": "5,000 to 9,999 people",
       "population0": "Fewer than 5,000 people",
-      "populationUnknown": "Population unknown",
-      "planned": "Planned"
+      "populationUnknown": "Population unknown"
     },
     "preview": {
       "label": "Selected city",

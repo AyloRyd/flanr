@@ -109,3 +109,23 @@
     cursor: pointer;
   }
 }
+
+/*
+ * The map's attribution in black in both themes, on its light background (NFR-LIC-001). Its
+ * links only change the cursor on hover.
+ */
+.mapboxgl-map .mapboxgl-ctrl.mapboxgl-ctrl-attrib,
+.mapboxgl-map .mapboxgl-ctrl.mapboxgl-ctrl-attrib a,
+.mapboxgl-map .mapboxgl-ctrl.mapboxgl-ctrl-attrib a:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+/* Lighter than Mapbox's, so that the black text reads on the dark map too. */
+.mapboxgl-map .mapboxgl-ctrl.mapboxgl-ctrl-attrib {
+  background-color: rgb(255 255 255 / 0.8);
+}
+
+.mapboxgl-map .mapboxgl-ctrl.mapboxgl-ctrl-attrib a {
+  cursor: pointer;
+}

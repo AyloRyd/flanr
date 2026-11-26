@@ -53,7 +53,7 @@ export function CityPanel({ city, rating, own }: CityPanelProps) {
       </div>
       <div className="flex flex-col gap-5 px-5 pb-5">
         <CityHeader city={city} own={own} compact />
-        <CommunityRatingCard rating={rating} />
+        <CommunityRatingCard rating={rating} collapsibleCriteria />
         {own && (
           <OwnCityCard
             cityName={city.name}
