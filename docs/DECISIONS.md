@@ -8,7 +8,8 @@ Decisions made while preparing the project, with the reasons behind them. The co
 - **A darker space around the globe.** Only the Standard style's space colour at low zoom is replaced; the sky closer in stays Mapbox's.
 - **Fewer city names, sized by importance (FR-MAP-003).** The owner found the map too dense and slow to draw. A name now needs room around it, and a filter by zoom keeps only capitals of countries and cities from 500,000 people zoomed out, then capitals of regions and ever smaller places, all from zoom 10. Thinning by room rather than by settlement type treats countries alike, whatever OpenStreetMap calls a city there. The tiles carry the capital status for this. Each name has a dot, so a name and its dot are shown together or not at all.
 - **The trip calendar left the left panel**, as the owner asked. Its place is open (OI-025); the component and the API stay.
-- **The map moves to a city without a lasting padding.** Mapbox's `fitBounds` keeps its padding on the map, so after the city panel closed the globe stayed off centre. The map now works out the camera for the city's bounds with the padding and flies there without it.
+- **The map keeps room for the city panel only while it is open.** The map moves to a city with the panel's padding, so that the city fits beside the panel, and gives the padding back when the panel closes, so that the globe is centred again. Working out the camera without a lasting padding left cities partly under the panel.
+- **City names sit right of their dot**, as on common map services, or left of it where the right has no room.
 
 ## 2026-11-24
 

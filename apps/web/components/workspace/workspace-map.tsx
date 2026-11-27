@@ -40,6 +40,11 @@ interface WorkspaceMapProps {
 
 const worldView: InitialView = { center: [10, 35], zoom: 1.5 };
 
+/** The room the city panel takes on the right of wide screens, in pixels. */
+function panelWidth() {
+  return window.innerWidth >= 640 ? 428 : 0;
+}
+
 /** Room around a city the map moves to: for the city panel on the right of wide screens. */
 function panelPadding() {
   return window.innerWidth >= 640 ? { top: 80, bottom: 80, left: 80, right: 480 } : 40;
@@ -47,27 +52,25 @@ function panelPadding() {
 
 /**
  * Moves the map to a city, close enough to see its boundary (FR-MAP-004): the tiles have
- * boundaries only from a zoom on (FR-MAP-003). A map closer in keeps its zoom.
+ * boundaries only from a zoom on (FR-MAP-003). A map closer in keeps its zoom. The padding
+ * stays on the map while the panel is open and is cleared when it closes (`clearPanelRoom`).
  */
 function flyToCity(map: MapboxMap, position: [number, number], type: SettlementType) {
   map.flyTo({
     center: position,
     zoom: Math.max(map.getZoom(), boundaryZoom(type)),
-    // Half the city panel to the left; a padding here would stay on the map for good.
-    offset: window.innerWidth >= 640 ? [-214, 0] : [0, 0],
+    padding: { top: 0, bottom: 0, left: 0, right: panelWidth() },
   });
 }
 
-/**
- * Fits a city's boundary beside the city panel. The camera is worked out first, because
- * fitBounds would keep the padding on the map, and the globe would stay off centre after the
- * panel closes.
- */
+/** Fits a city's boundary beside the city panel. */
 function fitCity(map: MapboxMap, bounds: Bounds) {
-  const camera = map.cameraForBounds(bounds, { padding: panelPadding(), maxZoom: 12 });
-  if (camera?.center && camera.zoom !== undefined) {
-    map.flyTo({ center: camera.center, zoom: camera.zoom });
-  }
+  map.fitBounds(bounds, { padding: panelPadding(), maxZoom: 12 });
+}
+
+/** Gives the map its whole width back once the city panel has closed. */
+function clearPanelRoom(map: MapboxMap) {
+  map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 } });
 }
 
 /**
@@ -171,6 +174,7 @@ export function WorkspaceMap({ data, prefs, className }: WorkspaceMapProps) {
   useEffect(() => {
     if (!map) return;
     if (!selection) {
+      if (moved.current) clearPanelRoom(map);
       moved.current = null;
       return;
     }

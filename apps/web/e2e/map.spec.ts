@@ -69,7 +69,8 @@ test('the owner’s map shows the cities in three modes with legends (FR-MAP-005
   const me = await signInWithMap(page, freshUser, { rate: true });
   await page.goto(`/users/${me.username}`);
   await page.getByRole('link', { name: en.profile.map }).click();
-  await expect(page).toHaveURL(new RegExp(`${mapPath(me.username)}$`));
+  // The first visit compiles the map page, which can take longer than a navigation usually does.
+  await expect(page).toHaveURL(new RegExp(`${mapPath(me.username)}$`), { timeout: 20_000 });
   // Without a token the page says so instead of drawing the map, and everything else works.
   await expect(page.getByText(map.unavailable)).toBeVisible();
 

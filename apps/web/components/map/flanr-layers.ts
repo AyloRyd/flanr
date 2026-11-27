@@ -318,7 +318,9 @@ export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): 
         'text-field': ['get', 'name'],
         'text-font': labelFont,
         'text-size': labelSize,
-        'text-variable-anchor': ['top', 'bottom', 'right', 'left'],
+        // Right of the dot, as on common map services; left of it where the right has no room.
+        'text-variable-anchor': ['left', 'right'],
+        'text-justify': 'auto',
         'text-radial-offset': labelOffset(marked),
         // A dot where the city is, as on common map services; under a marker it is not needed.
         // A name and its dot are shown together or not at all.
@@ -365,7 +367,7 @@ export function setLabelTheme(map: MapboxMap, dark: boolean): void {
 
 /** The distance of a name from its city, in ems: clear of the largest marker where it has one. */
 function labelOffset(marked: number[]): ExpressionSpecification {
-  return ['case', ['in', ['id'], ['literal', marked]], 1.6, 0.6];
+  return ['case', ['in', ['id'], ['literal', marked]], 1.6, 0.45];
 }
 
 /** The dot beside the name, left out for cities with a marker. */
