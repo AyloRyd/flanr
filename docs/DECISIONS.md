@@ -9,7 +9,9 @@ Decisions made while preparing the project, with the reasons behind them. The co
 - **Fewer city names, sized by importance (FR-MAP-003).** The owner found the map too dense and slow to draw. A name now needs room around it, and a filter by zoom keeps only capitals of countries and cities from 500,000 people zoomed out, then capitals of regions and ever smaller places, all from zoom 10. Thinning by room rather than by settlement type treats countries alike, whatever OpenStreetMap calls a city there. The tiles carry the capital status for this. Each name has a dot, so a name and its dot are shown together or not at all.
 - **The trip calendar left the left panel**, as the owner asked. Its place is open (OI-025); the component and the API stay.
 - **The map keeps room for the city panel only while it is open.** The map moves to a city with the panel's padding, so that the city fits beside the panel, and gives the padding back when the panel closes, so that the globe is centred again. Working out the camera without a lasting padding left cities partly under the panel.
-- **City names sit right of their dot**, as on common map services, or left of it where the right has no room.
+- **City names sit right of their dot or marker**, as on common map services, or left of it where the right has no room, with the same small gap from the edge of either.
+- **Names of cities with a marker are layers of their own below the markers.** In the layer of the tiles a name keeps room around it for the thinning, which its own marker would not leave; inside the marker's symbol, the name's priority would follow the marker's drawing order, so Potsdam's name would win over Berlin's. Below the markers every marker keeps its room, larger places keep their names first, and the names thin out by population like the other names.
+- **The selected city's name moves beyond the ring around it.** Mapbox does not let the state of a feature move a name, so the map sets the offset again when the selection changes.
 
 ## 2026-11-24
 

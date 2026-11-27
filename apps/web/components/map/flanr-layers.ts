@@ -16,6 +16,8 @@ export const layerIds = {
   boundaryCasing: 'flanr-city-boundary-casing',
   cityPoints: 'flanr-city-points',
   cityLabels: 'flanr-city-labels',
+  visitedNames: 'flanr-visited-names',
+  plannedNames: 'flanr-planned-names',
   visited: 'flanr-visited',
   planned: 'flanr-planned',
   selection: 'flanr-selection',
@@ -95,17 +97,22 @@ export function addCityTiles(map: MapboxMap): void {
 }
 
 /** Markers grow a little with the zoom around the size of their style. */
-const markerScale: ExpressionSpecification = [
+/**
+ * How the markers and the ring around the selected city grow with the zoom: the scale of the
+ * markers and the radius of the ring in pixels.
+ */
+const zoomStops = [
+  { zoom: 2, scale: 0.85, ring: 19 },
+  { zoom: 8, scale: 1, ring: 22 },
+  { zoom: 14, scale: 1.3, ring: 27 },
+] as const;
+const ringStroke = 3;
+const markerScale = [
   'interpolate',
   ['linear'],
   ['zoom'],
-  2,
-  0.85,
-  8,
-  1,
-  14,
-  1.3,
-];
+  ...zoomStops.flatMap(({ zoom, scale }) => [zoom, scale]),
+] as ExpressionSpecification;
 /** The same scale for circles; the zoom can only be the input of the outermost expression. */
 const radius: ExpressionSpecification = [
   'interpolate',
@@ -138,8 +145,10 @@ export function addVisitedLayer(map: MapboxMap, data: MarkerCollection): void {
       'icon-image': ['get', 'image'],
       'icon-size': markerScale,
       'icon-allow-overlap': true,
-      // City names make way for the markers (addCityLabels).
+      // City names make way for the markers (addCityLabels), up to the marker's edge, so that
+      // the name beside it fits.
       'icon-ignore-placement': false,
+      'icon-padding': 0,
       'symbol-sort-key': ['get', 'sortKey'],
     },
     paint: { 'icon-emissive-strength': emissive },
@@ -168,7 +177,9 @@ export function addPlannedLayer(map: MapboxMap, data: MarkerCollection, visible:
       map.getLayer(layerIds.visited) ? layerIds.visited : undefined,
     );
   }
-  map.setLayoutProperty(layerIds.planned, 'visibility', visible ? 'visible' : 'none');
+  for (const id of [layerIds.planned, layerIds.plannedNames]) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+  }
 }
 
 /** A ring around the selected city, which also shows a city without a boundary (FR-MAP-004). */
@@ -185,10 +196,15 @@ export function addSelectionLayer(map: MapboxMap, position: [number, number] | n
     type: 'circle',
     source: layerIds.selection,
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 2, 19, 8, 22, 14, 27],
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        ...zoomStops.flatMap(({ zoom, ring }) => [zoom, ring]),
+      ],
       'circle-opacity': 0,
       'circle-stroke-color': highlight,
-      'circle-stroke-width': 3,
+      'circle-stroke-width': ringStroke,
       'circle-emissive-strength': emissive,
     },
   });
@@ -202,6 +218,25 @@ export function selectBoundary(map: MapboxMap, cityId: number | null, previous: 
     const target = { source: citySourceId, sourceLayer };
     if (previous !== null) map.setFeatureState({ ...target, id: previous }, { selected: false });
     if (cityId !== null) map.setFeatureState({ ...target, id: cityId }, { selected: true });
+  }
+  // The name beside the city's marker.
+  for (const source of [layerIds.visited, layerIds.planned]) {
+    if (!map.getSource(source)) continue;
+    if (previous !== null) map.setFeatureState({ source, id: previous }, { selected: false });
+    if (cityId !== null) map.setFeatureState({ source, id: cityId }, { selected: true });
+  }
+  moveNamesOffRing(map, cityId);
+}
+
+/** Moves the selected city's name beyond the ring around it. */
+function moveNamesOffRing(map: MapboxMap, cityId: number | null): void {
+  const offsets = [
+    { id: layerIds.cityLabels, offset: dotNameOffset(cityId) },
+    { id: layerIds.visitedNames, offset: markerNameOffset(cityId) },
+    { id: layerIds.plannedNames, offset: markerNameOffset(cityId) },
+  ];
+  for (const { id, offset } of offsets) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'text-radial-offset', offset);
   }
 }
 
@@ -227,6 +262,8 @@ function setSourceData(map: MapboxMap, id: string, data: GeoJSON.FeatureCollecti
 
 /** The layers a click looks in for a city, the topmost first. */
 export const clickableLayers = [
+  layerIds.visitedNames,
+  layerIds.plannedNames,
   layerIds.visited,
   layerIds.planned,
   layerIds.cityLabels,
@@ -245,33 +282,42 @@ const capital: ExpressionSpecification = ['get', 'capital'];
  * closer in also capitals of regions and ever smaller places, and every place from zoom 10.
  * Fewer names are easier to read and quicker to draw.
  */
-const labelFilter = (() => {
-  const atLeast = (people: number): ExpressionSpecification => [
-    'any',
-    ['==', capital, 'national'],
-    ['==', capital, 'regional'],
-    ['>=', population, people],
-  ];
+/**
+ * An expression by zoom for which cities have a name: zoomed out only the important ones, closer
+ * in ever smaller places, all from zoom 10. `at` gets the least number of people at a zoom and
+ * whether it is the farthest zoom, where only capitals of countries count.
+ */
+function byZoom(
+  at: (people: number, farthest: boolean) => ExpressionSpecification | boolean,
+): ExpressionSpecification {
+  const people = [200_000, 100_000, 50_000, 20_000, 5_000, 1_000];
   return [
     'step',
     ['zoom'],
-    ['any', ['==', capital, 'national'], ['>=', population, 500_000]],
-    4,
-    atLeast(200_000),
-    5,
-    atLeast(100_000),
-    6,
-    atLeast(50_000),
-    7,
-    atLeast(20_000),
-    8,
-    atLeast(5_000),
-    9,
-    atLeast(1_000),
+    at(500_000, true),
+    ...people.flatMap((least, index) => [4 + index, at(least, false)]),
     10,
-    true,
+    at(0, false),
   ] as ExpressionSpecification;
-})();
+}
+
+const labelFilter = byZoom((people, farthest) =>
+  people === 0
+    ? true
+    : [
+        'any',
+        ['==', capital, 'national'],
+        ['==', capital, farthest ? 'national' : 'regional'],
+        ['>=', population, people],
+      ],
+);
+
+/** The name beside a marker, by the same rule as the names of the tiles, without capitals. */
+const markerText = byZoom((people) =>
+  people === 0
+    ? ['get', 'name']
+    : ['case', ['>=', ['coalesce', ['get', 'population'], 0], people], ['get', 'name'], ''],
+);
 
 /**
  * The size of a city's name: larger for more people, and for capitals of countries and regions
@@ -294,18 +340,76 @@ const labelRank: ExpressionSpecification = [
 ];
 
 /**
+ * The gap between a name's box and the edge of its dot or marker, in pixels. The box keeps a few
+ * pixels beside the text, which already make the gap.
+ */
+const nameGap = 0.5;
+/** Half the box of the dot's image, in pixels, from which Mapbox measures a name's offset. */
+const dotBox = 6;
+
+/**
+ * The offset of a name, in ems: beyond the `edge` of its dot or marker (in pixels at a scale of
+ * the markers), or beyond the ring around the selected city. Mapbox measures the offset from the
+ * edge of the symbol's own icon (`icon`), or from the city where the symbol has none. It does not
+ * let the state of a feature move a name, so the selected city is part of the expression.
+ */
+function nameOffset(
+  size: ExpressionSpecification | number,
+  selectedId: number | null,
+  icon: number,
+  edge: (scale: number) => ExpressionSpecification | number,
+): ExpressionSpecification {
+  const at = ({ scale, ring }: (typeof zoomStops)[number]): ExpressionSpecification => {
+    const beyond: ExpressionSpecification = [
+      'case',
+      ['==', ['id'], selectedId ?? -1],
+      ['max', edge(scale), ring + ringStroke],
+      edge(scale),
+    ];
+    return ['/', ['+', ['-', beyond, icon], nameGap], size];
+  };
+  return [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    ...zoomStops.flatMap((stop) => [stop.zoom, at(stop)]),
+  ] as ExpressionSpecification;
+}
+
+/** A name beside its dot, which is the icon of the same symbol. */
+const dotNameOffset = (selectedId: number | null) =>
+  nameOffset(labelSize, selectedId, dotBox, () => dotBox);
+/** A name beside a marker, which is in a layer of its own. */
+const markerNameOffset = (selectedId: number | null) =>
+  nameOffset(markedNameSize, selectedId, 0, (scale) => [
+    '*',
+    ['+', ['get', 'radius'], ['get', 'strokeWidth']],
+    scale,
+  ]);
+
+/** The size of the names of the cities with a marker. */
+const markedNameSize = 13;
+
+/**
  * Flanr's names of the cities from the tiles, which the user clicks to select a city
  * (FR-MAP-003). They lie below the user's markers and make way for them: a name that would
  * overlap a marker moves to another side of its city or is left out, as are names that would
- * overlap a larger place's. `marked` are the cities with a marker, whose names keep clear of it.
+ * overlap a larger place's. The cities with a marker (`marked`) have their names beside the
+ * marker instead (addMarkerNames).
  */
 export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): void {
+  addMarkerNames(map, dark);
   if (map.getLayer(layerIds.cityLabels)) {
     setMarkedCities(map, marked);
     return;
   }
   addCityDot(map);
-  const below = [layerIds.planned, layerIds.visited].find((id) => map.getLayer(id));
+  const below = [
+    layerIds.plannedNames,
+    layerIds.visitedNames,
+    layerIds.planned,
+    layerIds.visited,
+  ].find((id) => map.getLayer(id));
   map.addLayer(
     {
       id: layerIds.cityLabels,
@@ -315,19 +419,19 @@ export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): 
       minzoom: 2,
       filter: labelFilter,
       layout: {
-        'text-field': ['get', 'name'],
+        'text-field': labelText(marked),
         'text-font': labelFont,
         'text-size': labelSize,
         // Right of the dot, as on common map services; left of it where the right has no room.
         'text-variable-anchor': ['left', 'right'],
         'text-justify': 'auto',
-        'text-radial-offset': labelOffset(marked),
-        // A dot where the city is, as on common map services; under a marker it is not needed.
+        'text-radial-offset': dotNameOffset(null),
+        // A dot where the city is, as on common map services.
         // A name and its dot are shown together or not at all.
-        'icon-image': labelIcon(marked),
+        'icon-image': cityDotImage,
         'icon-size': ['match', capital, 'national', 1.3, 1],
-        // Room around each name, so that about half as many fit as names alone would need.
-        'text-padding': 12,
+        // Room around each name, so that about a third as many fit as names alone would need.
+        'text-padding': 18,
         'text-max-width': 8,
         'symbol-sort-key': labelRank,
       },
@@ -343,7 +447,48 @@ export function addCityLabels(map: MapboxMap, dark: boolean, marked: number[]): 
   );
 }
 
-function labelColors(dark: boolean) {
+/**
+ * The names of the cities with a marker, just beside the marker. They are layers of their own
+ * below the markers, so that every marker keeps its room and a name that does not fit is left
+ * out; larger places keep theirs first. A name in the layer of the tiles would keep the room for
+ * the thinning, which its own marker never leaves, so these thin out by population instead.
+ */
+function addMarkerNames(map: MapboxMap, dark: boolean): void {
+  const names = [
+    { id: layerIds.visitedNames, source: layerIds.visited },
+    { id: layerIds.plannedNames, source: layerIds.planned },
+  ];
+  for (const { id, source } of names) {
+    if (map.getLayer(id) || !map.getLayer(source)) continue;
+    const above = map.getLayer(layerIds.visitedNames) ? layerIds.visitedNames : undefined;
+    const below =
+      above ?? [layerIds.planned, layerIds.visited].find((layer) => map.getLayer(layer));
+    map.addLayer(
+      {
+        id,
+        type: 'symbol',
+        source,
+        layout: {
+          'text-field': markerText,
+          'text-font': labelFont,
+          'text-size': markedNameSize,
+          'text-variable-anchor': ['left', 'right'],
+          'text-justify': 'auto',
+          'text-radial-offset': markerNameOffset(null),
+          'text-max-width': 8,
+          // No room around the name: the room would reach into its own marker.
+          'text-padding': 0,
+          'symbol-sort-key': ['-', 0, ['coalesce', ['get', 'population'], 0]],
+          visibility: map.getLayoutProperty(source, 'visibility') ?? 'visible',
+        },
+        paint: { ...nameColors(dark), 'text-halo-width': 1.5, 'text-emissive-strength': emissive },
+      },
+      below,
+    );
+  }
+}
+
+function nameColors(dark: boolean) {
   return {
     'text-color': [
       'case',
@@ -352,6 +497,12 @@ function labelColors(dark: boolean) {
       dark ? '#e5e7eb' : '#1f2937',
     ] as ExpressionSpecification,
     'text-halo-color': dark ? '#111827' : '#ffffff',
+  };
+}
+
+function labelColors(dark: boolean) {
+  return {
+    ...nameColors(dark),
     'icon-color': dark ? '#d1d5db' : '#4b5563',
     'icon-halo-color': dark ? '#111827' : '#ffffff',
   };
@@ -359,27 +510,28 @@ function labelColors(dark: boolean) {
 
 /** Gives the names the colours of the site's light or dark theme. */
 export function setLabelTheme(map: MapboxMap, dark: boolean): void {
-  if (!map.getLayer(layerIds.cityLabels)) return;
-  for (const [name, value] of Object.entries(labelColors(dark))) {
-    map.setPaintProperty(layerIds.cityLabels, name as 'text-color', value);
+  const layers = [
+    { id: layerIds.cityLabels, colors: labelColors(dark) },
+    { id: layerIds.visitedNames, colors: nameColors(dark) },
+    { id: layerIds.plannedNames, colors: nameColors(dark) },
+  ];
+  for (const { id, colors } of layers) {
+    if (!map.getLayer(id)) continue;
+    for (const [name, value] of Object.entries(colors)) {
+      map.setPaintProperty(id, name as 'text-color', value);
+    }
   }
 }
 
-/** The distance of a name from its city, in ems: clear of the largest marker where it has one. */
-function labelOffset(marked: number[]): ExpressionSpecification {
-  return ['case', ['in', ['id'], ['literal', marked]], 1.6, 0.45];
-}
-
-/** The dot beside the name, left out for cities with a marker. */
-function labelIcon(marked: number[]): ExpressionSpecification {
-  return ['case', ['in', ['id'], ['literal', marked]], '', cityDotImage];
+/** The name of a city from the tiles, left out where its marker has the name beside it. */
+function labelText(marked: number[]): ExpressionSpecification {
+  return ['case', ['in', ['id'], ['literal', marked]], '', ['get', 'name']];
 }
 
 /** Tells the names which cities have a marker now. */
 export function setMarkedCities(map: MapboxMap, marked: number[]): void {
   if (map.getLayer(layerIds.cityLabels)) {
-    map.setLayoutProperty(layerIds.cityLabels, 'text-radial-offset', labelOffset(marked));
-    map.setLayoutProperty(layerIds.cityLabels, 'icon-image', labelIcon(marked));
+    map.setLayoutProperty(layerIds.cityLabels, 'text-field', labelText(marked));
   }
 }
 

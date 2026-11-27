@@ -10,9 +10,9 @@ type LegendKey = Exclude<keyof Messages['map']['legend'], 'title'>;
 function Swatch({ style }: { style: MarkerStyle }) {
   const size = Math.round(style.radius * 1.2);
   return (
-    <span className="flex w-6 shrink-0 justify-center" aria-hidden>
+    <span className="grid size-6 shrink-0 place-items-center" aria-hidden>
       <span
-        className="flex items-center justify-center rounded-full"
+        className="flex flex-none items-center justify-center rounded-full"
         style={{
           width: size,
           height: size,

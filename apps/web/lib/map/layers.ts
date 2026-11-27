@@ -19,6 +19,10 @@ import {
 /** What every marker of the user's layers carries; the map draws its image from it. */
 export interface MarkerProperties extends MarkerImage {
   cityId: number;
+  /** The local name, shown beside the marker. */
+  name: string;
+  /** Larger places have their name from farther out. */
+  population: number | null;
   settlementType: SettlementType;
   /** Higher keys are drawn above lower ones. */
   sortKey: number;
@@ -40,6 +44,8 @@ function feature(
     geometry: { type: 'Point', coordinates: [city.longitude, city.latitude] },
     properties: {
       cityId: city.cityId,
+      name: city.name,
+      population: city.population,
       settlementType: city.settlementType,
       sortKey,
       image: markerImageId({ ...style, value }),
